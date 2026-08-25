@@ -11,8 +11,8 @@ package app.froggo.patches.facebook.ads
 
 import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.returnEarly
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 
 private fun redexRunnable(originalName: String) = Fingerprint(
@@ -60,9 +60,27 @@ val blockFacebookAds573Patch = bytecodePatch(
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
-        storyAdsInsertion.method.returnEarly()
-        storyAdsFetchMore.method.returnEarly()
-        multiAdsSponsoredData.method.returnEarly()
-        partialStorySponsoredData.method.returnEarly()
+        storyAdsInsertion.method.addInstructions(
+            0,
+            "return-void",
+        )
+        storyAdsFetchMore.method.addInstructions(
+            0,
+            "return-void",
+        )
+        multiAdsSponsoredData.method.addInstructions(
+            0,
+            """
+                const/4 p0, 0x0
+                return-object p0
+            """.trimIndent(),
+        )
+        partialStorySponsoredData.method.addInstructions(
+            0,
+            """
+                const/4 p0, 0x0
+                return-object p0
+            """.trimIndent(),
+        )
     }
 }
