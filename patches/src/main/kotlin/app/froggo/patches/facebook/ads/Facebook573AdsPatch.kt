@@ -170,8 +170,8 @@ val blockFacebookAds573Patch = bytecodePatch(
         feedAdsResponseConverter.method.addInstructions(
             0,
             """
-                const/4 p0, 0x0
-                return-object p0
+                const/4 v0, 0x0
+                return-object v0
             """.trimIndent(),
         )
         storyAdsBucketInsertion.method.addInstructions(
@@ -189,15 +189,15 @@ val blockFacebookAds573Patch = bytecodePatch(
         multiAdsSponsoredData.method.addInstructions(
             0,
             """
-                const/4 p0, 0x0
-                return-object p0
+                const/4 v0, 0x0
+                return-object v0
             """.trimIndent(),
         )
         partialStorySponsoredData.method.addInstructions(
             0,
             """
-                const/4 p0, 0x0
-                return-object p0
+                const/4 v0, 0x0
+                return-object v0
             """.trimIndent(),
         )
     }
