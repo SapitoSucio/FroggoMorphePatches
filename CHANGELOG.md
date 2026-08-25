@@ -1,3 +1,9 @@
+## [1.1.4](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.3...v1.1.4) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve story playback while blocking ads ([36beb04](https://github.com/SapitoSucio/FroggoMorphePatches/commit/36beb04ee03c801cd97abf0c010e10a357aba38a))
+
 ## [1.1.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.2...v1.1.3) (2026-08-25)
 
 ### 🐛 Bug Fixes
