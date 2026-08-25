@@ -14,6 +14,13 @@
  * - X.AuI.Doc(X.9XO): V (ads_rti_insertion bucket insertion)
  * - AdBreakFetchHelper -> A05(...): V
  * - AdBreakStateMachine callback -> onSuccess(Object): V
+ * - X.5Vs.A03(...): V (Reels/video banner and video ad fetch)
+ * - X.62B.onSuccess(Object): V (banner/card ad callback)
+ * - X.9mO.onSuccess(Object): V (video ad callback)
+ * - X.3JX.A0F(...): X.6Ke (FeedAsyncAdsController ASYNC_ADS edge conversion;
+ *   returns an empty C6Ke because DbP consumes both fields)
+ * - X.1vv.addNewEdgeToCollection(...): Z (final feed UI insertion filter for
+ *   SPONSORED/PROMOTION edges)
  * - GraphQLFBMultiAdsFeedUnit.A00(): X.41Q
  * - GraphQLPartialStory.getSponsoredData(): X.41Q
  */
@@ -116,6 +123,61 @@ private val videoAdBreakSuccess = exactMethod(
     listOf("Ljava/lang/Object;"),
 )
 
+private val reelsVideoAdFetch = exactMethod(
+    "LX/5Vs;",
+    "A03",
+    listOf(
+        "LX/5Vw;",
+        "LX/41Q;",
+        "LX/caj;",
+        "LX/5I6;",
+        "Ljava/lang/Boolean;",
+        "Ljava/lang/Integer;",
+        "Ljava/lang/String;",
+        "Ljava/lang/String;",
+        "Ljava/lang/String;",
+        "Ljava/lang/String;",
+        "I",
+        "I",
+        "J",
+        "Z",
+        "Z",
+        "Z",
+    ),
+)
+
+private val reelsBannerAdSuccess = exactMethod(
+    "LX/62B;",
+    "onSuccess",
+    listOf("Ljava/lang/Object;"),
+)
+
+private val reelsVideoAdSuccess = exactMethod(
+    "LX/9mO;",
+    "onSuccess",
+    listOf("Ljava/lang/Object;"),
+)
+
+private val asyncFeedAdsController = exactMethod(
+    "LX/3JX;",
+    "A0F",
+    listOf(
+        "Lcom/facebook/auth/usersession/FbUserSession;",
+        "LX/3pN;",
+        "Lcom/facebook/graphql/executor/GraphQLResult;",
+    ),
+)
+
+private val feedEdgeInsertion = exactMethod(
+    "LX/1vv;",
+    "addNewEdgeToCollection",
+    listOf(
+        "Lcom/google/common/collect/ImmutableList\$Builder;",
+        "Lcom/facebook/graphql/model/GraphQLFeedUnitEdge;",
+        "LX/1cP;",
+    ),
+)
+
 private val multiAdsSponsoredData = exactMethod(
     "Lcom/facebook/graphql/model/GraphQLFBMultiAdsFeedUnit;",
     "A00",
@@ -185,6 +247,48 @@ val blockFacebookAds573Patch = bytecodePatch(
         videoAdBreakSuccess.method.addInstructions(
             0,
             "return-void",
+        )
+        reelsVideoAdFetch.method.addInstructions(
+            0,
+            "return-void",
+        )
+        reelsBannerAdSuccess.method.addInstructions(
+            0,
+            "return-void",
+        )
+        reelsVideoAdSuccess.method.addInstructions(
+            0,
+            "return-void",
+        )
+        asyncFeedAdsController.method.addInstructions(
+            0,
+            """
+                new-instance v0, LX/6Ke;
+                invoke-static {}, Lcom/google/common/collect/ImmutableList;->of()Lcom/google/common/collect/ImmutableList;
+                move-result-object v1
+                const/4 v2, 0x0
+                invoke-direct {v0, v1, v2}, LX/6Ke;-><init>(Lcom/google/common/collect/ImmutableList;Ljava/lang/String;)V
+                return-object v0
+            """.trimIndent(),
+        )
+        feedEdgeInsertion.method.addInstructions(
+            0,
+            """
+                move-object/from16 v0, p2
+                invoke-virtual {v0}, Lcom/facebook/graphql/model/GraphQLFeedUnitEdge;->B6k()Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;
+                move-result-object v1
+                sget-object v2, Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;->A0K:Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;
+                if-eq v1, v2, :froggo_ads573_drop_feed_edge
+                sget-object v2, Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;->A0I:Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;
+                if-eq v1, v2, :froggo_ads573_drop_feed_edge
+                goto :froggo_ads573_keep_feed_edge
+
+                :froggo_ads573_drop_feed_edge
+                const/4 v0, 0x0
+                return v0
+
+                :froggo_ads573_keep_feed_edge
+            """.trimIndent(),
         )
         multiAdsSponsoredData.method.addInstructions(
             0,

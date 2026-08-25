@@ -1,9 +1,11 @@
 /*
  * Facebook 573.0.0.37.74 / 473623755
  *
- * NewsFeedFragmentDataController$maybeRefreshForHotStart$1 is a synthetic
- * Runnable.run(): V. The separate handlePTRRefresh$1 callback is intentionally
- * not patched, so manual pull-to-refresh remains available.
+ * NewsFeedFragmentDataController$maybeRefreshForHotStart$1 only sets a flag;
+ * the actual automatic refresh is requested through
+ * NewsFeedFragmentDataController.refreshForRevisit(...): Z. The separate
+ * handlePTRRefresh$1 callback is intentionally not patched, so manual
+ * pull-to-refresh remains available.
  */
 package app.froggo.patches.facebook.refresh
 
@@ -25,6 +27,21 @@ private val automaticHotStartRefresh = Fingerprint(
     },
 )
 
+private val automaticRefreshForRevisit = Fingerprint(
+    returnType = "Z",
+    parameters = listOf(
+        "Z",
+        "Z",
+        "Z",
+        "I",
+        "Ljava/lang/String;",
+        "Z",
+    ),
+    custom = { method, classDef ->
+        classDef.type == "LX/2UL;" && method.name == "refreshForRevisit"
+    },
+)
+
 @Suppress("unused")
 val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     name = "Block Facebook automatic refresh (573)",
@@ -37,6 +54,13 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
         automaticHotStartRefresh.method.addInstructions(
             0,
             "return-void",
+        )
+        automaticRefreshForRevisit.method.addInstructions(
+            0,
+            """
+                const/4 v0, 0x0
+                return v0
+            """.trimIndent(),
         )
     }
 }

@@ -103,6 +103,51 @@ private val videoAdBreakSuccess = exactMethod(
     listOf("Ljava/lang/Object;"),
 )
 
+private val reelsVideoAdFetch = exactMethod(
+    "LX/5Vs;",
+    "A03",
+    listOf(
+        "LX/5Vw;",
+        "LX/41Q;",
+        "LX/caj;",
+        "LX/5I6;",
+        "Ljava/lang/Boolean;",
+        "Ljava/lang/Integer;",
+        "Ljava/lang/String;",
+        "Ljava/lang/String;",
+        "Ljava/lang/String;",
+        "Ljava/lang/String;",
+        "I",
+        "I",
+        "J",
+        "Z",
+        "Z",
+        "Z",
+    ),
+)
+
+private val reelsBannerAdSuccess = exactMethod(
+    "LX/62B;",
+    "onSuccess",
+    listOf("Ljava/lang/Object;"),
+)
+
+private val reelsVideoAdSuccess = exactMethod(
+    "LX/9mO;",
+    "onSuccess",
+    listOf("Ljava/lang/Object;"),
+)
+
+private val asyncFeedAdsController = exactMethod(
+    "LX/3JX;",
+    "A0F",
+    listOf(
+        "Lcom/facebook/auth/usersession/FbUserSession;",
+        "LX/3pN;",
+        "Lcom/facebook/graphql/executor/GraphQLResult;",
+    ),
+)
+
 private val multiAdsSponsoredData = exactMethod(
     "Lcom/facebook/graphql/model/GraphQLFBMultiAdsFeedUnit;",
     "A00",
@@ -111,6 +156,11 @@ private val multiAdsSponsoredData = exactMethod(
 private val partialStorySponsoredData = exactMethod(
     "Lcom/facebook/graphql/model/GraphQLPartialStory;",
     "getSponsoredData",
+)
+
+private val diagnosticsProbe = exactMethod(
+    "LX/2Q7;",
+    "onResume",
 )
 
 private fun Instruction.registersUsed(): List<Int> = when (this) {
@@ -178,13 +228,13 @@ private fun findSafeLowRegister(method: MutableMethod): Int? {
 private fun logRoute(method: MutableMethod, label: String) {
     val register = findSafeLowRegister(method) ?: return
 
-    // Log.d uses a 4-bit register list. Skip a route rather than producing an
+    // Log.i uses a 4-bit register list. Skip a route rather than producing an
     // invalid patch if this method has no safe low register available.
     method.addInstructions(
         0,
         """
             const-string v$register, "$label"
-            invoke-static {v$register, v$register}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+            invoke-static {v$register, v$register}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
         """.trimIndent(),
     )
 }
@@ -198,6 +248,7 @@ val logFacebookAdsRoutes573Patch = bytecodePatch(
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
+        logRoute(diagnosticsProbe.method, "FroggoAds573/probe")
         logRoute(feedTailLoad.method, "FroggoAds573/ftail")
         logRoute(storyAdsInsertion.method, "FroggoAds573/sins")
         logRoute(storyAdsFetchMore.method, "FroggoAds573/sfetch")
@@ -207,6 +258,10 @@ val logFacebookAdsRoutes573Patch = bytecodePatch(
         logRoute(storyAdsBucketInsertion.method, "FroggoAds573/sbucket")
         logRoute(videoAdBreakFetch.method, "FroggoAds573/vfetch")
         logRoute(videoAdBreakSuccess.method, "FroggoAds573/vok")
+        logRoute(reelsVideoAdFetch.method, "FroggoAds573/rvfetch")
+        logRoute(reelsBannerAdSuccess.method, "FroggoAds573/rbok")
+        logRoute(reelsVideoAdSuccess.method, "FroggoAds573/rvok")
+        logRoute(asyncFeedAdsController.method, "FroggoAds573/async")
         logRoute(multiAdsSponsoredData.method, "FroggoAds573/gmulti")
         logRoute(partialStorySponsoredData.method, "FroggoAds573/gstory")
     }
