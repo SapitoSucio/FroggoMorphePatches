@@ -225,16 +225,30 @@ private fun findSafeLowRegister(method: MutableMethod): Int? {
     return null
 }
 
+private fun logProbe(method: MutableMethod) {
+    // In the exact 573 APK, LX/2Q7.onResume has 28 registers and v0 is a
+    // safe local. Keep this probe independent of the best-effort scanner so
+    // its absence distinguishes patch selection/application from route miss.
+    method.addInstructions(
+        0,
+        """
+            const-string v0, "FroggoAds573/probe"
+            invoke-static {v0, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+        """.trimIndent(),
+    )
+}
+
 private fun logRoute(method: MutableMethod, label: String) {
     val register = findSafeLowRegister(method) ?: return
 
-    // Log.i uses a 4-bit register list. Skip a route rather than producing an
-    // invalid patch if this method has no safe low register available.
+    // Log.w uses a 4-bit register list and is visible in viewers that hide
+    // informational entries. Skip a route rather than producing an invalid
+    // patch if this method has no safe low register available.
     method.addInstructions(
         0,
         """
             const-string v$register, "$label"
-            invoke-static {v$register, v$register}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+            invoke-static {v$register, v$register}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
         """.trimIndent(),
     )
 }
@@ -248,7 +262,7 @@ val logFacebookAdsRoutes573Patch = bytecodePatch(
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
-        logRoute(diagnosticsProbe.method, "FroggoAds573/probe")
+        logProbe(diagnosticsProbe.method)
         logRoute(feedTailLoad.method, "FroggoAds573/ftail")
         logRoute(storyAdsInsertion.method, "FroggoAds573/sins")
         logRoute(storyAdsFetchMore.method, "FroggoAds573/sfetch")

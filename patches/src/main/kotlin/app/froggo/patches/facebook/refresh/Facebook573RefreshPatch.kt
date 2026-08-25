@@ -3,8 +3,11 @@
  *
  * NewsFeedFragmentDataController$maybeRefreshForHotStart$1 only sets a flag;
  * the actual automatic refresh is requested through
- * NewsFeedFragmentDataController.refreshForRevisit(...): Z. The separate
- * handlePTRRefresh$1 callback is intentionally not patched, so manual
+ * NewsFeedFragmentDataController.refreshForRevisit(...): Z. On foreground,
+ * NewsFeedFragment$onAppForeground$1 and $2 can also call
+ * NewsFeedFragment.A0N ("foreground" / "foreground_ads"), so both automatic
+ * foreground callbacks are patched. The separate handlePTRRefresh$1 callback
+ * and C2UL.A0M refresh callers are intentionally not patched, so manual
  * pull-to-refresh remains available.
  */
 package app.froggo.patches.facebook.refresh
@@ -42,6 +45,20 @@ private val automaticRefreshForRevisit = Fingerprint(
     },
 )
 
+private val automaticForegroundRefresh = Fingerprint(
+    returnType = "V",
+    parameters = emptyList(),
+    custom = { method, classDef ->
+        method.name == "run" && classDef.fields.any { field ->
+            field.name == "__redex_internal_original_name" &&
+                ((field.initialValue as? StringEncodedValue)?.value ==
+                    "NewsFeedFragment\$onAppForeground\$1" ||
+                    (field.initialValue as? StringEncodedValue)?.value ==
+                    "NewsFeedFragment\$onAppForeground\$2")
+        }
+    },
+)
+
 @Suppress("unused")
 val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     name = "Block Facebook automatic refresh (573)",
@@ -61,6 +78,10 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
                 const/4 v0, 0x0
                 return v0
             """.trimIndent(),
+        )
+        automaticForegroundRefresh.method.addInstructions(
+            0,
+            "return-void",
         )
     }
 }

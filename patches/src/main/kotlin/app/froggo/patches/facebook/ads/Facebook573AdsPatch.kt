@@ -24,6 +24,57 @@
  * - GraphQLFBMultiAdsFeedUnit.A00(): X.41Q
  * - GraphQLPartialStory.getSponsoredData(): X.41Q
  */
+
+/*
+ * Findings and maintenance guide for future Facebook versions
+ *
+ * Facebook 573 does not have one ad pipeline. The working map is:
+ *
+ * 1. Feed CSR: C23I.A0F -> bZU.A00 -> GraphQLFeedUnitEdge. The converter
+ *    produces feed units from the CSR response.
+ * 2. Feed async ads: 3JX.A0F (FeedAsyncAdsController) can build ASYNC_ADS
+ *    edges after the normal feed response. DbP consumes its C6Ke result.
+ * 3. Final feed insertion: 1vv.addNewEdgeToCollection(...) is the last
+ *    source-independent seam before the feed collection reaches the UI.
+ *    In this APK GraphQLFeedStoryCategory.A0K is SPONSORED and A0I is
+ *    PROMOTION; both are rejected there as a defensive final filter.
+ * 4. Story Ads: the Redex AdBucketDataSourceUtil runnables feed deferred,
+ *    CTA, dwell, and late insertion work; AuI.Doc is the bucket insertion
+ *    point for the ads_rti_insertion path.
+ * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
+ *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
+ *    separate commercial-break / AdBreak state machine, including
+ *    NON_INTERRUPTIVE_AD.
+ * 6. Model fallbacks: GraphQLFBMultiAdsFeedUnit.A00 and
+ *    GraphQLPartialStory.getSponsoredData expose sponsored data to later
+ *    renderers, so they are kept as narrow null-return guards.
+ *
+ * To port this patch to a new APK:
+ *
+ * - Extract the DEX files and run the local string-table scanner first. Use
+ *   narrow terms such as ASYNC_ADS, AdBreakServerAPI, NON_INTERRUPTIVE_AD,
+ *   GraphQLFeedUnitEdge, banner ads fetch, video ad fetch, and sponsored.
+ *   Example:
+ *   python C:\Users\Administrator\Documents\Codex\2026-08-25\q\work\dex_string_xrefs.py <dex-dir> ASYNC_ADS NON_INTERRUPTIVE_AD
+ * - Use each scanner hit to identify the raw LX/... descriptor and exact
+ *   method. Then inspect only those methods in JADX MCP, sequentially and
+ *   with low result limits. Prefer a method lookup or smali view, followed
+ *   by at most a small xref query; avoid global keyword searches.
+ * - Trace each route from response/callback -> converter -> feed/model list
+ *   -> collection insertion -> renderer. Keep feed, Story, commercial-break,
+ *   and non-interruptive video routes separate; they only partially overlap.
+ * - Patch the latest ad-specific seam that still leaves ordinary content
+ *   intact. If a new feed pipeline bypasses the loaders, look for its final
+ *   GraphQLFeedUnitEdge/list insertion rather than only blocking networking.
+ * - Reconfirm every descriptor and constructor against the exact target APK,
+ *   compile and apply to that APK, then test feed, Story, full-screen video,
+ *   and the card below video independently.
+ *
+ * Diagnostics intentionally use fixed labels only. They must never log URLs,
+ * IDs, accounts, request bodies, or GraphQL responses. Register aliases are
+ * physical registers: p0 can be v16+ in a large method. Use low v registers
+ * for injected const/4, return-object, invoke-*, and field instructions.
+ */
 package app.froggo.patches.facebook.ads
 
 import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
