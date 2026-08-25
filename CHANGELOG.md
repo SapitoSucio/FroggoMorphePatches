@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.0...v1.1.1) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* block Facebook 573 ad and refresh routes ([960ed67](https://github.com/SapitoSucio/FroggoMorphePatches/commit/960ed67caa9f8444d210b954a3927b85402d22d2))
+
 ## [1.1.0](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.3...v1.1.0) (2026-08-25)
 
 ### 🐛 Bug Fixes
