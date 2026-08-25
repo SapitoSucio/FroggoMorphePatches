@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-25T08:55:36",
-  "description": "## [1.0.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.2...v1.0.3) (2026-08-25)\n\n### 🐛 Bug Fixes\n\n* use low register for null returns ([ad3cc89](https://github.com/SapitoSucio/FroggoMorphePatches/commit/ad3cc892d341f1716adc14fcd6ca2d6cb4a56962))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.0.3/patches-1.0.3.mpp",
+  "created_at": "2026-08-25T09:18:46",
+  "description": "## [1.1.0](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.3...v1.1.0) (2026-08-25)\n\n### 🐛 Bug Fixes\n\n* use compatible register scan ([5aa52de](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5aa52de9d487ca41e3d9538f3222b3bfeba30e8e))\n* use mutable method diagnostics ([de1f2aa](https://github.com/SapitoSucio/FroggoMorphePatches/commit/de1f2aaa9dbdffce605bb050209a5fb39f311fe5))\n\n### ✨ New Features\n\n* add Facebook ad route diagnostics ([34d940d](https://github.com/SapitoSucio/FroggoMorphePatches/commit/34d940da68b07f17a8cf0ea72f8f86b4e658aba0))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.1.0/patches-1.1.0.mpp",
   "signature_download_url": "",
-  "version": "1.0.3"
+  "version": "1.1.0"
 }

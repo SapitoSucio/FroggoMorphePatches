@@ -15,9 +15,9 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.0.3](https://github.com/SapitoSucio/FroggoMorphePatches/releases/tag/v1.0.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;2 patches total
+> **[v1.1.0](https://github.com/SapitoSucio/FroggoMorphePatches/releases/tag/v1.1.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;3 patches total
 <details open>
-<summary>📦 Facebook&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
+<summary>📦 Facebook&nbsp;&nbsp;•&nbsp;&nbsp;3 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -29,6 +29,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 |----------|----------------|-----------|
 | [Block Facebook ads (573)](#block-facebook-ads-573) | Stops feed, Story Ads, deferred/tail loads, and video commercial-break ads. |  |
 | [Block Facebook automatic refresh (573)](#block-facebook-automatic-refresh-573) | Disables News Feed hot-start refresh while preserving manual pull-to-refresh. |  |
+| [Log Facebook ad routes (573)](#log-facebook-ad-routes-573) | Opt-in Logcat route markers for feed, Reels/video, and Story Ads diagnostics. |  |
 
 </details>
 

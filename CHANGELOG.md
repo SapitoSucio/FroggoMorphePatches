@@ -1,3 +1,14 @@
+## [1.1.0](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.3...v1.1.0) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* use compatible register scan ([5aa52de](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5aa52de9d487ca41e3d9538f3222b3bfeba30e8e))
+* use mutable method diagnostics ([de1f2aa](https://github.com/SapitoSucio/FroggoMorphePatches/commit/de1f2aaa9dbdffce605bb050209a5fb39f311fe5))
+
+### ✨ New Features
+
+* add Facebook ad route diagnostics ([34d940d](https://github.com/SapitoSucio/FroggoMorphePatches/commit/34d940da68b07f17a8cf0ea72f8f86b4e658aba0))
+
 ## [1.0.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.2...v1.0.3) (2026-08-25)
 
 ### 🐛 Bug Fixes
