@@ -1,3 +1,9 @@
+## [1.1.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.1...v1.1.2) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* block Facebook foreground refresh ([1091053](https://github.com/SapitoSucio/FroggoMorphePatches/commit/10910537de00fcb998dbfd1ed400243db64aa3ad))
+
 ## [1.1.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.0...v1.1.1) (2026-08-25)
 
 ### 🐛 Bug Fixes
