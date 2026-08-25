@@ -11,7 +11,8 @@
  * - MainFeedCSRDataLoaderImpl$maybeDoAsyncAdsTailLoad$1 -> run(): V
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
- * - X.AuI.Doc(X.9XO): V (ads_rti_insertion bucket insertion)
+ * - X.AuI.B46(FbUserSession, X.Aly, ImmutableList): ImmutableList
+ *   (StoryViewerBucketDataController provider merge)
  * - AdBreakFetchHelper -> A05(...): V
  * - AdBreakStateMachine callback -> onSuccess(Object): V
  * - X.5Vs.A03(...): V (Reels/video banner and video ad fetch)
@@ -38,9 +39,10 @@
  *    source-independent seam before the feed collection reaches the UI.
  *    In this APK GraphQLFeedStoryCategory.A0K is SPONSORED and A0I is
  *    PROMOTION; both are rejected there as a defensive final filter.
- * 4. Story Ads: the Redex AdBucketDataSourceUtil runnables feed deferred,
- *    CTA, dwell, and late insertion work; AuI.Doc is the bucket insertion
- *    point for the ads_rti_insertion path.
+ * 4. Story Ads: StoryViewerBucketDataController chains provider merges through
+ *    AuI.B46(...). Returning its incoming list at that seam preserves organic
+ *    story buckets while dropping the ad-provider merge. The internal Redex
+ *    callbacks must remain intact or the viewer can stall before rendering.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -104,26 +106,6 @@ private fun exactMethod(
     },
 )
 
-private val storyAdsInsertion = redexRunnable(
-    "AdBucketDataSourceUtil\$attemptAdsInsertion\$1",
-)
-
-private val storyAdsFetchMore = redexRunnable(
-    "AdBucketDataSourceUtil\$attemptFetchMoreAds\$1",
-)
-
-private val storyAdsDeferredFetch = redexRunnable(
-    "AdBucketDataSourceUtil\$fetchDeferredAds\$1",
-)
-
-private val storyAdsCtaTailLoad = redexRunnable(
-    "AdBucketDataSourceUtil\$triggerCtaTailload\$1",
-)
-
-private val storyAdsDwellTailLoad = redexRunnable(
-    "AdBucketDataSourceUtil\$triggerDwellTailload\$1",
-)
-
 private val mainFeedTailLoad = redexRunnable(
     "MainFeedCSRDataLoaderImpl\$handlerTailLoadEvent\$2",
 )
@@ -148,10 +130,14 @@ private val feedAdsResponseConverter = exactMethod(
     ),
 )
 
-private val storyAdsBucketInsertion = exactMethod(
+private val storyAdsBucketMerge = exactMethod(
     "LX/AuI;",
-    "Doc",
-    listOf("LX/9XO;"),
+    "B46",
+    listOf(
+        "Lcom/facebook/auth/usersession/FbUserSession;",
+        "LX/Aly;",
+        "Lcom/google/common/collect/ImmutableList;",
+    ),
 )
 
 private val videoAdBreakFetch = exactMethod(
@@ -241,32 +227,12 @@ private val partialStorySponsoredData = exactMethod(
 @Suppress("unused")
 val blockFacebookAds573Patch = bytecodePatch(
     name = "Block Facebook ads (573)",
-    description = "Stops feed, Story Ads, deferred/tail loads, and video commercial-break ads.",
+    description = "Stops feed, Story ad-bucket merge, deferred/tail loads, and video commercial-break ads.",
     default = true,
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
-        storyAdsInsertion.method.addInstructions(
-            0,
-            "return-void",
-        )
-        storyAdsFetchMore.method.addInstructions(
-            0,
-            "return-void",
-        )
-        storyAdsDeferredFetch.method.addInstructions(
-            0,
-            "return-void",
-        )
-        storyAdsCtaTailLoad.method.addInstructions(
-            0,
-            "return-void",
-        )
-        storyAdsDwellTailLoad.method.addInstructions(
-            0,
-            "return-void",
-        )
         mainFeedTailLoad.method.addInstructions(
             0,
             "return-void",
@@ -286,9 +252,12 @@ val blockFacebookAds573Patch = bytecodePatch(
                 return-object v0
             """.trimIndent(),
         )
-        storyAdsBucketInsertion.method.addInstructions(
+        storyAdsBucketMerge.method.addInstructions(
             0,
-            "return-void",
+            """
+                move-object/from16 v0, p3
+                return-object v0
+            """.trimIndent(),
         )
         videoAdBreakFetch.method.addInstructions(
             0,
