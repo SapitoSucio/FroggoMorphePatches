@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-25T22:41:21",
-  "description": "## [1.1.5](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.4...v1.1.5) (2026-08-25)\n\n### 🐛 Bug Fixes\n\n* **facebook:** preserve story batches while filtering ads ([854db0f](https://github.com/SapitoSucio/FroggoMorphePatches/commit/854db0f851970628d6dc0eabc751bf4277e48631))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.1.5/patches-1.1.5.mpp",
+  "created_at": "2026-08-25T23:02:08",
+  "description": "## [1.1.6](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.5...v1.1.6) (2026-08-25)\n\n### 🐛 Bug Fixes\n\n* **facebook:** preserve story pagination ([09c4029](https://github.com/SapitoSucio/FroggoMorphePatches/commit/09c4029fbee1545e2bfd4d07df9b0ac3839ff88d))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.1.6/patches-1.1.6.mpp",
   "signature_download_url": "",
-  "version": "1.1.5"
+  "version": "1.1.6"
 }

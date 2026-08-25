@@ -1,3 +1,9 @@
+## [1.1.6](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.5...v1.1.6) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve story pagination ([09c4029](https://github.com/SapitoSucio/FroggoMorphePatches/commit/09c4029fbee1545e2bfd4d07df9b0ac3839ff88d))
+
 ## [1.1.5](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.4...v1.1.5) (2026-08-25)
 
 ### 🐛 Bug Fixes
