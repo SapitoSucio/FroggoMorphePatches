@@ -11,7 +11,6 @@ import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -19,6 +18,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstructio
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 
 private fun redexRunnable(originalName: String) = Fingerprint(
     returnType = "V",
@@ -157,7 +157,7 @@ private fun Instruction.writeRegister(): Int? {
     }
 }
 
-private fun findSafeLowRegister(method: Method): Int? {
+private fun findSafeLowRegister(method: MutableMethod): Int? {
     val implementation = method.implementation ?: return null
     val usedRegisters = mutableSetOf<Int>()
 
@@ -175,7 +175,7 @@ private fun findSafeLowRegister(method: Method): Int? {
     return null
 }
 
-private fun logRoute(method: Method, label: String) {
+private fun logRoute(method: MutableMethod, label: String) {
     val register = findSafeLowRegister(method) ?: return
 
     // Log.d uses a 4-bit register list. Skip a route rather than producing an
