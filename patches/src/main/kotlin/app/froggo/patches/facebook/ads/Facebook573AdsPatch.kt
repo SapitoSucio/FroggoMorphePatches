@@ -2,8 +2,8 @@
  * Facebook 573.0.0.37.74 / 473623755
  *
  * Validated against the target APK with JADX/MCP and the DEX string table:
- * - AdBucketDataSource$attemptAdsInsertion$1 -> run(): V
- * - AdBucketDataSource$attemptFetchMoreAds$1 -> run(): V
+ * - AdBucketDataSourceUtil$attemptAdsInsertion$1 -> run(): V
+ * - AdBucketDataSourceUtil$attemptFetchMoreAds$1 -> run(): V
  * - GraphQLFBMultiAdsFeedUnit.A00(): X.41Q
  * - GraphQLPartialStory.getSponsoredData(): X.41Q
  */
@@ -34,11 +34,11 @@ private fun exactMethod(classDescriptor: String, methodName: String) = Fingerpri
 )
 
 private val storyAdsInsertion = redexRunnable(
-    "AdBucketDataSource\$attemptAdsInsertion\$1",
+    "AdBucketDataSourceUtil\$attemptAdsInsertion\$1",
 )
 
 private val storyAdsFetchMore = redexRunnable(
-    "AdBucketDataSource\$attemptFetchMoreAds\$1",
+    "AdBucketDataSourceUtil\$attemptFetchMoreAds\$1",
 )
 
 private val multiAdsSponsoredData = exactMethod(
