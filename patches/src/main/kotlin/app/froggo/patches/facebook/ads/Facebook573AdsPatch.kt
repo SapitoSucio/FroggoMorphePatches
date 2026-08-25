@@ -70,10 +70,9 @@
  *   compile and apply to that APK, then test feed, Story, full-screen video,
  *   and the card below video independently.
  *
- * Diagnostics intentionally use fixed labels only. They must never log URLs,
- * IDs, accounts, request bodies, or GraphQL responses. Register aliases are
- * physical registers: p0 can be v16+ in a large method. Use low v registers
- * for injected const/4, return-object, invoke-*, and field instructions.
+ * Register aliases are physical registers: p0 can be v16+ in a large method.
+ * Use low v registers for injected const/4, return-object, invoke-*, and
+ * field instructions.
  */
 package app.froggo.patches.facebook.ads
 
