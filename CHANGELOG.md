@@ -1,3 +1,9 @@
+## [1.0.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.2...v1.0.3) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* use low register for null returns ([ad3cc89](https://github.com/SapitoSucio/FroggoMorphePatches/commit/ad3cc892d341f1716adc14fcd6ca2d6cb4a56962))
+
 ## [1.0.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.1...v1.0.2) (2026-08-25)
 
 ### 🐛 Bug Fixes
