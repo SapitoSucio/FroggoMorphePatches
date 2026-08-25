@@ -1,3 +1,9 @@
+## [1.1.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.2...v1.1.3) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* remove Facebook diagnostics references ([d9f662e](https://github.com/SapitoSucio/FroggoMorphePatches/commit/d9f662e4933d6ca0e3d84262cfd84e535fc6993c))
+
 ## [1.1.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.1...v1.1.2) (2026-08-25)
 
 ### 🐛 Bug Fixes
