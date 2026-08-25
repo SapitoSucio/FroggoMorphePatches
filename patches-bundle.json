@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-25T08:26:04",
-  "description": "## [1.0.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.0...v1.0.1) (2026-08-25)\n\n### 🐛 Bug Fixes\n\n* match Facebook ad datasource names ([1b32a89](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1b32a892da475bceb346abdcc66cee12a8a2868d))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.0.1/patches-1.0.1.mpp",
+  "created_at": "2026-08-25T08:48:43",
+  "description": "## [1.0.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.1...v1.0.2) (2026-08-25)\n\n### 🐛 Bug Fixes\n\n* block feed and video ads ([97c555a](https://github.com/SapitoSucio/FroggoMorphePatches/commit/97c555ab780c796106ecd05b41b38fe821584029))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.0.2/patches-1.0.2.mpp",
   "signature_download_url": "",
-  "version": "1.0.1"
+  "version": "1.0.2"
 }

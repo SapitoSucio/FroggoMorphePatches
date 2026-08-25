@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.1...v1.0.2) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* block feed and video ads ([97c555a](https://github.com/SapitoSucio/FroggoMorphePatches/commit/97c555ab780c796106ecd05b41b38fe821584029))
+
 ## [1.0.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.0...v1.0.1) (2026-08-25)
 
 ### 🐛 Bug Fixes

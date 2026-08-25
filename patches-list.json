@@ -1,10 +1,10 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "patches": [
     {
       "name": "Block Facebook ads (573)",
-      "description": "Stops Story Ads insertion/fetch and removes sponsored-data access in the feed.",
+      "description": "Stops feed, Story Ads, deferred/tail loads, and video commercial-break ads.",
       "default": true,
       "dependencies": [],
       "compatiblePackages": [
