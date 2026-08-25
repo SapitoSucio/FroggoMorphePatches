@@ -1,3 +1,9 @@
+## [1.1.5](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.4...v1.1.5) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve story batches while filtering ads ([854db0f](https://github.com/SapitoSucio/FroggoMorphePatches/commit/854db0f851970628d6dc0eabc751bf4277e48631))
+
 ## [1.1.4](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.3...v1.1.4) (2026-08-25)
 
 ### 🐛 Bug Fixes
