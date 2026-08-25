@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.0.0...v1.0.1) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* match Facebook ad datasource names ([1b32a89](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1b32a892da475bceb346abdcc66cee12a8a2868d))
+
 ## 1.0.0 (2026-08-25)
 
 ### 🐛 Bug Fixes
