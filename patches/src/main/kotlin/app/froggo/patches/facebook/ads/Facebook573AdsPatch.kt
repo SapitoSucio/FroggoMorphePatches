@@ -1,18 +1,15 @@
 /*
  * Facebook 573.0.0.37.74 / 473623755
  *
- * Validated against the loaded APK with JADX/MCP and the DEX string table:
+ * Validated against the target APK with JADX/MCP and the DEX string table:
  * - AdBucketDataSource$attemptAdsInsertion$1 -> run(): V
  * - AdBucketDataSource$attemptFetchMoreAds$1 -> run(): V
  * - GraphQLFBMultiAdsFeedUnit.A00(): X.41Q
  * - GraphQLPartialStory.getSponsoredData(): X.41Q
- *
- * The first two hooks stop Story Ads before insertion/fetch. The GraphQL hooks
- * are a late safeguard for sponsored feed units in this universal APK.
  */
-package app.morphe.patches.facebook.ads.v573
+package app.froggo.patches.facebook.ads
 
-import app.morphe.patches.shared.compat.AppCompatibilities
+import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.returnEarly
@@ -58,8 +55,9 @@ private val partialStorySponsoredData = exactMethod(
 val blockFacebookAds573Patch = bytecodePatch(
     name = "Block Facebook ads (573)",
     description = "Stops Story Ads insertion/fetch and removes sponsored-data access in the feed.",
+    default = true,
 ) {
-    compatibleWith(AppCompatibilities.FACEBOOK)
+    compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
         storyAdsInsertion.method.returnEarly()
