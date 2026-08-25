@@ -11,7 +11,13 @@ import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.getFreeRegisterProvider
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 
 private fun redexRunnable(originalName: String) = Fingerprint(
@@ -107,16 +113,73 @@ private val partialStorySponsoredData = exactMethod(
     "getSponsoredData",
 )
 
-private fun Fingerprint.logRoute(label: String) {
-    val method = this.method
-    val register = runCatching {
-        method.getFreeRegisterProvider(0, 1, emptyList()).getFreeRegister()
-    }.getOrNull() ?: return
+private fun Instruction.registersUsed(): List<Int> = when (this) {
+    is FiveRegisterInstruction -> when (registerCount) {
+        0 -> emptyList()
+        1 -> listOf(registerC)
+        2 -> listOf(registerC, registerD)
+        3 -> listOf(registerC, registerD, registerE)
+        4 -> listOf(registerC, registerD, registerE, registerF)
+        else -> listOf(registerC, registerD, registerE, registerF, registerG)
+    }
+    is ThreeRegisterInstruction -> listOf(registerA, registerB, registerC)
+    is TwoRegisterInstruction -> listOf(registerA, registerB)
+    is OneRegisterInstruction -> listOf(registerA)
+    is RegisterRangeInstruction -> (startRegister until (startRegister + registerCount)).toList()
+    else -> emptyList()
+}
+
+private fun Instruction.writeRegister(): Int? {
+    val opcode = opcode.name
+    val writesRegister = opcode.startsWith(
+        prefix = "MOVE",
+    ) || opcode.startsWith("CONST") || opcode.startsWith("IGET") ||
+        opcode.startsWith("SGET") || opcode.startsWith("AGET") ||
+        opcode.startsWith("NEW_INSTANCE") || opcode.startsWith("NEW_ARRAY") ||
+        opcode.startsWith("ARRAY_LENGTH") || opcode.startsWith("INSTANCE_OF") ||
+        opcode.startsWith("NEG_") || opcode.startsWith("NOT_") ||
+        opcode.startsWith("ADD_") || opcode.startsWith("SUB_") ||
+        opcode.startsWith("MUL_") || opcode.startsWith("DIV_") ||
+        opcode.startsWith("REM_") || opcode.startsWith("AND_") ||
+        opcode.startsWith("OR_") || opcode.startsWith("XOR_") ||
+        opcode.startsWith("SHL_") || opcode.startsWith("SHR_") ||
+        opcode.startsWith("USHR_") || opcode.startsWith("INT_TO_") ||
+        opcode.startsWith("LONG_TO_") || opcode.startsWith("FLOAT_TO_") ||
+        opcode.startsWith("DOUBLE_TO_") || opcode.startsWith("CMP_")
+
+    if (!writesRegister) return null
+
+    return when (this) {
+        is OneRegisterInstruction -> registerA
+        is TwoRegisterInstruction -> registerA
+        is ThreeRegisterInstruction -> registerA
+        else -> null
+    }
+}
+
+private fun findSafeLowRegister(method: Method): Int? {
+    val implementation = method.implementation ?: return null
+    val usedRegisters = mutableSetOf<Int>()
+
+    for (instruction in implementation.instructions) {
+        val registers = instruction.registersUsed()
+        val writeRegister = instruction.writeRegister()
+        if (writeRegister != null && writeRegister < 16 && writeRegister !in usedRegisters &&
+            registers.count { it == writeRegister } <= 1
+        ) {
+            return writeRegister
+        }
+        usedRegisters += registers
+    }
+
+    return null
+}
+
+private fun logRoute(method: Method, label: String) {
+    val register = findSafeLowRegister(method) ?: return
 
     // Log.d uses a 4-bit register list. Skip a route rather than producing an
     // invalid patch if this method has no safe low register available.
-    if (register >= 16) return
-
     method.addInstructions(
         0,
         """
@@ -135,16 +198,16 @@ val logFacebookAdsRoutes573Patch = bytecodePatch(
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
-        feedTailLoad.logRoute("FroggoAds573/ftail")
-        storyAdsInsertion.logRoute("FroggoAds573/sins")
-        storyAdsFetchMore.logRoute("FroggoAds573/sfetch")
-        storyAdsDeferredFetch.logRoute("FroggoAds573/sdefer")
-        feedAdsChannel.logRoute("FroggoAds573/fchan")
-        feedAdsResponseConverter.logRoute("FroggoAds573/fconv")
-        storyAdsBucketInsertion.logRoute("FroggoAds573/sbucket")
-        videoAdBreakFetch.logRoute("FroggoAds573/vfetch")
-        videoAdBreakSuccess.logRoute("FroggoAds573/vok")
-        multiAdsSponsoredData.logRoute("FroggoAds573/gmulti")
-        partialStorySponsoredData.logRoute("FroggoAds573/gstory")
+        logRoute(feedTailLoad.method, "FroggoAds573/ftail")
+        logRoute(storyAdsInsertion.method, "FroggoAds573/sins")
+        logRoute(storyAdsFetchMore.method, "FroggoAds573/sfetch")
+        logRoute(storyAdsDeferredFetch.method, "FroggoAds573/sdefer")
+        logRoute(feedAdsChannel.method, "FroggoAds573/fchan")
+        logRoute(feedAdsResponseConverter.method, "FroggoAds573/fconv")
+        logRoute(storyAdsBucketInsertion.method, "FroggoAds573/sbucket")
+        logRoute(videoAdBreakFetch.method, "FroggoAds573/vfetch")
+        logRoute(videoAdBreakSuccess.method, "FroggoAds573/vok")
+        logRoute(multiAdsSponsoredData.method, "FroggoAds573/gmulti")
+        logRoute(partialStorySponsoredData.method, "FroggoAds573/gstory")
     }
 }
