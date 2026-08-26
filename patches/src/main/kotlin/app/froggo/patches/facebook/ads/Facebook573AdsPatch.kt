@@ -44,9 +44,9 @@
  * 4. Story Ads: StoryViewerBucketDataController chains provider merges through
  *    AuI.B46(...) or the alternate WXO.B46(...), depending on mobile config.
  *    AuI.B46 must execute its state machine so the viewer can initialize and
- *    paginate normally; its generated list is discarded at the final return.
- *    WXO is an ad-only insertion provider, so its merge and callbacks are
- *    blocked at entry.
+ *    paginate normally; its generated list is filtered at the final return.
+ *    WXO is an ad-only insertion provider; its insertion helper is bypassed
+ *    while its public merge still runs normally.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -146,12 +146,10 @@ private val storyAdsBucketMerge = exactMethod(
     ),
 )
 
-private val storyAdsAlternateBucketMerge = exactMethod(
+private val storyAdsAlternateInsertionHelper = exactMethod(
     "LX/WXO;",
-    "B46",
+    "A00",
     listOf(
-        "Lcom/facebook/auth/usersession/FbUserSession;",
-        "LX/Aly;",
         "Lcom/google/common/collect/ImmutableList;",
     ),
 )
@@ -310,13 +308,38 @@ val blockFacebookAds573Patch = bytecodePatch(
         storyAdsBucketMerge.method.addInstructions(
             storyAdsMergeReturnIndex,
             """
-                move-object/from16 v0, p3
+                new-instance v1, Ljava/util/ArrayList;
+                invoke-direct {v1}, Ljava/util/ArrayList;-><init>()V
+                invoke-interface {v0}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+                move-result-object v2
+
+                :froggo_storyads_filter_loop
+                invoke-interface {v2}, Ljava/util/Iterator;->hasNext()Z
+                move-result v3
+                if-eqz v3, :froggo_storyads_filter_done
+                invoke-interface {v2}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+                move-result-object v3
+                instance-of v4, v3, LX/9XO;
+                if-eqz v4, :froggo_storyads_filter_keep
+                move-object v4, v3
+                check-cast v4, LX/9XO;
+                invoke-virtual {v4}, LX/9XO;->A1K()Z
+                move-result v4
+                if-nez v4, :froggo_storyads_filter_loop
+
+                :froggo_storyads_filter_keep
+                invoke-virtual {v1, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+                goto :froggo_storyads_filter_loop
+
+                :froggo_storyads_filter_done
+                invoke-static {v1}, Lcom/google/common/collect/ImmutableList;->copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;
+                move-result-object v0
             """.trimIndent(),
         )
-        storyAdsAlternateBucketMerge.method.addInstructions(
+        storyAdsAlternateInsertionHelper.method.addInstructions(
             0,
             """
-                move-object/from16 v0, p3
+                move-object/from16 v0, p1
                 return-object v0
             """.trimIndent(),
         )
