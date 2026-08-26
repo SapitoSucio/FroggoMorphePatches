@@ -12,8 +12,8 @@
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
  * - X.AuI.Doc(X.9XO): V (ads_rti_insertion bucket insertion)
- * - X.AkQ.A02(X.Alw, FbUserSession, X.AkQ, ImmutableList, boolean): V
- *   (final StoryViewerBucketDataController publication)
+ * - X.AkQ.A00(FbUserSession, X.AkQ, ImmutableList, boolean, boolean): ImmutableList
+ *   (StoryViewerBucketDataController provider processing)
  * - AdBreakFetchHelper -> A05(...): V
  * - AdBreakStateMachine callback -> onSuccess(Object): V
  * - X.5Vs.A03(...): V (Reels/video banner and video ad fetch)
@@ -42,11 +42,11 @@
  *    PROMOTION; both are rejected there as a defensive final filter.
  * 4. Story Ads: StoryViewerBucketDataController chains provider merges through
  *    the normal story providers and an ad provider (AuI or WXO, depending on
- *    mobile config). B46 is part of the viewer's normal list/state contract;
- *    it is deliberately left untouched. Only ad-specific insertion/fetch
- *    runnables and AuI.Doc(C9XO) are stopped. Any C9XO that arrives from
- *    cache or an already-completed provider is removed at AkQ.A02, the final
- *    publication seam.
+ *    mobile config). B46 and A02 are part of the viewer's normal list/state
+ *    contract and are deliberately left untouched. Only ad-specific
+ *    insertion/fetch runnables and AuI.Doc(C9XO) are stopped. Any C9XO that
+ *    arrives from cache or an already-completed provider is removed from the
+ *    A00 result before A02 updates viewer state.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -160,14 +160,14 @@ private val storyAdsBucketInsertion = exactMethod(
     listOf("LX/9XO;"),
 )
 
-private val storyAdsBucketPublication = exactMethod(
+private val storyAdsBucketProcessing = exactMethod(
     "LX/AkQ;",
-    "A02",
+    "A00",
     listOf(
-        "LX/Alw;",
         "Lcom/facebook/auth/usersession/FbUserSession;",
         "LX/AkQ;",
         "Lcom/google/common/collect/ImmutableList;",
+        "Z",
         "Z",
     ),
 )
@@ -308,12 +308,16 @@ val blockFacebookAds573Patch = bytecodePatch(
             0,
             "return-void",
         )
-        storyAdsBucketPublication.method.addInstructions(
-            0,
+        val storyAdsProcessingReturnIndex = storyAdsBucketProcessing.method.implementation!!.instructions
+            .withIndex()
+            .last { (_, instruction) -> instruction.opcode == com.android.tools.smali.dexlib2.Opcode.RETURN_OBJECT }
+            .index
+        storyAdsBucketProcessing.method.addInstructions(
+            storyAdsProcessingReturnIndex,
             """
                 new-instance v0, Ljava/util/ArrayList;
                 invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
-                invoke-interface {p3}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+                invoke-interface {p2}, Ljava/util/List;->iterator()Ljava/util/Iterator;
                 move-result-object v1
 
                 :froggo_storyads_publish_filter_loop
@@ -333,7 +337,7 @@ val blockFacebookAds573Patch = bytecodePatch(
                 :froggo_storyads_publish_filter_done
                 invoke-static {v0}, Lcom/google/common/collect/ImmutableList;->copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;
                 move-result-object v0
-                move-object p3, v0
+                return-object v0
             """.trimIndent(),
         )
         videoAdBreakFetch.method.addInstructions(
