@@ -1,3 +1,9 @@
+## [1.1.8](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.7...v1.1.8) (2026-08-26)
+
+### 🐛 Bug Fixes
+
+* **facebook:** bypass story ad merge state ([5b76530](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5b7653088f58bfbb1242141b95404e5c1d5e6400))
+
 ## [1.1.7](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.6...v1.1.7) (2026-08-26)
 
 ### 🐛 Bug Fixes
