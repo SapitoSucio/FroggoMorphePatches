@@ -1,3 +1,9 @@
+## [1.1.7](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.6...v1.1.7) (2026-08-26)
+
+### 🐛 Bug Fixes
+
+* **facebook:** stop story ad callbacks ([98150f5](https://github.com/SapitoSucio/FroggoMorphePatches/commit/98150f5f46135ea3e67392700f1e8d11eb4fb23a))
+
 ## [1.1.6](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.5...v1.1.6) (2026-08-25)
 
 ### 🐛 Bug Fixes
