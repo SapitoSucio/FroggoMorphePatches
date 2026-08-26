@@ -43,10 +43,9 @@
  *    PROMOTION; both are rejected there as a defensive final filter.
  * 4. Story Ads: StoryViewerBucketDataController chains provider merges through
  *    AuI.B46(...) or the alternate WXO.B46(...), depending on mobile config.
- *    AuI.B46 runs normally and its generated output is discarded in favor of
- *    the original organic list; WXO.B46 is ad-only and returns its input
- *    immediately. Both providers' fetch-more, deferred-update, insertion,
- *    and prefetch callbacks are no-oped; they are ad-only callbacks, not
+ *    Both provider merges return the incoming organic list before executing
+ *    their ad-state mutations. Their fetch-more, deferred-update, insertion,
+ *    and prefetch callbacks are also no-oped; they are ad-only callbacks, not
  *    organic story pagination.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
@@ -87,8 +86,6 @@ import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 
 private fun redexRunnable(originalName: String) = Fingerprint(
@@ -333,22 +330,19 @@ val blockFacebookAds573Patch = bytecodePatch(
                 return-object v0
             """.trimIndent(),
         )
-        val storyAdsMergeReturnIndex = storyAdsBucketMerge.method.implementation!!.instructions
-            .withIndex()
-            .last { (_, instruction) ->
-                instruction.opcode == Opcode.RETURN_OBJECT &&
-                    (instruction as OneRegisterInstruction).registerA == 0
-            }
-            .index
         storyAdsBucketMerge.method.addInstructions(
-            storyAdsMergeReturnIndex,
+            0,
             """
                 move-object/from16 v0, p3
+                return-object v0
             """.trimIndent(),
         )
         storyAdsAlternateBucketMerge.method.addInstructions(
             0,
-            "return-object p3",
+            """
+                move-object/from16 v0, p3
+                return-object v0
+            """.trimIndent(),
         )
         storyAdsPrefetch.method.addInstructions(
             0,
