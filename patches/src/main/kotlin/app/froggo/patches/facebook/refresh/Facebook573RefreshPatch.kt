@@ -5,9 +5,9 @@
  * lifecycle and explicit refresh paths. The lifecycle callers identify
  * themselves with "onResume" and "onAppForeground"; activity-result and
  * fullscreen-close callers use different reasons and must keep the original
- * behavior. The synthetic hot-start and foreground runnables are left intact:
- * they maintain feed state and auto-scroll, rather than being the refresh
- * request itself.
+ * behavior. NewsFeedFragment.onSetUserVisibleHint and its onPause work also
+ * call C2UL.A0A(...), which is the stale-post auto-refresh selector; manual
+ * refresh uses a separate path and remains available.
  */
 package app.froggo.patches.facebook.refresh
 
@@ -30,6 +30,18 @@ private val automaticRefreshForRevisit = Fingerprint(
     },
 )
 
+private val automaticStalePostRefresh = Fingerprint(
+    returnType = "V",
+    parameters = listOf(
+        "LX/2UL;",
+        "I",
+        "Z",
+    ),
+    custom = { method, classDef ->
+        classDef.type == "LX/2UL;" && method.name == "A0A"
+    },
+)
+
 @Suppress("unused")
 val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     name = "Block Facebook automatic refresh (573)",
@@ -39,6 +51,10 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
+        automaticStalePostRefresh.method.addInstructions(
+            0,
+            "return-void",
+        )
         automaticRefreshForRevisit.method.addInstructions(
             0,
             """
