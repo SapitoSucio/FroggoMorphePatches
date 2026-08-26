@@ -11,10 +11,7 @@
  * - MainFeedCSRDataLoaderImpl$maybeDoAsyncAdsTailLoad$1 -> run(): V
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
- * - X.AuI.B46(FbUserSession, X.Aly, ImmutableList): ImmutableList
- *   (StoryViewerBucketDataController provider merge)
- * - X.WXO.B46(FbUserSession, X.Aly, ImmutableList): ImmutableList
- *   (alternate AdPaginatingBucketStaticInsertionDataSource provider merge)
+ * - X.AuI.Doc(X.9XO): V (ads_rti_insertion bucket insertion)
  * - AdBreakFetchHelper -> A05(...): V
  * - AdBreakStateMachine callback -> onSuccess(Object): V
  * - X.5Vs.A03(...): V (Reels/video banner and video ad fetch)
@@ -42,11 +39,10 @@
  *    In this APK GraphQLFeedStoryCategory.A0K is SPONSORED and A0I is
  *    PROMOTION; both are rejected there as a defensive final filter.
  * 4. Story Ads: StoryViewerBucketDataController chains provider merges through
- *    AuI.B46(...) or the alternate WXO.B46(...), depending on mobile config.
- *    AuI.B46 must execute its state machine so the viewer can initialize and
- *    paginate normally; its generated list is filtered at the final return.
- *    WXO is an ad-only insertion provider; its insertion helper is bypassed
- *    while its public merge still runs normally.
+ *    the normal story providers and an ad provider (AuI or WXO, depending on
+ *    mobile config). B46 is part of the viewer's normal list/state contract;
+ *    it is deliberately left untouched. Only ad-specific insertion/fetch
+ *    runnables and AuI.Doc(C9XO) are stopped.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -86,8 +82,6 @@ import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 
 private fun redexRunnable(originalName: String) = Fingerprint(
@@ -136,54 +130,30 @@ private val feedAdsResponseConverter = exactMethod(
     ),
 )
 
-private val storyAdsBucketMerge = exactMethod(
+private val storyAdsInsertion = redexRunnable(
+    "AdBucketDataSourceUtil\$attemptAdsInsertion\$1",
+)
+
+private val storyAdsFetchMore = redexRunnable(
+    "AdBucketDataSourceUtil\$attemptFetchMoreAds\$1",
+)
+
+private val storyAdsDeferredFetch = redexRunnable(
+    "AdBucketDataSourceUtil\$fetchDeferredAds\$1",
+)
+
+private val storyAdsCtaTailLoad = redexRunnable(
+    "AdBucketDataSourceUtil\$triggerCtaTailload\$1",
+)
+
+private val storyAdsDwellTailLoad = redexRunnable(
+    "AdBucketDataSourceUtil\$triggerDwellTailload\$1",
+)
+
+private val storyAdsBucketInsertion = exactMethod(
     "LX/AuI;",
-    "B46",
-    listOf(
-        "Lcom/facebook/auth/usersession/FbUserSession;",
-        "LX/Aly;",
-        "Lcom/google/common/collect/ImmutableList;",
-    ),
-)
-
-private val storyAdsAlternateInsertionHelper = exactMethod(
-    "LX/WXO;",
-    "A00",
-    listOf(
-        "Lcom/google/common/collect/ImmutableList;",
-    ),
-)
-
-private val storyAdsAlternatePrefetch = exactMethod(
-    "LX/WXO;",
-    "Ap5",
-    listOf(
-        "Ljava/lang/Boolean;",
-        "Ljava/lang/Boolean;",
-    ),
-)
-
-private val storyAdsAlternateFetchMore = exactMethod(
-    "LX/WXO;",
-    "ApR",
-    listOf(
-        "Lcom/google/common/collect/ImmutableList;",
-        "I",
-    ),
-)
-
-private val storyAdsAlternateDeferredUpdate = exactMethod(
-    "LX/WXO;",
-    "Aoq",
-    listOf(
-        "LX/9Ta;",
-        "Lcom/google/common/collect/ImmutableList;",
-    ),
-)
-
-private val storyAdsAlternateInsertion = exactMethod(
-    "LX/WXO;",
-    "AHX",
+    "Doc",
+    listOf("LX/9XO;"),
 )
 
 private val videoAdBreakFetch = exactMethod(
@@ -273,7 +243,7 @@ private val partialStorySponsoredData = exactMethod(
 @Suppress("unused")
 val blockFacebookAds573Patch = bytecodePatch(
     name = "Block Facebook ads (573)",
-    description = "Stops feed, Story ad-bucket merge, deferred/tail loads, and video commercial-break ads.",
+    description = "Stops feed, Story ad-bucket insertion/fetch, deferred/tail loads, and video commercial-break ads.",
     default = true,
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
@@ -298,64 +268,27 @@ val blockFacebookAds573Patch = bytecodePatch(
                 return-object v0
             """.trimIndent(),
         )
-        val storyAdsMergeReturnIndex = storyAdsBucketMerge.method.implementation!!.instructions
-            .withIndex()
-            .last { (_, instruction) ->
-                instruction.opcode == Opcode.RETURN_OBJECT &&
-                    (instruction as OneRegisterInstruction).registerA == 0
-            }
-            .index
-        storyAdsBucketMerge.method.addInstructions(
-            storyAdsMergeReturnIndex,
-            """
-                new-instance v1, Ljava/util/ArrayList;
-                invoke-direct {v1}, Ljava/util/ArrayList;-><init>()V
-                invoke-interface {v0}, Ljava/util/List;->iterator()Ljava/util/Iterator;
-                move-result-object v2
-
-                :froggo_storyads_filter_loop
-                invoke-interface {v2}, Ljava/util/Iterator;->hasNext()Z
-                move-result v3
-                if-eqz v3, :froggo_storyads_filter_done
-                invoke-interface {v2}, Ljava/util/Iterator;->next()Ljava/lang/Object;
-                move-result-object v3
-                instance-of v4, v3, LX/9XO;
-                if-eqz v4, :froggo_storyads_filter_keep
-                move-object v4, v3
-                check-cast v4, LX/9XO;
-                invoke-virtual {v4}, LX/9XO;->A1K()Z
-                move-result v4
-                if-nez v4, :froggo_storyads_filter_loop
-
-                :froggo_storyads_filter_keep
-                invoke-virtual {v1, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
-                goto :froggo_storyads_filter_loop
-
-                :froggo_storyads_filter_done
-                invoke-static {v1}, Lcom/google/common/collect/ImmutableList;->copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;
-                move-result-object v0
-            """.trimIndent(),
-        )
-        storyAdsAlternateInsertionHelper.method.addInstructions(
-            0,
-            """
-                move-object/from16 v0, p1
-                return-object v0
-            """.trimIndent(),
-        )
-        storyAdsAlternatePrefetch.method.addInstructions(
+        storyAdsInsertion.method.addInstructions(
             0,
             "return-void",
         )
-        storyAdsAlternateFetchMore.method.addInstructions(
+        storyAdsFetchMore.method.addInstructions(
             0,
             "return-void",
         )
-        storyAdsAlternateDeferredUpdate.method.addInstructions(
+        storyAdsDeferredFetch.method.addInstructions(
             0,
             "return-void",
         )
-        storyAdsAlternateInsertion.method.addInstructions(
+        storyAdsCtaTailLoad.method.addInstructions(
+            0,
+            "return-void",
+        )
+        storyAdsDwellTailLoad.method.addInstructions(
+            0,
+            "return-void",
+        )
+        storyAdsBucketInsertion.method.addInstructions(
             0,
             "return-void",
         )
