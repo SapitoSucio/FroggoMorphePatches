@@ -1,3 +1,9 @@
+## [1.1.11](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.10...v1.1.11) (2026-08-26)
+
+### 🐛 Bug Fixes
+
+* **facebook:** leave story merge untouched ([1a8793e](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1a8793e1fac13b86b560e29d0e4e9ca661163628))
+
 ## [1.1.10](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.9...v1.1.10) (2026-08-26)
 
 ### 🐛 Bug Fixes
