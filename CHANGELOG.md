@@ -1,3 +1,9 @@
+## [1.1.13](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.12...v1.1.13) (2026-08-26)
+
+### 🐛 Bug Fixes
+
+* **facebook:** filter story ads before publish ([c8a240e](https://github.com/SapitoSucio/FroggoMorphePatches/commit/c8a240ea596fefb1dc974ca71ee5e4fc500a06a2))
+
 ## [1.1.12](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.11...v1.1.12) (2026-08-26)
 
 ### 🐛 Bug Fixes
