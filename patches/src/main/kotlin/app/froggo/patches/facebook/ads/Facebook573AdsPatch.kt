@@ -12,6 +12,8 @@
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
  * - X.AuI.Doc(X.9XO): V (ads_rti_insertion bucket insertion)
+ * - X.AkQ.A02(X.Alw, FbUserSession, X.AkQ, ImmutableList, boolean): V
+ *   (final StoryViewerBucketDataController publication)
  * - AdBreakFetchHelper -> A05(...): V
  * - AdBreakStateMachine callback -> onSuccess(Object): V
  * - X.5Vs.A03(...): V (Reels/video banner and video ad fetch)
@@ -42,7 +44,9 @@
  *    the normal story providers and an ad provider (AuI or WXO, depending on
  *    mobile config). B46 is part of the viewer's normal list/state contract;
  *    it is deliberately left untouched. Only ad-specific insertion/fetch
- *    runnables and AuI.Doc(C9XO) are stopped.
+ *    runnables and AuI.Doc(C9XO) are stopped. Any C9XO that arrives from
+ *    cache or an already-completed provider is removed at AkQ.A02, the final
+ *    publication seam.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -154,6 +158,18 @@ private val storyAdsBucketInsertion = exactMethod(
     "LX/AuI;",
     "Doc",
     listOf("LX/9XO;"),
+)
+
+private val storyAdsBucketPublication = exactMethod(
+    "LX/AkQ;",
+    "A02",
+    listOf(
+        "LX/Alw;",
+        "Lcom/facebook/auth/usersession/FbUserSession;",
+        "LX/AkQ;",
+        "Lcom/google/common/collect/ImmutableList;",
+        "Z",
+    ),
 )
 
 private val videoAdBreakFetch = exactMethod(
@@ -291,6 +307,34 @@ val blockFacebookAds573Patch = bytecodePatch(
         storyAdsBucketInsertion.method.addInstructions(
             0,
             "return-void",
+        )
+        storyAdsBucketPublication.method.addInstructions(
+            0,
+            """
+                new-instance v0, Ljava/util/ArrayList;
+                invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
+                invoke-interface {p3}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+                move-result-object v1
+
+                :froggo_storyads_publish_filter_loop
+                invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
+                move-result v2
+                if-eqz v2, :froggo_storyads_publish_filter_done
+                invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+                move-result-object v2
+                instance-of v3, v2, LX/9XO;
+                if-eqz v3, :froggo_storyads_publish_filter_keep
+                goto :froggo_storyads_publish_filter_loop
+
+                :froggo_storyads_publish_filter_keep
+                invoke-virtual {v0, v2}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+                goto :froggo_storyads_publish_filter_loop
+
+                :froggo_storyads_publish_filter_done
+                invoke-static {v0}, Lcom/google/common/collect/ImmutableList;->copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;
+                move-result-object v0
+                move-object p3, v0
+            """.trimIndent(),
         )
         videoAdBreakFetch.method.addInstructions(
             0,
