@@ -315,6 +315,7 @@ val blockFacebookAds573Patch = bytecodePatch(
         storyAdsBucketProcessing.method.addInstructions(
             storyAdsProcessingReturnIndex,
             """
+                if-eqz p2, :froggo_storyads_publish_filter_keep_original
                 new-instance v0, Ljava/util/ArrayList;
                 invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
                 invoke-interface {p2}, Ljava/util/List;->iterator()Ljava/util/Iterator;
@@ -335,9 +336,14 @@ val blockFacebookAds573Patch = bytecodePatch(
                 goto :froggo_storyads_publish_filter_loop
 
                 :froggo_storyads_publish_filter_done
+                invoke-virtual {v0}, Ljava/util/ArrayList;->isEmpty()Z
+                move-result v1
+                if-nez v1, :froggo_storyads_publish_filter_keep_original
                 invoke-static {v0}, Lcom/google/common/collect/ImmutableList;->copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;
                 move-result-object v0
-                return-object v0
+                move-object p2, v0
+
+                :froggo_storyads_publish_filter_keep_original
             """.trimIndent(),
         )
         videoAdBreakFetch.method.addInstructions(
