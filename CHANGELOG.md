@@ -1,3 +1,9 @@
+## [1.1.9](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.8...v1.1.9) (2026-08-26)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve story provider state ([70f6608](https://github.com/SapitoSucio/FroggoMorphePatches/commit/70f6608a24c418f64de69446d8ca5dfe11ebbd46))
+
 ## [1.1.8](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.7...v1.1.8) (2026-08-26)
 
 ### 🐛 Bug Fixes
