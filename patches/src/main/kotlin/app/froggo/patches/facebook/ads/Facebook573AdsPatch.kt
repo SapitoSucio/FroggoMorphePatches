@@ -12,8 +12,6 @@
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
  * - X.AuI.Doc(X.9XO): V (ads_rti_insertion bucket insertion)
- * - X.AkQ.A00(FbUserSession, X.AkQ, ImmutableList, boolean, boolean): ImmutableList
- *   (StoryViewerBucketDataController provider processing)
  * - AdBreakFetchHelper -> A05(...): V
  * - AdBreakStateMachine callback -> onSuccess(Object): V
  * - X.5Vs.A03(...): V (Reels/video banner and video ad fetch)
@@ -44,9 +42,9 @@
  *    the normal story providers and an ad provider (AuI or WXO, depending on
  *    mobile config). B46 and A02 are part of the viewer's normal list/state
  *    contract and are deliberately left untouched. Only ad-specific
- *    insertion/fetch runnables and AuI.Doc(C9XO) are stopped. Any C9XO that
- *    arrives from cache or an already-completed provider is removed from the
- *    A00 result before A02 updates viewer state.
+ *    insertion/fetch runnables and AuI.Doc(C9XO) are stopped. The provider
+ *    result is left unchanged so the viewer keeps its original bucket/index
+ *    contract, including cache and targeted-story launches.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -158,18 +156,6 @@ private val storyAdsBucketInsertion = exactMethod(
     "LX/AuI;",
     "Doc",
     listOf("LX/9XO;"),
-)
-
-private val storyAdsBucketProcessing = exactMethod(
-    "LX/AkQ;",
-    "A00",
-    listOf(
-        "Lcom/facebook/auth/usersession/FbUserSession;",
-        "LX/AkQ;",
-        "Lcom/google/common/collect/ImmutableList;",
-        "Z",
-        "Z",
-    ),
 )
 
 private val videoAdBreakFetch = exactMethod(
@@ -307,44 +293,6 @@ val blockFacebookAds573Patch = bytecodePatch(
         storyAdsBucketInsertion.method.addInstructions(
             0,
             "return-void",
-        )
-        val storyAdsProcessingReturnIndex = storyAdsBucketProcessing.method.implementation!!.instructions
-            .withIndex()
-            .last { (_, instruction) -> instruction.opcode == com.android.tools.smali.dexlib2.Opcode.RETURN_OBJECT }
-            .index
-        storyAdsBucketProcessing.method.addInstructions(
-            storyAdsProcessingReturnIndex,
-            """
-                if-eqz p2, :froggo_storyads_publish_filter_keep_original
-                new-instance v0, Ljava/util/ArrayList;
-                invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
-                invoke-interface {p2}, Ljava/util/List;->iterator()Ljava/util/Iterator;
-                move-result-object v1
-
-                :froggo_storyads_publish_filter_loop
-                invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
-                move-result v2
-                if-eqz v2, :froggo_storyads_publish_filter_done
-                invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
-                move-result-object v2
-                instance-of v3, v2, LX/9XO;
-                if-eqz v3, :froggo_storyads_publish_filter_keep
-                goto :froggo_storyads_publish_filter_loop
-
-                :froggo_storyads_publish_filter_keep
-                invoke-virtual {v0, v2}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
-                goto :froggo_storyads_publish_filter_loop
-
-                :froggo_storyads_publish_filter_done
-                invoke-virtual {v0}, Ljava/util/ArrayList;->isEmpty()Z
-                move-result v1
-                if-nez v1, :froggo_storyads_publish_filter_keep_original
-                invoke-static {v0}, Lcom/google/common/collect/ImmutableList;->copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;
-                move-result-object v0
-                move-object p2, v0
-
-                :froggo_storyads_publish_filter_keep_original
-            """.trimIndent(),
         )
         videoAdBreakFetch.method.addInstructions(
             0,
