@@ -1,3 +1,9 @@
+## [1.1.17](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.16...v1.1.17) (2026-08-26)
+
+### 🐛 Bug Fixes
+
+* **facebook:** block stale post refresh ([1d082d6](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1d082d6bac6279f71d1c90118502e39b3bbbf104))
+
 ## [1.1.16](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.15...v1.1.16) (2026-08-26)
 
 ### 🐛 Bug Fixes
