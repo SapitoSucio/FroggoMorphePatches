@@ -1,3 +1,9 @@
+## [1.1.15](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.14...v1.1.15) (2026-08-26)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve story bucket state ([5448f53](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5448f536a02687c39969cb99f39a7f825427652e))
+
 ## [1.1.14](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.13...v1.1.14) (2026-08-26)
 
 ### 🐛 Bug Fixes
