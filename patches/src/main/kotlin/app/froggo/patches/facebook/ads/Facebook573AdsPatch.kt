@@ -13,6 +13,8 @@
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
  * - X.AuI.B46(FbUserSession, X.Aly, ImmutableList): ImmutableList
  *   (StoryViewerBucketDataController provider merge)
+ * - X.WXO.B46(FbUserSession, X.Aly, ImmutableList): ImmutableList
+ *   (alternate AdPaginatingBucketStaticInsertionDataSource provider merge)
  * - AdBreakFetchHelper -> A05(...): V
  * - AdBreakStateMachine callback -> onSuccess(Object): V
  * - X.5Vs.A03(...): V (Reels/video banner and video ad fetch)
@@ -40,10 +42,12 @@
  *    In this APK GraphQLFeedStoryCategory.A0K is SPONSORED and A0I is
  *    PROMOTION; both are rejected there as a defensive final filter.
  * 4. Story Ads: StoryViewerBucketDataController chains provider merges through
- *    AuI.B46(...). That method also advances the provider's organic/ad queues
- *    and positions; it must run normally. The generated output is discarded
- *    in favor of the original organic list, keeping provider state and the
- *    controller's pagination list in sync without publishing Story Ads.
+ *    AuI.B46(...) or the alternate WXO.B46(...), depending on mobile config.
+ *    AuI.B46 runs normally and its generated output is discarded in favor of
+ *    the original organic list; WXO.B46 is ad-only and returns its input
+ *    immediately. Both providers' fetch-more, deferred-update, insertion,
+ *    and prefetch callbacks are no-oped; they are ad-only callbacks, not
+ *    organic story pagination.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -141,6 +145,80 @@ private val storyAdsBucketMerge = exactMethod(
         "LX/Aly;",
         "Lcom/google/common/collect/ImmutableList;",
     ),
+)
+
+private val storyAdsAlternateBucketMerge = exactMethod(
+    "LX/WXO;",
+    "B46",
+    listOf(
+        "Lcom/facebook/auth/usersession/FbUserSession;",
+        "LX/Aly;",
+        "Lcom/google/common/collect/ImmutableList;",
+    ),
+)
+
+private val storyAdsPrefetch = exactMethod(
+    "LX/AuI;",
+    "Ap5",
+    listOf(
+        "Ljava/lang/Boolean;",
+        "Ljava/lang/Boolean;",
+    ),
+)
+
+private val storyAdsAlternatePrefetch = exactMethod(
+    "LX/WXO;",
+    "Ap5",
+    listOf(
+        "Ljava/lang/Boolean;",
+        "Ljava/lang/Boolean;",
+    ),
+)
+
+private val storyAdsFetchMore = exactMethod(
+    "LX/AuI;",
+    "ApR",
+    listOf(
+        "Lcom/google/common/collect/ImmutableList;",
+        "I",
+    ),
+)
+
+private val storyAdsAlternateFetchMore = exactMethod(
+    "LX/WXO;",
+    "ApR",
+    listOf(
+        "Lcom/google/common/collect/ImmutableList;",
+        "I",
+    ),
+)
+
+private val storyAdsDeferredUpdate = exactMethod(
+    "LX/AuI;",
+    "Aoq",
+    listOf(
+        "LX/9Ta;",
+        "Lcom/google/common/collect/ImmutableList;",
+    ),
+)
+
+private val storyAdsAlternateDeferredUpdate = exactMethod(
+    "LX/WXO;",
+    "Aoq",
+    listOf(
+        "LX/9Ta;",
+        "Lcom/google/common/collect/ImmutableList;",
+    ),
+)
+
+private val storyAdsInsertion = exactMethod(
+    "LX/AuI;",
+    "AHX",
+)
+
+private val storyAdsAlternateInsertion = exactMethod(
+    "LX/WXO;",
+    "AHX",
 )
 
 private val videoAdBreakFetch = exactMethod(
@@ -267,6 +345,42 @@ val blockFacebookAds573Patch = bytecodePatch(
             """
                 move-object/from16 v0, p3
             """.trimIndent(),
+        )
+        storyAdsAlternateBucketMerge.method.addInstructions(
+            0,
+            "return-object p3",
+        )
+        storyAdsPrefetch.method.addInstructions(
+            0,
+            "return-void",
+        )
+        storyAdsAlternatePrefetch.method.addInstructions(
+            0,
+            "return-void",
+        )
+        storyAdsFetchMore.method.addInstructions(
+            0,
+            "return-void",
+        )
+        storyAdsAlternateFetchMore.method.addInstructions(
+            0,
+            "return-void",
+        )
+        storyAdsDeferredUpdate.method.addInstructions(
+            0,
+            "return-void",
+        )
+        storyAdsAlternateDeferredUpdate.method.addInstructions(
+            0,
+            "return-void",
+        )
+        storyAdsInsertion.method.addInstructions(
+            0,
+            "return-void",
+        )
+        storyAdsAlternateInsertion.method.addInstructions(
+            0,
+            "return-void",
         )
         videoAdBreakFetch.method.addInstructions(
             0,
