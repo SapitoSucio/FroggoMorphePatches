@@ -1,3 +1,9 @@
+## [1.1.14](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.13...v1.1.14) (2026-08-26)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve empty story batches ([024ba41](https://github.com/SapitoSucio/FroggoMorphePatches/commit/024ba413e4aabd1e05f1eb0af36181dfb63ddde2))
+
 ## [1.1.13](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.12...v1.1.13) (2026-08-26)
 
 ### 🐛 Bug Fixes
