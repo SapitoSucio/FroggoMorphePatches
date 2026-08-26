@@ -28,6 +28,7 @@ private val automaticRefreshForRevisit = Fingerprint(
     custom = { method, classDef ->
         classDef.type == "LX/2UL;" && method.name == "refreshForRevisit"
     },
+)
 
 @Suppress("unused")
 val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
