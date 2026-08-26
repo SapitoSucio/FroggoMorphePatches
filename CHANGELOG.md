@@ -1,3 +1,10 @@
+## [1.1.16](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.15...v1.1.16) (2026-08-26)
+
+### 🐛 Bug Fixes
+
+* **facebook:** close refresh fingerprint ([9446ff2](https://github.com/SapitoSucio/FroggoMorphePatches/commit/9446ff2dceb02841b873c2d9b8fb5ac1245ece7d))
+* **facebook:** scope foreground refresh block ([9fdf307](https://github.com/SapitoSucio/FroggoMorphePatches/commit/9fdf30782510700783308debdb91d92dc55f0e18))
+
 ## [1.1.15](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.14...v1.1.15) (2026-08-26)
 
 ### 🐛 Bug Fixes
