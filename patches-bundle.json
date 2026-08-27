@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-27T05:47:45",
-  "description": "## [1.1.19](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.18...v1.1.19) (2026-08-27)\n\n### 🐛 Bug Fixes\n\n* **facebook:** preserve story pagination refresh ([0e5316b](https://github.com/SapitoSucio/FroggoMorphePatches/commit/0e5316b3148f69425bf39e6fdfab6da85d6eed4f))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.1.19/patches-1.1.19.mpp",
+  "created_at": "2026-08-27T06:04:36",
+  "description": "## [1.1.20](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.19...v1.1.20) (2026-08-27)\n\n### 🐛 Bug Fixes\n\n* **facebook:** skip story ad buckets ([8cf9d52](https://github.com/SapitoSucio/FroggoMorphePatches/commit/8cf9d52e55f6864fe62c9f4086d7e66888edc10d))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.1.20/patches-1.1.20.mpp",
   "signature_download_url": "",
-  "version": "1.1.19"
+  "version": "1.1.20"
 }

@@ -1,3 +1,9 @@
+## [1.1.20](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.19...v1.1.20) (2026-08-27)
+
+### 🐛 Bug Fixes
+
+* **facebook:** skip story ad buckets ([8cf9d52](https://github.com/SapitoSucio/FroggoMorphePatches/commit/8cf9d52e55f6864fe62c9f4086d7e66888edc10d))
+
 ## [1.1.19](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.18...v1.1.19) (2026-08-27)
 
 ### 🐛 Bug Fixes
