@@ -11,7 +11,8 @@
  * - MainFeedCSRDataLoaderImpl$maybeDoAsyncAdsTailLoad$1 -> run(): V
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
- * - X.AuI.Doc(X.9XO): V (ads_rti_insertion bucket insertion)
+ * - X.AuI.AHX(): V (ads_insertion completion path)
+ * - X.AuI.Doc(X.9XO): V (ads_rti_insertion completion path)
  * - AdBreakFetchHelper -> A05(...): V
  * - AdBreakStateMachine callback -> onSuccess(Object): V
  * - X.5Vs.A03(...): V (Reels/video banner and video ad fetch)
@@ -41,10 +42,14 @@
  * 4. Story Ads: StoryViewerBucketDataController chains provider merges through
  *    the normal story providers and an ad provider (AuI or WXO, depending on
  *    mobile config). B46 and A02 are part of the viewer's normal list/state
- *    contract and are deliberately left untouched. Only ad-specific
- *    insertion/fetch runnables and AuI.Doc(C9XO) are stopped. The provider
- *    result is left unchanged so the viewer keeps its original bucket/index
- *    contract, including cache and targeted-story launches.
+ *    contract and are deliberately left untouched. Ad-only fetch/deferred/tail
+ *    runnables stay blocked, but attemptAdsInsertion must still dispatch into
+ *    the provider so its completion contract can run. The provider result is
+ *    left unchanged so the viewer keeps its original bucket/index contract,
+ *    including cache and targeted-story launches. AuI.AHX/Doc are
+ *    reduced to their mandatory ES9 completion callbacks instead of returning
+ *    early; otherwise a server-side MobileConfig switch to the AuI provider can
+ *    leave StoryViewerBucketDataController waiting forever after cache expiry.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -132,10 +137,6 @@ private val feedAdsResponseConverter = exactMethod(
     ),
 )
 
-private val storyAdsInsertion = redexRunnable(
-    "AdBucketDataSourceUtil\$attemptAdsInsertion\$1",
-)
-
 private val storyAdsFetchMore = redexRunnable(
     "AdBucketDataSourceUtil\$attemptFetchMoreAds\$1",
 )
@@ -152,7 +153,12 @@ private val storyAdsDwellTailLoad = redexRunnable(
     "AdBucketDataSourceUtil\$triggerDwellTailload\$1",
 )
 
-private val storyAdsBucketInsertion = exactMethod(
+private val storyAdsInsertionCompletion = exactMethod(
+    "LX/AuI;",
+    "AHX",
+)
+
+private val storyAdsRtiInsertionCompletion = exactMethod(
     "LX/AuI;",
     "Doc",
     listOf("LX/9XO;"),
@@ -270,10 +276,6 @@ val blockFacebookAds573Patch = bytecodePatch(
                 return-object v0
             """.trimIndent(),
         )
-        storyAdsInsertion.method.addInstructions(
-            0,
-            "return-void",
-        )
         storyAdsFetchMore.method.addInstructions(
             0,
             "return-void",
@@ -290,9 +292,25 @@ val blockFacebookAds573Patch = bytecodePatch(
             0,
             "return-void",
         )
-        storyAdsBucketInsertion.method.addInstructions(
+        storyAdsInsertionCompletion.method.addInstructions(
             0,
-            "return-void",
+            """
+                move-object/from16 v0, p0
+                iget-object v1, v0, LX/AuI;->A00:LX/CKM;
+                const-string v2, "ads_insertion"
+                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
+                return-void
+            """.trimIndent(),
+        )
+        storyAdsRtiInsertionCompletion.method.addInstructions(
+            0,
+            """
+                move-object/from16 v0, p0
+                iget-object v1, v0, LX/AuI;->A00:LX/CKM;
+                const-string v2, "ads_rti_insertion"
+                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
+                return-void
+            """.trimIndent(),
         )
         videoAdBreakFetch.method.addInstructions(
             0,
