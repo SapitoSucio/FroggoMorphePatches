@@ -2,22 +2,12 @@
  * Facebook 573.0.0.37.74 / 473623755
  *
  * Validated against the target APK with JADX/MCP and the DEX string table:
- * - AdBucketDataSourceUtil$attemptAdsInsertion$1 -> run(): V
- * - AdBucketDataSourceUtil$attemptFetchMoreAds$1 -> run(): V
- * - AdBucketDataSourceUtil$fetchDeferredAds$1 -> run(): V
- * - AdBucketDataSourceUtil$triggerCtaTailload$1 -> run(): V
- * - AdBucketDataSourceUtil$triggerDwellTailload$1 -> run(): V
+ * - X.AmP.A00(FbUserSession, StoryBucketLaunchConfig, X.BsJ): Z
+ *   (native Story Ads eligibility gate; false prevents provider creation)
  * - MainFeedCSRDataLoaderImpl$handlerTailLoadEvent$2 -> run(): V
  * - MainFeedCSRDataLoaderImpl$maybeDoAsyncAdsTailLoad$1 -> run(): V
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
- * - X.9WB.A06(X.9Tl, int): V (StoryViewerNavigationDelegate move-to-bucket)
- * - X.9WB.A0B(FbUserSession, X.9Tl): Z (shouldMoveToNextBucket)
- * - X.AuI.ApR/Aoq(...): V (paginated/deferred ad fetch paths)
- * - X.WXO.ApR/Aoq(...): V (alternate paginated/deferred ad fetch paths)
- * - X.AuI.Eay/Ebo(): V (CTA/dwell ad-tail trigger flags)
- * - X.AuI.AHX(): V (ads_insertion completion path)
- * - X.AuI.Doc(X.9XO): V (ads_rti_insertion completion path)
  * - AdBreakFetchHelper -> A05(...): V
  * - AdBreakStateMachine callback -> onSuccess(Object): V
  * - X.5Vs.A03(...): V (Reels/video banner and video ad fetch)
@@ -44,22 +34,12 @@
  *    source-independent seam before the feed collection reaches the UI.
  *    In this APK GraphQLFeedStoryCategory.A0K is SPONSORED and A0I is
  *    PROMOTION; both are rejected there as a defensive final filter.
- * 4. Story Ads: StoryViewerBucketDataController chains provider merges through
- *    the normal story providers and an ad provider (AuI or WXO, depending on
- *    mobile config). B46 and A02 are part of the viewer's normal list/state
- *    contract and are deliberately left untouched. The controller's Redex
- *    runnables must execute because they are part of the viewer pagination
- *    flow. Ad networking is instead stopped inside AuI/WXO ApR/Aoq, which are
- *    reduced to the same ES9("ads_insertion") refresh callback emitted by a
- *    completed ad fetch. AuI Eay/Ebo tail-trigger flags are suppressed because
- *    no real tail fetch follows. AuI.AHX/Doc are likewise reduced to their
- *    mandatory ES9 completion callbacks. Returning directly from the runnables
- *    skips StoryViewerBucketDataController refresh. C9XO is definitively the
- *    Story ad bucket (getBucketType() always returns 9). It remains in provider
- *    state so bucket indices stay stable, but 9WB navigation skips C9XO targets
- *    before entering them; if cache/launch already lands on one, A0B forces the
- *    next navigation action to leave the ad bucket instead of traversing its
- *    unavailable cards.
+ * 4. Story Ads: do not mutate StoryViewerBucketDataController, AuI/WXO,
+ *    navigation, bucket lists, pagination callbacks, or C9XO state. Facebook
+ *    already has a native eligibility gate at AmP.A00(...). Returning false
+ *    follows the app's own "Story Ads disabled" path, so Aky.A0C does not
+ *    create/register the Story ad provider at all. This avoids placeholders,
+ *    provider completion contracts, and bucket-index desynchronization.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -95,7 +75,7 @@
  */
 package app.froggo.patches.facebook.ads
 
-import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
+import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
@@ -147,79 +127,14 @@ private val feedAdsResponseConverter = exactMethod(
     ),
 )
 
-private val storyNavigationMoveToBucket = exactMethod(
-    "LX/9WB;",
-    "A06",
-    listOf(
-        "LX/9Tl;",
-        "I",
-    ),
-)
-
-private val storyNavigationShouldMoveToNextBucket = exactMethod(
-    "LX/9WB;",
-    "A0B",
+private val storyAdsEligibility = exactMethod(
+    "LX/AmP;",
+    "A00",
     listOf(
         "Lcom/facebook/auth/usersession/FbUserSession;",
-        "LX/9Tl;",
+        "Lcom/facebook/stories/model/StoryBucketLaunchConfig;",
+        "LX/BsJ;",
     ),
-)
-
-private val storyAdsFetchMoreCompletion = exactMethod(
-    "LX/AuI;",
-    "ApR",
-    listOf(
-        "Lcom/google/common/collect/ImmutableList;",
-        "I",
-    ),
-)
-
-private val storyAdsDeferredFetchCompletion = exactMethod(
-    "LX/AuI;",
-    "Aoq",
-    listOf(
-        "LX/9Ta;",
-        "Lcom/google/common/collect/ImmutableList;",
-    ),
-)
-
-private val storyAdsAlternateFetchMoreCompletion = exactMethod(
-    "LX/WXO;",
-    "ApR",
-    listOf(
-        "Lcom/google/common/collect/ImmutableList;",
-        "I",
-    ),
-)
-
-private val storyAdsAlternateDeferredFetchCompletion = exactMethod(
-    "LX/WXO;",
-    "Aoq",
-    listOf(
-        "LX/9Ta;",
-        "Lcom/google/common/collect/ImmutableList;",
-    ),
-)
-
-private val storyAdsCtaTailTrigger = exactMethod(
-    "LX/AuI;",
-    "Eay",
-)
-
-private val storyAdsDwellTailTrigger = exactMethod(
-    "LX/AuI;",
-    "Ebo",
-)
-
-private val storyAdsInsertionCompletion = exactMethod(
-    "LX/AuI;",
-    "AHX",
-)
-
-private val storyAdsRtiInsertionCompletion = exactMethod(
-    "LX/AuI;",
-    "Doc",
-    listOf("LX/9XO;"),
 )
 
 private val videoAdBreakFetch = exactMethod(
@@ -309,10 +224,10 @@ private val partialStorySponsoredData = exactMethod(
 @Suppress("unused")
 val blockFacebookAds573Patch = bytecodePatch(
     name = "Block Facebook ads (573)",
-    description = "Stops feed, Story ad-bucket insertion/fetch, deferred/tail loads, and video commercial-break ads.",
+    description = "Stops feed, Reels/video, and commercial-break ads without modifying the Story viewer pipeline.",
     default = true,
 ) {
-    compatibleWith(COMPATIBILITY_FACEBOOK_573)
+    compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
 
     execute {
         mainFeedTailLoad.method.addInstructions(
@@ -332,127 +247,6 @@ val blockFacebookAds573Patch = bytecodePatch(
             """
                 const/4 v0, 0x0
                 return-object v0
-            """.trimIndent(),
-        )
-        storyNavigationMoveToBucket.method.addInstructions(
-            0,
-            """
-                iget-object v0, p0, LX/9WB;->A01:LX/Bsm;
-                invoke-interface {v0}, LX/CM4;->size()I
-                move-result v1
-                iget-object v2, p0, LX/9WB;->A0H:LX/9Ta;
-                iget-object v2, v2, LX/9Ta;->A04:LX/9Tb;
-                iget v2, v2, LX/9Tb;->A00:I
-                if-le p2, v2, :froggo_storyads_nav_check_backward
-
-                :froggo_storyads_nav_skip_forward
-                if-ge p2, v1, :froggo_storyads_nav_no_target
-                invoke-interface {v0, p2}, LX/CM4;->B3v(I)Lcom/facebook/stories/model/StoryBucket;
-                move-result-object v3
-                if-eqz v3, :froggo_storyads_nav_continue
-                instance-of v4, v3, LX/9XO;
-                if-eqz v4, :froggo_storyads_nav_continue
-                add-int/lit8 p2, p2, 0x1
-                goto :froggo_storyads_nav_skip_forward
-
-                :froggo_storyads_nav_check_backward
-                if-ge p2, v2, :froggo_storyads_nav_continue
-
-                :froggo_storyads_nav_skip_backward
-                if-ltz p2, :froggo_storyads_nav_no_target
-                invoke-interface {v0, p2}, LX/CM4;->B3v(I)Lcom/facebook/stories/model/StoryBucket;
-                move-result-object v3
-                if-eqz v3, :froggo_storyads_nav_continue
-                instance-of v4, v3, LX/9XO;
-                if-eqz v4, :froggo_storyads_nav_continue
-                add-int/lit8 p2, p2, -0x1
-                goto :froggo_storyads_nav_skip_backward
-
-                :froggo_storyads_nav_no_target
-                return-void
-
-                :froggo_storyads_nav_continue
-            """.trimIndent(),
-        )
-        storyNavigationShouldMoveToNextBucket.method.addInstructions(
-            0,
-            """
-                invoke-direct {p0}, LX/9WB;->A04()Lcom/facebook/stories/model/StoryBucket;
-                move-result-object v0
-                instance-of v1, v0, LX/9XO;
-                if-eqz v1, :froggo_storyads_nav_keep_should_move
-                const/4 v0, 0x1
-                return v0
-
-                :froggo_storyads_nav_keep_should_move
-            """.trimIndent(),
-        )
-        storyAdsFetchMoreCompletion.method.addInstructions(
-            0,
-            """
-                move-object/from16 v0, p0
-                iget-object v1, v0, LX/AuI;->A00:LX/CKM;
-                const-string v2, "ads_insertion"
-                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
-                return-void
-            """.trimIndent(),
-        )
-        storyAdsDeferredFetchCompletion.method.addInstructions(
-            0,
-            """
-                move-object/from16 v0, p0
-                iget-object v1, v0, LX/AuI;->A00:LX/CKM;
-                const-string v2, "ads_insertion"
-                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
-                return-void
-            """.trimIndent(),
-        )
-        storyAdsAlternateFetchMoreCompletion.method.addInstructions(
-            0,
-            """
-                move-object/from16 v0, p0
-                iget-object v1, v0, LX/WXO;->A00:LX/CKM;
-                const-string v2, "ads_insertion"
-                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
-                return-void
-            """.trimIndent(),
-        )
-        storyAdsAlternateDeferredFetchCompletion.method.addInstructions(
-            0,
-            """
-                move-object/from16 v0, p0
-                iget-object v1, v0, LX/WXO;->A00:LX/CKM;
-                const-string v2, "ads_insertion"
-                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
-                return-void
-            """.trimIndent(),
-        )
-        storyAdsCtaTailTrigger.method.addInstructions(
-            0,
-            "return-void",
-        )
-        storyAdsDwellTailTrigger.method.addInstructions(
-            0,
-            "return-void",
-        )
-        storyAdsInsertionCompletion.method.addInstructions(
-            0,
-            """
-                move-object/from16 v0, p0
-                iget-object v1, v0, LX/AuI;->A00:LX/CKM;
-                const-string v2, "ads_insertion"
-                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
-                return-void
-            """.trimIndent(),
-        )
-        storyAdsRtiInsertionCompletion.method.addInstructions(
-            0,
-            """
-                move-object/from16 v0, p0
-                iget-object v1, v0, LX/AuI;->A00:LX/CKM;
-                const-string v2, "ads_rti_insertion"
-                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
-                return-void
             """.trimIndent(),
         )
         videoAdBreakFetch.method.addInstructions(
@@ -517,6 +311,25 @@ val blockFacebookAds573Patch = bytecodePatch(
             """
                 const/4 v0, 0x0
                 return-object v0
+            """.trimIndent(),
+        )
+    }
+}
+
+@Suppress("unused")
+val blockFacebookStoryAds573Patch = bytecodePatch(
+    name = "Block Facebook Story ads (573)",
+    description = "Disables Facebook's native Story Ads eligibility gate before the Story ad provider is created.",
+    default = true,
+) {
+    compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
+
+    execute {
+        storyAdsEligibility.method.addInstructions(
+            0,
+            """
+                const/4 v0, 0x0
+                return v0
             """.trimIndent(),
         )
     }
