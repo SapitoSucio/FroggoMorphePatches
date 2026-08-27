@@ -2,8 +2,6 @@
  * Facebook 573.0.0.37.74 / 473623755
  *
  * Validated against the target APK with JADX/MCP and the DEX string table:
- * - X.AmP.A00(FbUserSession, StoryBucketLaunchConfig, X.BsJ): Z
- *   (native Story Ads eligibility gate; false prevents provider creation)
  * - MainFeedCSRDataLoaderImpl$handlerTailLoadEvent$2 -> run(): V
  * - MainFeedCSRDataLoaderImpl$maybeDoAsyncAdsTailLoad$1 -> run(): V
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
@@ -34,12 +32,9 @@
  *    source-independent seam before the feed collection reaches the UI.
  *    In this APK GraphQLFeedStoryCategory.A0K is SPONSORED and A0I is
  *    PROMOTION; both are rejected there as a defensive final filter.
- * 4. Story Ads: do not mutate StoryViewerBucketDataController, AuI/WXO,
- *    navigation, bucket lists, pagination callbacks, or C9XO state. Facebook
- *    already has a native eligibility gate at AmP.A00(...). Returning false
- *    follows the app's own "Story Ads disabled" path, so Aky.A0C does not
- *    create/register the Story ad provider at all. This avoids placeholders,
- *    provider completion contracts, and bucket-index desynchronization.
+ * 4. Story Ads are intentionally not modified by this stable patch. Story
+ *    experiments belong on the dev/pre-release source so regressions cannot
+ *    affect the proven Feed/Reels patch.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -75,7 +70,7 @@
  */
 package app.froggo.patches.facebook.ads
 
-import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL
+import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
@@ -124,16 +119,6 @@ private val feedAdsResponseConverter = exactMethod(
         "Lcom/facebook/api/feed/model/FetchFeedParams;",
         "LX/3pN;",
         "LX/41R;",
-    ),
-)
-
-private val storyAdsEligibility = exactMethod(
-    "LX/AmP;",
-    "A00",
-    listOf(
-        "Lcom/facebook/auth/usersession/FbUserSession;",
-        "Lcom/facebook/stories/model/StoryBucketLaunchConfig;",
-        "LX/BsJ;",
     ),
 )
 
@@ -227,7 +212,7 @@ val blockFacebookAds573Patch = bytecodePatch(
     description = "Stops feed, Reels/video, and commercial-break ads without modifying the Story viewer pipeline.",
     default = true,
 ) {
-    compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
+    compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
         mainFeedTailLoad.method.addInstructions(
@@ -311,25 +296,6 @@ val blockFacebookAds573Patch = bytecodePatch(
             """
                 const/4 v0, 0x0
                 return-object v0
-            """.trimIndent(),
-        )
-    }
-}
-
-@Suppress("unused")
-val blockFacebookStoryAds573Patch = bytecodePatch(
-    name = "Block Facebook Story ads (573)",
-    description = "Disables Facebook's native Story Ads eligibility gate before the Story ad provider is created.",
-    default = true,
-) {
-    compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
-
-    execute {
-        storyAdsEligibility.method.addInstructions(
-            0,
-            """
-                const/4 v0, 0x0
-                return v0
             """.trimIndent(),
         )
     }
