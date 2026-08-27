@@ -1,3 +1,9 @@
+## [1.2.0-dev.4](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.3...v1.2.0-dev.4) (2026-08-27)
+
+### ✨ New Features
+
+* **facebook:** add ads diagnostic split ([779a453](https://github.com/SapitoSucio/FroggoMorphePatches/commit/779a45315a57e09e73e86c08f54769b163169712))
+
 ## [1.2.0-dev.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.2...v1.2.0-dev.3) (2026-08-27)
 
 ### 🐛 Bug Fixes
