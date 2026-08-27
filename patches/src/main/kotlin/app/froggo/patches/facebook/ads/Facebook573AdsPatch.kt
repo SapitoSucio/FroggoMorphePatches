@@ -11,6 +11,9 @@
  * - MainFeedCSRDataLoaderImpl$maybeDoAsyncAdsTailLoad$1 -> run(): V
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
+ * - X.AuI.ApR/Aoq(...): V (paginated/deferred ad fetch paths)
+ * - X.WXO.ApR/Aoq(...): V (alternate paginated/deferred ad fetch paths)
+ * - X.AuI.Eay/Ebo(): V (CTA/dwell ad-tail trigger flags)
  * - X.AuI.AHX(): V (ads_insertion completion path)
  * - X.AuI.Doc(X.9XO): V (ads_rti_insertion completion path)
  * - AdBreakFetchHelper -> A05(...): V
@@ -42,14 +45,15 @@
  * 4. Story Ads: StoryViewerBucketDataController chains provider merges through
  *    the normal story providers and an ad provider (AuI or WXO, depending on
  *    mobile config). B46 and A02 are part of the viewer's normal list/state
- *    contract and are deliberately left untouched. Ad-only fetch/deferred/tail
- *    runnables stay blocked, but attemptAdsInsertion must still dispatch into
- *    the provider so its completion contract can run. The provider result is
- *    left unchanged so the viewer keeps its original bucket/index contract,
- *    including cache and targeted-story launches. AuI.AHX/Doc are
- *    reduced to their mandatory ES9 completion callbacks instead of returning
- *    early; otherwise a server-side MobileConfig switch to the AuI provider can
- *    leave StoryViewerBucketDataController waiting forever after cache expiry.
+ *    contract and are deliberately left untouched. The controller's Redex
+ *    runnables must execute because they are part of the viewer pagination
+ *    flow. Ad networking is instead stopped inside AuI/WXO ApR/Aoq, which are
+ *    reduced to the same ES9("ads_insertion") refresh callback emitted by a
+ *    completed ad fetch. AuI Eay/Ebo tail-trigger flags are suppressed because
+ *    no real tail fetch follows. AuI.AHX/Doc are likewise reduced to their
+ *    mandatory ES9 completion callbacks. Returning directly from the runnables
+ *    skips StoryViewerBucketDataController refresh and can leave the next
+ *    organic Story blurred behind an infinite loading spinner.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -137,20 +141,50 @@ private val feedAdsResponseConverter = exactMethod(
     ),
 )
 
-private val storyAdsFetchMore = redexRunnable(
-    "AdBucketDataSourceUtil\$attemptFetchMoreAds\$1",
+private val storyAdsFetchMoreCompletion = exactMethod(
+    "LX/AuI;",
+    "ApR",
+    listOf(
+        "Lcom/google/common/collect/ImmutableList;",
+        "I",
+    ),
 )
 
-private val storyAdsDeferredFetch = redexRunnable(
-    "AdBucketDataSourceUtil\$fetchDeferredAds\$1",
+private val storyAdsDeferredFetchCompletion = exactMethod(
+    "LX/AuI;",
+    "Aoq",
+    listOf(
+        "LX/9Ta;",
+        "Lcom/google/common/collect/ImmutableList;",
+    ),
 )
 
-private val storyAdsCtaTailLoad = redexRunnable(
-    "AdBucketDataSourceUtil\$triggerCtaTailload\$1",
+private val storyAdsAlternateFetchMoreCompletion = exactMethod(
+    "LX/WXO;",
+    "ApR",
+    listOf(
+        "Lcom/google/common/collect/ImmutableList;",
+        "I",
+    ),
 )
 
-private val storyAdsDwellTailLoad = redexRunnable(
-    "AdBucketDataSourceUtil\$triggerDwellTailload\$1",
+private val storyAdsAlternateDeferredFetchCompletion = exactMethod(
+    "LX/WXO;",
+    "Aoq",
+    listOf(
+        "LX/9Ta;",
+        "Lcom/google/common/collect/ImmutableList;",
+    ),
+)
+
+private val storyAdsCtaTailTrigger = exactMethod(
+    "LX/AuI;",
+    "Eay",
+)
+
+private val storyAdsDwellTailTrigger = exactMethod(
+    "LX/AuI;",
+    "Ebo",
 )
 
 private val storyAdsInsertionCompletion = exactMethod(
@@ -276,19 +310,51 @@ val blockFacebookAds573Patch = bytecodePatch(
                 return-object v0
             """.trimIndent(),
         )
-        storyAdsFetchMore.method.addInstructions(
+        storyAdsFetchMoreCompletion.method.addInstructions(
+            0,
+            """
+                move-object/from16 v0, p0
+                iget-object v1, v0, LX/AuI;->A00:LX/CKM;
+                const-string v2, "ads_insertion"
+                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
+                return-void
+            """.trimIndent(),
+        )
+        storyAdsDeferredFetchCompletion.method.addInstructions(
+            0,
+            """
+                move-object/from16 v0, p0
+                iget-object v1, v0, LX/AuI;->A00:LX/CKM;
+                const-string v2, "ads_insertion"
+                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
+                return-void
+            """.trimIndent(),
+        )
+        storyAdsAlternateFetchMoreCompletion.method.addInstructions(
+            0,
+            """
+                move-object/from16 v0, p0
+                iget-object v1, v0, LX/WXO;->A00:LX/CKM;
+                const-string v2, "ads_insertion"
+                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
+                return-void
+            """.trimIndent(),
+        )
+        storyAdsAlternateDeferredFetchCompletion.method.addInstructions(
+            0,
+            """
+                move-object/from16 v0, p0
+                iget-object v1, v0, LX/WXO;->A00:LX/CKM;
+                const-string v2, "ads_insertion"
+                invoke-interface {v1, v0, v2}, LX/CKM;->ES9(LX/CMz;Ljava/lang/String;)V
+                return-void
+            """.trimIndent(),
+        )
+        storyAdsCtaTailTrigger.method.addInstructions(
             0,
             "return-void",
         )
-        storyAdsDeferredFetch.method.addInstructions(
-            0,
-            "return-void",
-        )
-        storyAdsCtaTailLoad.method.addInstructions(
-            0,
-            "return-void",
-        )
-        storyAdsDwellTailLoad.method.addInstructions(
+        storyAdsDwellTailTrigger.method.addInstructions(
             0,
             "return-void",
         )
