@@ -11,6 +11,8 @@
  * - MainFeedCSRDataLoaderImpl$maybeDoAsyncAdsTailLoad$1 -> run(): V
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
+ * - X.9WB.A06(X.9Tl, int): V (StoryViewerNavigationDelegate move-to-bucket)
+ * - X.9WB.A0B(FbUserSession, X.9Tl): Z (shouldMoveToNextBucket)
  * - X.AuI.ApR/Aoq(...): V (paginated/deferred ad fetch paths)
  * - X.WXO.ApR/Aoq(...): V (alternate paginated/deferred ad fetch paths)
  * - X.AuI.Eay/Ebo(): V (CTA/dwell ad-tail trigger flags)
@@ -52,8 +54,12 @@
  *    completed ad fetch. AuI Eay/Ebo tail-trigger flags are suppressed because
  *    no real tail fetch follows. AuI.AHX/Doc are likewise reduced to their
  *    mandatory ES9 completion callbacks. Returning directly from the runnables
- *    skips StoryViewerBucketDataController refresh and can leave the next
- *    organic Story blurred behind an infinite loading spinner.
+ *    skips StoryViewerBucketDataController refresh. C9XO is definitively the
+ *    Story ad bucket (getBucketType() always returns 9). It remains in provider
+ *    state so bucket indices stay stable, but 9WB navigation skips C9XO targets
+ *    before entering them; if cache/launch already lands on one, A0B forces the
+ *    next navigation action to leave the ad bucket instead of traversing its
+ *    unavailable cards.
  * 5. Reels/video: 5Vs.A03 starts banner/video ad work and 62B/9mO consume
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
@@ -138,6 +144,24 @@ private val feedAdsResponseConverter = exactMethod(
         "Lcom/facebook/api/feed/model/FetchFeedParams;",
         "LX/3pN;",
         "LX/41R;",
+    ),
+)
+
+private val storyNavigationMoveToBucket = exactMethod(
+    "LX/9WB;",
+    "A06",
+    listOf(
+        "LX/9Tl;",
+        "I",
+    ),
+)
+
+private val storyNavigationShouldMoveToNextBucket = exactMethod(
+    "LX/9WB;",
+    "A0B",
+    listOf(
+        "Lcom/facebook/auth/usersession/FbUserSession;",
+        "LX/9Tl;",
     ),
 )
 
@@ -308,6 +332,59 @@ val blockFacebookAds573Patch = bytecodePatch(
             """
                 const/4 v0, 0x0
                 return-object v0
+            """.trimIndent(),
+        )
+        storyNavigationMoveToBucket.method.addInstructions(
+            0,
+            """
+                iget-object v0, p0, LX/9WB;->A01:LX/Bsm;
+                invoke-interface {v0}, LX/CM4;->size()I
+                move-result v1
+                iget-object v2, p0, LX/9WB;->A0H:LX/9Ta;
+                iget-object v2, v2, LX/9Ta;->A04:LX/9Tb;
+                iget v2, v2, LX/9Tb;->A00:I
+                if-le p2, v2, :froggo_storyads_nav_check_backward
+
+                :froggo_storyads_nav_skip_forward
+                if-ge p2, v1, :froggo_storyads_nav_no_target
+                invoke-interface {v0, p2}, LX/CM4;->B3v(I)Lcom/facebook/stories/model/StoryBucket;
+                move-result-object v3
+                if-eqz v3, :froggo_storyads_nav_continue
+                instance-of v4, v3, LX/9XO;
+                if-eqz v4, :froggo_storyads_nav_continue
+                add-int/lit8 p2, p2, 0x1
+                goto :froggo_storyads_nav_skip_forward
+
+                :froggo_storyads_nav_check_backward
+                if-ge p2, v2, :froggo_storyads_nav_continue
+
+                :froggo_storyads_nav_skip_backward
+                if-ltz p2, :froggo_storyads_nav_no_target
+                invoke-interface {v0, p2}, LX/CM4;->B3v(I)Lcom/facebook/stories/model/StoryBucket;
+                move-result-object v3
+                if-eqz v3, :froggo_storyads_nav_continue
+                instance-of v4, v3, LX/9XO;
+                if-eqz v4, :froggo_storyads_nav_continue
+                add-int/lit8 p2, p2, -0x1
+                goto :froggo_storyads_nav_skip_backward
+
+                :froggo_storyads_nav_no_target
+                return-void
+
+                :froggo_storyads_nav_continue
+            """.trimIndent(),
+        )
+        storyNavigationShouldMoveToNextBucket.method.addInstructions(
+            0,
+            """
+                invoke-direct {p0}, LX/9WB;->A04()Lcom/facebook/stories/model/StoryBucket;
+                move-result-object v0
+                instance-of v1, v0, LX/9XO;
+                if-eqz v1, :froggo_storyads_nav_keep_should_move
+                const/4 v0, 0x1
+                return v0
+
+                :froggo_storyads_nav_keep_should_move
             """.trimIndent(),
         )
         storyAdsFetchMoreCompletion.method.addInstructions(
