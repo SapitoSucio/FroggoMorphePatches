@@ -15,7 +15,6 @@
  * - X.1vv.addNewEdgeToCollection(...): Z (final feed UI insertion filter for
  *   SPONSORED/PROMOTION edges)
  * - GraphQLFBMultiAdsFeedUnit.A00(): X.41Q
- * - GraphQLPartialStory.getSponsoredData(): X.41Q
  */
 
 /*
@@ -40,9 +39,11 @@
  *    banner/card and video callbacks. Qsb.A05 and Qsw.onSuccess handle the
  *    separate commercial-break / AdBreak state machine, including
  *    NON_INTERRUPTIVE_AD.
- * 6. Model fallbacks: GraphQLFBMultiAdsFeedUnit.A00 and
- *    GraphQLPartialStory.getSponsoredData expose sponsored data to later
- *    renderers, so they are kept as narrow null-return guards.
+ * 6. Model fallback: GraphQLFBMultiAdsFeedUnit.A00 exposes sponsored data on
+ *    the dedicated multi-ad feed unit, so it remains a narrow null guard.
+ *    Do not patch GraphQLPartialStory.getSponsoredData(): that accessor is
+ *    also used by GraphQLPartialStory.asTree* and withFetchTime model rebuilds,
+ *    so forcing it null can corrupt ordinary Story state across transitions.
  *
  * To port this patch to a new APK:
  *
@@ -198,11 +199,6 @@ private val multiAdsSponsoredData = exactMethod(
     "A00",
 )
 
-private val partialStorySponsoredData = exactMethod(
-    "Lcom/facebook/graphql/model/GraphQLPartialStory;",
-    "getSponsoredData",
-)
-
 @Suppress("unused")
 val blockFacebookAds573Patch = bytecodePatch(
     name = "Block Facebook ads (573)",
@@ -278,13 +274,6 @@ val blockFacebookAds573Patch = bytecodePatch(
             """.trimIndent(),
         )
         multiAdsSponsoredData.method.addInstructions(
-            0,
-            """
-                const/4 v0, 0x0
-                return-object v0
-            """.trimIndent(),
-        )
-        partialStorySponsoredData.method.addInstructions(
             0,
             """
                 const/4 v0, 0x0
