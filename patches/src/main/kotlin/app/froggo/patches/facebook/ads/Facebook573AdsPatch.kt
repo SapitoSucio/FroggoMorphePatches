@@ -2,7 +2,6 @@
  * Facebook 573.0.0.37.74 / 473623755
  *
  * Validated against the target APK with JADX/MCP and the DEX string table:
- * - MainFeedCSRDataLoaderImpl$handlerTailLoadEvent$2 -> run(): V
  * - MainFeedCSRDataLoaderImpl$maybeDoAsyncAdsTailLoad$1 -> run(): V
  * - MainFeedCSRDataLoaderImpl.maybeDoAsyncAdsTailLoad -> A08(X.1wV): V
  * - FeedCSRAdChannelControllerImpl converter -> X.bZU.A00(...): X.3JJ
@@ -25,7 +24,9 @@
  * Facebook 573 does not have one ad pipeline. The working map is:
  *
  * 1. Feed CSR: C23I.A0F -> bZU.A00 -> GraphQLFeedUnitEdge. The converter
- *    produces feed units from the CSR response.
+ *    produces feed units from the CSR response. Do not suppress the generic
+ *    MainFeedCSRDataLoaderImpl$handlerTailLoadEvent$2 runnable: it resumes the
+ *    base CSR tail-load state machine and is not ad-specific.
  * 2. Feed async ads: 3JX.A0F (FeedAsyncAdsController) can build ASYNC_ADS
  *    edges after the normal feed response. DbP consumes its C6Ke result.
  * 3. Final feed insertion: 1vv.addNewEdgeToCollection(...) is the last
@@ -96,10 +97,6 @@ private fun exactMethod(
     custom = { method, classDef ->
         classDef.type == classDescriptor && method.name == methodName
     },
-)
-
-private val mainFeedTailLoad = redexRunnable(
-    "MainFeedCSRDataLoaderImpl\$handlerTailLoadEvent\$2",
 )
 
 private val mainFeedAsyncAdsTailLoadRunnable = redexRunnable(
@@ -215,10 +212,6 @@ val blockFacebookAds573Patch = bytecodePatch(
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
-        mainFeedTailLoad.method.addInstructions(
-            0,
-            "return-void",
-        )
         mainFeedAsyncAdsTailLoadRunnable.method.addInstructions(
             0,
             "return-void",
