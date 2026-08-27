@@ -15,19 +15,18 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.1.21](https://github.com/SapitoSucio/FroggoMorphePatches/releases/tag/v1.1.21)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;3 patches total
+> **[v1.1.22](https://github.com/SapitoSucio/FroggoMorphePatches/releases/tag/v1.1.22)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;2 patches total
 <details open>
-<summary>📦 Facebook&nbsp;&nbsp;•&nbsp;&nbsp;3 patches</summary>
+<summary>📦 Facebook&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 🧪&nbsp;573.0.0.37.74 |
+| 573.0.0.37.74 |
 | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
-| [Block Facebook Story ads (573)](#block-facebook-story-ads-573) | Disables Facebook's native Story Ads eligibility gate before the Story ad provider is created. |  |
 | [Block Facebook ads (573)](#block-facebook-ads-573) | Stops feed, Reels/video, and commercial-break ads without modifying the Story viewer pipeline. |  |
 | [Block Facebook automatic refresh (573)](#block-facebook-automatic-refresh-573) | Suppresses lifecycle feed refresh while preserving explicit refresh paths. |  |
 

@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-27T06:24:54",
-  "description": "## [1.1.21](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.20...v1.1.21) (2026-08-27)\n\n### 🐛 Bug Fixes\n\n* **facebook:** disable story ads at eligibility gate ([960ccdd](https://github.com/SapitoSucio/FroggoMorphePatches/commit/960ccdd6b6fc54755b7e35c1154d92e4030cf3bd))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.1.21/patches-1.1.21.mpp",
+  "created_at": "2026-08-27T06:39:20",
+  "description": "## [1.1.22](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.21...v1.1.22) (2026-08-27)\n\n### 🐛 Bug Fixes\n\n* **facebook:** keep story ads patch pre-release only ([ae16e62](https://github.com/SapitoSucio/FroggoMorphePatches/commit/ae16e6285f446f817c7698c841fb04d6be9fc6f5))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.1.22/patches-1.1.22.mpp",
   "signature_download_url": "",
-  "version": "1.1.21"
+  "version": "1.1.22"
 }
