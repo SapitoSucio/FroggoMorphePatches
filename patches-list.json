@@ -1,10 +1,10 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.1.20",
+  "version": "1.1.21",
   "patches": [
     {
-      "name": "Block Facebook ads (573)",
-      "description": "Stops feed, Story ad-bucket insertion/fetch, deferred/tail loads, and video commercial-break ads.",
+      "name": "Block Facebook Story ads (573)",
+      "description": "Disables Facebook's native Story Ads eligibility gate before the Story ad provider is created.",
       "default": true,
       "dependencies": [],
       "compatiblePackages": [
@@ -21,7 +21,35 @@
               "versionCodes": {
                 "ARM64_V8A": 473623755
               },
-              "isExperimental": false,
+              "isExperimental": true,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Block Facebook ads (573)",
+      "description": "Stops feed, Reels/video, and commercial-break ads without modifying the Story viewer pipeline.",
+      "default": true,
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "com.facebook.katana",
+          "name": "Facebook",
+          "description": null,
+          "apkFileType": "APK",
+          "appIconColor": "#1877F2",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "573.0.0.37.74",
+              "versionCodes": {
+                "ARM64_V8A": 473623755
+              },
+              "isExperimental": true,
               "minSdk": null,
               "description": null
             }

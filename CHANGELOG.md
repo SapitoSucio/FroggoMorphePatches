@@ -1,3 +1,9 @@
+## [1.1.21](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.20...v1.1.21) (2026-08-27)
+
+### 🐛 Bug Fixes
+
+* **facebook:** disable story ads at eligibility gate ([960ccdd](https://github.com/SapitoSucio/FroggoMorphePatches/commit/960ccdd6b6fc54755b7e35c1154d92e4030cf3bd))
+
 ## [1.1.20](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.19...v1.1.20) (2026-08-27)
 
 ### 🐛 Bug Fixes
