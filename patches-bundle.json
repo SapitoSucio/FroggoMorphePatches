@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-27T07:05:16",
-  "description": "## [1.1.23](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.22...v1.1.23) (2026-08-27)\n\n### 🐛 Bug Fixes\n\n* **facebook:** preserve csr tail-load state ([2094270](https://github.com/SapitoSucio/FroggoMorphePatches/commit/209427047608ac687d232090fdd1a3a59cd50eb0))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.1.23/patches-1.1.23.mpp",
+  "created_at": "2026-08-27T07:25:52",
+  "description": "## [1.1.24](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.23...v1.1.24) (2026-08-27)\n\n### 🐛 Bug Fixes\n\n* **facebook:** preserve partial story model state ([41f7d42](https://github.com/SapitoSucio/FroggoMorphePatches/commit/41f7d42348801f581649fbbe1a11ef5c50ddf57e))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.1.24/patches-1.1.24.mpp",
   "signature_download_url": "",
-  "version": "1.1.23"
+  "version": "1.1.24"
 }
