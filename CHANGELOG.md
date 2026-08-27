@@ -1,3 +1,9 @@
+## [1.2.0-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.1...v1.2.0-dev.2) (2026-08-27)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve csr tail-load state ([2094270](https://github.com/SapitoSucio/FroggoMorphePatches/commit/209427047608ac687d232090fdd1a3a59cd50eb0))
+
 ## [1.2.0-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.21...v1.2.0-dev.1) (2026-08-27)
 
 ### 🐛 Bug Fixes

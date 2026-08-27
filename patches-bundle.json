@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-27T06:46:08",
-  "description": "## [1.2.0-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.21...v1.2.0-dev.1) (2026-08-27)\n\n### 🐛 Bug Fixes\n\n* **facebook:** keep story ads patch pre-release only ([ae16e62](https://github.com/SapitoSucio/FroggoMorphePatches/commit/ae16e6285f446f817c7698c841fb04d6be9fc6f5))\n\n### ✨ New Features\n\n* **facebook:** add pre-release story ads experiment ([fcf99da](https://github.com/SapitoSucio/FroggoMorphePatches/commit/fcf99da6a7ca2c47c692f84380dd2aa6d9f871b6))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.1/patches-1.2.0-dev.1.mpp",
+  "created_at": "2026-08-27T07:10:50",
+  "description": "## [1.2.0-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.1...v1.2.0-dev.2) (2026-08-27)\n\n### 🐛 Bug Fixes\n\n* **facebook:** preserve csr tail-load state ([2094270](https://github.com/SapitoSucio/FroggoMorphePatches/commit/209427047608ac687d232090fdd1a3a59cd50eb0))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.2/patches-1.2.0-dev.2.mpp",
   "signature_download_url": "",
-  "version": "1.2.0-dev.1"
+  "version": "1.2.0-dev.2"
 }
