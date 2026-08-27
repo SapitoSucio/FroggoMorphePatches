@@ -1,3 +1,9 @@
+## [1.1.18](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.17...v1.1.18) (2026-08-27)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve story ad completion ([6ba90bc](https://github.com/SapitoSucio/FroggoMorphePatches/commit/6ba90bc616d24fe77e64b678c8f63777b8d4c2b9))
+
 ## [1.1.17](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.16...v1.1.17) (2026-08-26)
 
 ### 🐛 Bug Fixes
