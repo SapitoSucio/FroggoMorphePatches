@@ -1,11 +1,11 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.1.21",
+  "version": "1.2.0-dev.1",
   "patches": [
     {
       "name": "Block Facebook Story ads (573)",
-      "description": "Disables Facebook's native Story Ads eligibility gate before the Story ad provider is created.",
-      "default": true,
+      "description": "Pre-release experiment: disables Facebook's native Story Ads eligibility gate.",
+      "default": false,
       "dependencies": [],
       "compatiblePackages": [
         {
@@ -21,7 +21,7 @@
               "versionCodes": {
                 "ARM64_V8A": 473623755
               },
-              "isExperimental": true,
+              "isExperimental": false,
               "minSdk": null,
               "description": null
             }
@@ -49,7 +49,7 @@
               "versionCodes": {
                 "ARM64_V8A": 473623755
               },
-              "isExperimental": true,
+              "isExperimental": false,
               "minSdk": null,
               "description": null
             }

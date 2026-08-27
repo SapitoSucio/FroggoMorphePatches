@@ -1,3 +1,13 @@
+## [1.2.0-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.21...v1.2.0-dev.1) (2026-08-27)
+
+### 🐛 Bug Fixes
+
+* **facebook:** keep story ads patch pre-release only ([ae16e62](https://github.com/SapitoSucio/FroggoMorphePatches/commit/ae16e6285f446f817c7698c841fb04d6be9fc6f5))
+
+### ✨ New Features
+
+* **facebook:** add pre-release story ads experiment ([fcf99da](https://github.com/SapitoSucio/FroggoMorphePatches/commit/fcf99da6a7ca2c47c692f84380dd2aa6d9f871b6))
+
 ## [1.1.21](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.20...v1.1.21) (2026-08-27)
 
 ### 🐛 Bug Fixes
