@@ -1,3 +1,9 @@
+## [1.2.0-dev.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.2...v1.2.0-dev.3) (2026-08-27)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve partial story model state ([41f7d42](https://github.com/SapitoSucio/FroggoMorphePatches/commit/41f7d42348801f581649fbbe1a11ef5c50ddf57e))
+
 ## [1.2.0-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.1...v1.2.0-dev.2) (2026-08-27)
 
 ### 🐛 Bug Fixes
