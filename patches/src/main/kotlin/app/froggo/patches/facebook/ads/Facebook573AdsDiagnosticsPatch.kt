@@ -378,6 +378,11 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             reference.name == "flowAnnotate"
         }?.index ?: error("Could not find Am0 flowAnnotate before viewer notification")
         val notifyCallIndex = findMethodCallAfter(flowAnnotateIndex, "LX/Al1;", "A00")
+        val catchMoveExceptionIndex = publishRunnableInstructions.withIndex().lastOrNull { (index, instruction) ->
+            index > notifyCallIndex && instruction.opcode == Opcode.MOVE_EXCEPTION
+        }?.index ?: error("Could not find Am0 catchall move-exception")
+        val catchThrowableRegister = (publishRunnableInstructions[catchMoveExceptionIndex] as? OneRegisterInstruction)?.registerA
+            ?: error("Unexpected Am0 move-exception instruction")
         val notifySubscriberReadIndex = subscriberReadIndices.lastOrNull { it in (flowAnnotateIndex + 1) until notifyCallIndex }
             ?: error("Could not find Story AkQ subscriber re-read before Al1.A00")
         val notifySubscriberRead = publishRunnableInstructions[notifySubscriberReadIndex] as? TwoRegisterInstruction
@@ -421,6 +426,8 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         val enteredTryHelper = "froggoStoryDiagEnteredTry"
         val afterBucketLookupHelper = "froggoStoryDiagAfterBucketLookup"
         val beforeNotifyHelper = "froggoStoryDiagBeforeNotify"
+        val afterNotifyCallHelper = "froggoStoryDiagAfterNotifyCall"
+        val throwableHelper = "froggoStoryDiagThrowable"
         val entrySubscriberStateHelper = "froggoStoryDiagEntrySubscriberState"
         val notifySubscriberStateHelper = "froggoStoryDiagNotifySubscriberState"
         addMarkerHelper(subscriberNullHelper, "AM0_SUBSCRIBER_NULL")
@@ -429,6 +436,30 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         addMarkerHelper(enteredTryHelper, "AM0_ENTERED_TRY")
         addMarkerHelper(afterBucketLookupHelper, "AM0_AFTER_BUCKET_LOOKUP")
         addMarkerHelper(beforeNotifyHelper, "AM0_BEFORE_NOTIFY")
+        addMarkerHelper(afterNotifyCallHelper, "AM0_AFTER_NOTIFY_CALL")
+
+        targetClass.methods.add(
+            ImmutableMethod(
+                targetClassType,
+                throwableHelper,
+                listOf(ImmutableMethodParameter("Ljava/lang/Throwable;", null, null)),
+                "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                null,
+                null,
+                MutableMethodImplementation(3),
+            ).toMutable().apply {
+                addInstructions(
+                    0,
+                    """
+                        const-string v0, "FroggoStoryDiag"
+                        const-string v1, "AM0_THROW"
+                        invoke-static {v0, v1, p0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
+                        return-void
+                    """.trimIndent(),
+                )
+            },
+        )
 
         fun addSubscriberStateHelper(
             methodName: String,
@@ -651,6 +682,14 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         // Every new flow marker is placed *after* a stock instruction rather than
         // before a branch target. This prevents existing labels from jumping over
         // the diagnostic call.
+        diagStoryPublishRunnable.method.addInstructions(
+            catchMoveExceptionIndex + 1,
+            "invoke-static {v$catchThrowableRegister}, $targetClassType->$throwableHelper(Ljava/lang/Throwable;)V",
+        )
+        diagStoryPublishRunnable.method.addInstructions(
+            notifyCallIndex + 1,
+            "invoke-static {}, $targetClassType->$afterNotifyCallHelper()V",
+        )
         diagStoryPublishRunnable.method.addInstructions(
             notifySubscriberReadIndex + 1,
             "invoke-static {v$notifyControllerRegister, v$notifySubscriberRegister}, $targetClassType->$notifySubscriberStateHelper(${targetClassType}LX/Al1;)V",
