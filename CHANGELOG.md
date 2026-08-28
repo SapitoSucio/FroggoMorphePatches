@@ -1,3 +1,9 @@
+## [1.2.0-dev.15](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.14...v1.2.0-dev.15) (2026-08-28)
+
+### ✨ New Features
+
+* **facebook:** trace story notify exceptions ([980c5af](https://github.com/SapitoSucio/FroggoMorphePatches/commit/980c5af4e2cb9ecafe83445351457c925eb0929b))
+
 ## [1.2.0-dev.14](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.13...v1.2.0-dev.14) (2026-08-28)
 
 ### ✨ New Features
