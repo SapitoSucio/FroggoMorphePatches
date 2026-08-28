@@ -8,6 +8,8 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMuta
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 
@@ -27,9 +29,11 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
  * lifecycle. The result blocks ads but can poison Story Viewer publication.
  *
  * This experiment instead leaves the complete provider lifecycle untouched and
- * removes only C9XO from AkQ.A00's final output. C9XO.getBucketType() is always
- * 9 in this APK, so this is a late Story-ad bucket filter after all provider
- * state transitions but before C9TO/viewer publication.
+ * removes only C9XO immediately after the X68 ads provider returns from B46(...).
+ * C9XO.getBucketType() is always 9 in this APK. Filtering at that exact provider
+ * boundary lets AuI/WXO finish all internal state transitions while preventing
+ * downstream providers (AkT, AkV and WUB) from indexing/reordering ad buckets
+ * that will not be published to the viewer.
  */
 private val storyBucketProcessing = Fingerprint(
     returnType = "Lcom/google/common/collect/ImmutableList;",
@@ -48,7 +52,7 @@ private val storyBucketProcessing = Fingerprint(
 @Suppress("unused")
 val blockFacebookStoryAds573Patch = bytecodePatch(
     name = "Block Facebook Story ads (573)",
-    description = "Pre-release experiment: filters Story ad buckets after provider processing and before viewer publication.",
+    description = "Pre-release experiment: filters Story ad buckets immediately after the Story Ads provider returns.",
     default = false,
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
@@ -56,12 +60,17 @@ val blockFacebookStoryAds573Patch = bytecodePatch(
     execute {
         val targetClass = storyBucketProcessing.classDef
         val targetClassType = targetClass.type
-        val filterMethodName = "froggoFilterStoryAds"
+        val filterMethodName = "froggoFilterStoryAdsAfterAdsProvider"
 
         val filterMethod = ImmutableMethod(
             targetClassType,
             filterMethodName,
             listOf(
+                ImmutableMethodParameter(
+                    "LX/CMz;",
+                    null,
+                    null,
+                ),
                 ImmutableMethodParameter(
                     "Lcom/google/common/collect/ImmutableList;",
                     null,
@@ -72,7 +81,7 @@ val blockFacebookStoryAds573Patch = bytecodePatch(
             AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
             null,
             null,
-            MutableMethodImplementation(5),
+            MutableMethodImplementation(6),
         ).toMutable().apply {
             // This helper is a whole new method whose instructions start at dex
             // offset zero. Keeping all loop labels here avoids non-zero-index
@@ -80,7 +89,10 @@ val blockFacebookStoryAds573Patch = bytecodePatch(
             addInstructions(
                 0,
                 """
-                    invoke-interface {p0}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+                    instance-of v0, p0, LX/X68;
+                    if-eqz v0, :froggo_storyads_filter_exit
+
+                    invoke-interface {p1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
                     move-result-object v0
 
                     :froggo_storyads_scan_loop
@@ -94,7 +106,7 @@ val blockFacebookStoryAds573Patch = bytecodePatch(
 
                     new-instance v0, Ljava/util/ArrayList;
                     invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
-                    invoke-interface {p0}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+                    invoke-interface {p1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
                     move-result-object v1
 
                     :froggo_storyads_filter_loop
@@ -110,25 +122,33 @@ val blockFacebookStoryAds573Patch = bytecodePatch(
 
                     :froggo_storyads_filter_done
                     invoke-static {v0}, Lcom/google/common/collect/ImmutableList;->copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;
-                    move-result-object p0
+                    move-result-object p1
 
                     :froggo_storyads_filter_exit
-                    return-object p0
+                    return-object p1
                 """.trimIndent(),
             )
         }
 
         targetClass.methods.add(filterMethod)
 
-        val returnIndex = storyBucketProcessing.method.implementation!!.instructions
-            .withIndex()
-            .last { (_, instruction) -> instruction.opcode == Opcode.RETURN_OBJECT }
-            .index
+        val instructions = storyBucketProcessing.method.implementation!!.instructions
+        val providerCallIndex = instructions.indexOfFirst { instruction ->
+            if (instruction.opcode != Opcode.INVOKE_INTERFACE) return@indexOfFirst false
+            val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+            reference?.definingClass == "LX/CMz;" && reference.name == "B46"
+        }
+        require(providerCallIndex >= 0) { "Could not find Story provider B46 call in AkQ.A00" }
+
+        val providerResultIndex = providerCallIndex + 1
+        require(instructions[providerResultIndex].opcode == Opcode.MOVE_RESULT_OBJECT) {
+            "Unexpected Story provider B46 result sequence in AkQ.A00"
+        }
 
         storyBucketProcessing.method.addInstructions(
-            returnIndex,
+            providerResultIndex + 1,
             """
-                invoke-static {p2}, $targetClassType->$filterMethodName(Lcom/google/common/collect/ImmutableList;)Lcom/google/common/collect/ImmutableList;
+                invoke-static {v3, p2}, $targetClassType->$filterMethodName(LX/CMz;Lcom/google/common/collect/ImmutableList;)Lcom/google/common/collect/ImmutableList;
                 move-result-object p2
             """.trimIndent(),
         )
