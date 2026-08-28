@@ -8,8 +8,7 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMuta
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 
@@ -18,59 +17,97 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
  * absent from main/stable.
  *
  * Facebook 573.0.0.37.74 / 473623755:
- * StoryViewerBucketDataController processes every bucket collection through
- * AkQ.A00(...). That method runs each registered provider's B46(...) in order,
- * including the Story Ads provider (AuI or WXO), then returns the final list to
- * AkQ.A02(...) for publication.
  *
- * The previous experiment forced AmP.A00(...) false. On a cold cache that
- * removes the X68 ads provider from Aky.A0C entirely, so its Ap0 setup, fetch
- * work and ES9 completion/refresh callbacks never participate in the viewer
- * lifecycle. The result blocks ads but can poison Story Viewer publication.
+ * AmP=false removed the X68 Story Ads provider entirely and broke its lifecycle.
+ * The previous provider-boundary experiment preserved X68 but injected a helper
+ * call into AkQ.A00 after every provider B46(...), including the initial
+ * AkS/AkT/AkV pass that runs before X68 exists. Cold-start logging showed that
+ * the first Story can fail before deferred/X68 initialization, so this variant
+ * leaves AkQ.A00 completely stock.
  *
- * This experiment instead leaves the complete provider lifecycle untouched and
- * removes only C9XO immediately after the X68 ads provider returns from B46(...).
- * C9XO.getBucketType() is always 9 in this APK. Filtering at that exact provider
- * boundary lets AuI/WXO finish all internal state transitions while preventing
- * downstream providers (AkT, AkV and WUB) from indexing/reordering ad buckets
- * that will not be published to the viewer.
+ * AuI and WXO are the two concrete X68 implementations. This experiment lets
+ * each provider execute its stock B46(...) fully, then removes only C9XO from
+ * the provider's own normal return value. Downstream AkT/AkV/WUB therefore see
+ * an ad-free collection, while the early AkQ publication path is untouched.
  */
-private val storyBucketProcessing = Fingerprint(
+private val storyAdsAuI = Fingerprint(
     returnType = "Lcom/google/common/collect/ImmutableList;",
     parameters = listOf(
         "Lcom/facebook/auth/usersession/FbUserSession;",
-        "LX/AkQ;",
+        "LX/Aly;",
         "Lcom/google/common/collect/ImmutableList;",
-        "Z",
-        "Z",
     ),
     custom = { method, classDef ->
-        classDef.type == "LX/AkQ;" && method.name == "A00"
+        classDef.type == "LX/AuI;" && method.name == "B46"
+    },
+)
+
+private val storyAdsWXO = Fingerprint(
+    returnType = "Lcom/google/common/collect/ImmutableList;",
+    parameters = listOf(
+        "Lcom/facebook/auth/usersession/FbUserSession;",
+        "LX/Aly;",
+        "Lcom/google/common/collect/ImmutableList;",
+    ),
+    custom = { method, classDef ->
+        classDef.type == "LX/WXO;" && method.name == "B46"
     },
 )
 
 @Suppress("unused")
 val blockFacebookStoryAds573Patch = bytecodePatch(
     name = "Block Facebook Story ads (573)",
-    description = "Pre-release experiment: filters Story ad buckets immediately after the Story Ads provider returns.",
+    description = "Pre-release experiment: filters Story ad buckets only at the concrete X68 provider return boundary.",
     default = false,
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
-        val targetClass = storyBucketProcessing.classDef
-        val targetClassType = targetClass.type
-        val filterMethodName = "froggoFilterStoryAdsAfterAdsProvider"
+        val filterMethodName = "froggoFilterStoryAdsOutput"
+        val filterInstructions =
+            """
+                invoke-interface {p0}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+                move-result-object v0
 
-        val filterMethod = ImmutableMethod(
-            targetClassType,
+                :froggo_storyads_scan_loop
+                invoke-interface {v0}, Ljava/util/Iterator;->hasNext()Z
+                move-result v1
+                if-eqz v1, :froggo_storyads_filter_exit
+                invoke-interface {v0}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+                move-result-object v1
+                instance-of v2, v1, LX/9XO;
+                if-eqz v2, :froggo_storyads_scan_loop
+
+                new-instance v0, Ljava/util/ArrayList;
+                invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
+                invoke-interface {p0}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+                move-result-object v1
+
+                :froggo_storyads_filter_loop
+                invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
+                move-result v2
+                if-eqz v2, :froggo_storyads_filter_done
+                invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+                move-result-object v2
+                instance-of v3, v2, LX/9XO;
+                if-nez v3, :froggo_storyads_filter_loop
+                invoke-virtual {v0, v2}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+                goto :froggo_storyads_filter_loop
+
+                :froggo_storyads_filter_done
+                invoke-static {v0}, Lcom/google/common/collect/ImmutableList;->copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;
+                move-result-object p0
+
+                :froggo_storyads_filter_exit
+                return-object p0
+            """.trimIndent()
+
+        val auIClass = storyAdsAuI.classDef
+        val auIType = auIClass.type
+        val auIFilterMethod = ImmutableMethod(
+            auIType,
             filterMethodName,
             listOf(
-                ImmutableMethodParameter(
-                    "LX/CMz;",
-                    null,
-                    null,
-                ),
                 ImmutableMethodParameter(
                     "Lcom/google/common/collect/ImmutableList;",
                     null,
@@ -81,75 +118,65 @@ val blockFacebookStoryAds573Patch = bytecodePatch(
             AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
             null,
             null,
-            MutableMethodImplementation(6),
+            MutableMethodImplementation(5),
         ).toMutable().apply {
-            // This helper is a whole new method whose instructions start at dex
-            // offset zero. Keeping all loop labels here avoids non-zero-index
-            // label rebasing issues in addInstructions(...).
-            addInstructions(
-                0,
-                """
-                    instance-of v0, p0, LX/X68;
-                    if-eqz v0, :froggo_storyads_filter_exit
-
-                    invoke-interface {p1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
-                    move-result-object v0
-
-                    :froggo_storyads_scan_loop
-                    invoke-interface {v0}, Ljava/util/Iterator;->hasNext()Z
-                    move-result v1
-                    if-eqz v1, :froggo_storyads_filter_exit
-                    invoke-interface {v0}, Ljava/util/Iterator;->next()Ljava/lang/Object;
-                    move-result-object v1
-                    instance-of v2, v1, LX/9XO;
-                    if-eqz v2, :froggo_storyads_scan_loop
-
-                    new-instance v0, Ljava/util/ArrayList;
-                    invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
-                    invoke-interface {p1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
-                    move-result-object v1
-
-                    :froggo_storyads_filter_loop
-                    invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
-                    move-result v2
-                    if-eqz v2, :froggo_storyads_filter_done
-                    invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
-                    move-result-object v2
-                    instance-of v3, v2, LX/9XO;
-                    if-nez v3, :froggo_storyads_filter_loop
-                    invoke-virtual {v0, v2}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
-                    goto :froggo_storyads_filter_loop
-
-                    :froggo_storyads_filter_done
-                    invoke-static {v0}, Lcom/google/common/collect/ImmutableList;->copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;
-                    move-result-object p1
-
-                    :froggo_storyads_filter_exit
-                    return-object p1
-                """.trimIndent(),
-            )
+            addInstructions(0, filterInstructions)
         }
+        auIClass.methods.add(auIFilterMethod)
 
-        targetClass.methods.add(filterMethod)
-
-        val instructions = storyBucketProcessing.method.implementation!!.instructions
-        val providerCallIndex = instructions.indexOfFirst { instruction ->
-            if (instruction.opcode != Opcode.INVOKE_INTERFACE) return@indexOfFirst false
-            val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
-            reference?.definingClass == "LX/CMz;" && reference.name == "B46"
+        val auIInstructions = storyAdsAuI.method.implementation!!.instructions
+        val auIReturnIndex = auIInstructions.indexOfFirst { instruction ->
+            instruction.opcode == Opcode.RETURN_OBJECT
         }
-        require(providerCallIndex >= 0) { "Could not find Story provider B46 call in AkQ.A00" }
+        require(auIReturnIndex >= 0) { "Could not find AuI.B46 normal return" }
+        val auIReturnRegister = (auIInstructions[auIReturnIndex] as? OneRegisterInstruction)?.registerA
+            ?: error("Unexpected AuI.B46 return instruction")
+        require(auIReturnRegister <= 15) { "AuI.B46 return register cannot be encoded in invoke-static" }
 
-        val providerResultIndex = providerCallIndex + 1
-        require(instructions[providerResultIndex].opcode == Opcode.MOVE_RESULT_OBJECT) {
-            "Unexpected Story provider B46 result sequence in AkQ.A00"
-        }
-
-        storyBucketProcessing.method.addInstructions(
-            providerResultIndex + 1,
+        storyAdsAuI.method.addInstructions(
+            auIReturnIndex,
             """
-                invoke-static {v3, p2}, $targetClassType->$filterMethodName(LX/CMz;Lcom/google/common/collect/ImmutableList;)Lcom/google/common/collect/ImmutableList;
-                move-result-object p2
+                invoke-static {v$auIReturnRegister}, $auIType->$filterMethodName(Lcom/google/common/collect/ImmutableList;)Lcom/google/common/collect/ImmutableList;
+                move-result-object v$auIReturnRegister
+            """.trimIndent(),
+        )
+
+        val wxoClass = storyAdsWXO.classDef
+        val wxoType = wxoClass.type
+        val wxoFilterMethod = ImmutableMethod(
+            wxoType,
+            filterMethodName,
+            listOf(
+                ImmutableMethodParameter(
+                    "Lcom/google/common/collect/ImmutableList;",
+                    null,
+                    null,
+                ),
+            ),
+            "Lcom/google/common/collect/ImmutableList;",
+            AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
+            null,
+            null,
+            MutableMethodImplementation(5),
+        ).toMutable().apply {
+            addInstructions(0, filterInstructions)
+        }
+        wxoClass.methods.add(wxoFilterMethod)
+
+        val wxoInstructions = storyAdsWXO.method.implementation!!.instructions
+        val wxoReturnIndex = wxoInstructions.indexOfFirst { instruction ->
+            instruction.opcode == Opcode.RETURN_OBJECT
+        }
+        require(wxoReturnIndex >= 0) { "Could not find WXO.B46 return" }
+        val wxoReturnRegister = (wxoInstructions[wxoReturnIndex] as? OneRegisterInstruction)?.registerA
+            ?: error("Unexpected WXO.B46 return instruction")
+        require(wxoReturnRegister <= 15) { "WXO.B46 return register cannot be encoded in invoke-static" }
+
+        storyAdsWXO.method.addInstructions(
+            wxoReturnIndex,
+            """
+                invoke-static {v$wxoReturnRegister}, $wxoType->$filterMethodName(Lcom/google/common/collect/ImmutableList;)Lcom/google/common/collect/ImmutableList;
+                move-result-object v$wxoReturnRegister
             """.trimIndent(),
         )
     }
