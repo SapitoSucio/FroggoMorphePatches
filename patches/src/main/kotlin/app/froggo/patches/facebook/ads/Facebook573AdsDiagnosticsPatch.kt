@@ -134,6 +134,41 @@ private val diagReelsVideoAdSuccess = diagExactMethod(
     listOf("Ljava/lang/Object;"),
 )
 
+private val diagStoryFragmentCreate = diagExactMethod(
+    "LX/Aky;",
+    "onFragmentCreate",
+    listOf("Landroid/os/Bundle;"),
+)
+
+private val diagStoryPublish = diagExactMethod(
+    "LX/AkQ;",
+    "A02",
+    listOf(
+        "LX/Alw;",
+        "Lcom/facebook/auth/usersession/FbUserSession;",
+        "LX/AkQ;",
+        "Lcom/google/common/collect/ImmutableList;",
+        "Z",
+    ),
+)
+
+private val diagStoryPublishRunnable = diagExactMethod(
+    "LX/Am0;",
+    "run",
+)
+
+private val diagStoryCachedReplay = diagExactMethod(
+    "LX/AkQ;",
+    "A03",
+    listOf("LX/Alw;", "LX/Bsm;", "LX/AkQ;"),
+)
+
+private val diagStoryNotify = diagExactMethod(
+    "LX/Al1;",
+    "A00",
+    listOf("LX/Alw;", "LX/Bsm;"),
+)
+
 @Suppress("unused")
 val diagnoseFacebookAds573A1TailLoadPatch = bytecodePatch(
     name = "[Diag A1] Facebook 573 ads - CSR tail-load",
@@ -242,5 +277,62 @@ val diagnoseFacebookAds573CVideoReelsPatch = bytecodePatch(
         diagReelsVideoAdFetch.method.addInstructions(0, "return-void")
         diagReelsBannerAdSuccess.method.addInstructions(0, "return-void")
         diagReelsVideoAdSuccess.method.addInstructions(0, "return-void")
+    }
+}
+
+@Suppress("unused")
+val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
+    name = "[Diag D] Facebook 573 Stories - publication lifecycle",
+    description = "DEV diagnostic: logs Story bucket publication, cached replay and viewer notification without changing behavior.",
+    default = false,
+) {
+    compatibleWith(COMPATIBILITY_FACEBOOK_573)
+
+    execute {
+        diagStoryFragmentCreate.method.addInstructions(
+            0,
+            """
+                const-string v0, "FroggoStoryDiag"
+                const-string v1, "FRAGMENT_CREATE"
+                invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                move-result v0
+            """.trimIndent(),
+        )
+        diagStoryPublish.method.addInstructions(
+            0,
+            """
+                const-string v0, "FroggoStoryDiag"
+                const-string v1, "AKQ_A02_PUBLISH"
+                invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                move-result v0
+            """.trimIndent(),
+        )
+        diagStoryPublishRunnable.method.addInstructions(
+            0,
+            """
+                const-string v0, "FroggoStoryDiag"
+                const-string v1, "AM0_RUN"
+                invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                move-result v0
+            """.trimIndent(),
+        )
+        diagStoryCachedReplay.method.addInstructions(
+            0,
+            """
+                const-string v0, "FroggoStoryDiag"
+                const-string v1, "AKQ_REPLAY_CACHED"
+                invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                move-result v0
+            """.trimIndent(),
+        )
+        diagStoryNotify.method.addInstructions(
+            0,
+            """
+                const-string v0, "FroggoStoryDiag"
+                const-string v1, "AL1_NOTIFY"
+                invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                move-result v0
+            """.trimIndent(),
+        )
     }
 }
