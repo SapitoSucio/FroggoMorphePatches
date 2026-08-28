@@ -15,6 +15,7 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 
 /*
  * DEV-ONLY diagnostic split for Facebook 573 ads.
@@ -381,7 +382,7 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             ImmutableMethod(
                 targetClassType,
                 subscriberSetHelper,
-                listOf(targetClassType),
+                listOf(ImmutableMethodParameter(targetClassType, null, null)),
                 "V",
                 AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
                 null,
@@ -410,7 +411,10 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             ImmutableMethod(
                 targetClassType,
                 compareStateHelper,
-                listOf(targetClassType, "LX/Bsm;"),
+                listOf(
+                    ImmutableMethodParameter(targetClassType, null, null),
+                    ImmutableMethodParameter("LX/Bsm;", null, null),
+                ),
                 "V",
                 AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
                 null,
@@ -498,7 +502,7 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             ImmutableMethod(
                 targetClassType,
                 equalityResultHelper,
-                listOf("Z"),
+                listOf(ImmutableMethodParameter("Z", null, null)),
                 "V",
                 AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
                 null,
