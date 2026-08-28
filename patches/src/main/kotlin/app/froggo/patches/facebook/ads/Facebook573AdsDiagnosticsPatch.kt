@@ -12,6 +12,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
@@ -344,6 +345,34 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             "Unexpected Story AkQ equality result opcode"
         }
         val equalityResultRegister = equalityResult.registerA
+        val equalityBranchIndex = compareA02ReadIndex + 3
+        require(publishRunnableInstructions[equalityBranchIndex].opcode == Opcode.IF_NEZ) {
+            "Unexpected Story AkQ equality branch opcode"
+        }
+
+        fun findMethodCallAfter(startIndex: Int, definingClass: String, methodName: String): Int =
+            publishRunnableInstructions.withIndex().firstOrNull { (index, instruction) ->
+                if (index <= startIndex || instruction !is ReferenceInstruction) return@firstOrNull false
+                val reference = instruction.reference as? MethodReference ?: return@firstOrNull false
+                reference.definingClass == definingClass && reference.name == methodName
+            }?.index ?: error("Could not find $definingClass->$methodName after instruction $startIndex")
+
+        val traceCallIndex = findMethodCallAfter(equalityBranchIndex, "LX/0D7;", "A03")
+        val tryEntryIndex = publishRunnableInstructions.withIndex().firstOrNull { (index, instruction) ->
+            if (index <= traceCallIndex || instruction.opcode != Opcode.IGET_OBJECT) return@firstOrNull false
+            val reference = (instruction as? ReferenceInstruction)?.reference as? FieldReference
+            reference?.definingClass == "LX/AkQ;" && reference.name == "A0S"
+        }?.index ?: error("Could not find Am0 try-entry launch config read")
+        val bucketLookupIndex = findMethodCallAfter(tryEntryIndex, "LX/Bsm;", "B3w")
+        require(publishRunnableInstructions[bucketLookupIndex + 1].opcode == Opcode.MOVE_RESULT_OBJECT) {
+            "Unexpected Story bucket lookup result sequence"
+        }
+        val flowAnnotateIndex = publishRunnableInstructions.withIndex().firstOrNull { (index, instruction) ->
+            if (index <= bucketLookupIndex || instruction !is ReferenceInstruction) return@firstOrNull false
+            val reference = instruction.reference as? MethodReference ?: return@firstOrNull false
+            reference.name == "flowAnnotate"
+        }?.index ?: error("Could not find Am0 flowAnnotate before viewer notification")
+        val notifyCallIndex = findMethodCallAfter(flowAnnotateIndex, "LX/Al1;", "A00")
 
         val targetClass = diagStoryPublish.classDef
         val targetClassType = targetClass.type
@@ -376,7 +405,17 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         val subscriberNullHelper = "froggoStoryDiagSubscriberNull"
         val compareStateHelper = "froggoStoryDiagCompareState"
         val equalityResultHelper = "froggoStoryDiagEqualityResult"
+        val afterEqualityBranchHelper = "froggoStoryDiagAfterEqualityBranch"
+        val afterTraceHelper = "froggoStoryDiagAfterTrace"
+        val enteredTryHelper = "froggoStoryDiagEnteredTry"
+        val afterBucketLookupHelper = "froggoStoryDiagAfterBucketLookup"
+        val beforeNotifyHelper = "froggoStoryDiagBeforeNotify"
         addMarkerHelper(subscriberNullHelper, "AM0_SUBSCRIBER_NULL")
+        addMarkerHelper(afterEqualityBranchHelper, "AM0_AFTER_EQUALITY_BRANCH")
+        addMarkerHelper(afterTraceHelper, "AM0_AFTER_TRACE")
+        addMarkerHelper(enteredTryHelper, "AM0_ENTERED_TRY")
+        addMarkerHelper(afterBucketLookupHelper, "AM0_AFTER_BUCKET_LOOKUP")
+        addMarkerHelper(beforeNotifyHelper, "AM0_BEFORE_NOTIFY")
 
         targetClass.methods.add(
             ImmutableMethod(
@@ -527,13 +566,32 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         )
 
         // Insert higher offsets first so each index still refers to the stock method.
+        // Every new flow marker is placed *after* a stock instruction rather than
+        // before a branch target. This prevents existing labels from jumping over
+        // the diagnostic call.
+        diagStoryPublishRunnable.method.addInstructions(
+            flowAnnotateIndex + 1,
+            "invoke-static {}, $targetClassType->$beforeNotifyHelper()V",
+        )
+        diagStoryPublishRunnable.method.addInstructions(
+            bucketLookupIndex + 2,
+            "invoke-static {}, $targetClassType->$afterBucketLookupHelper()V",
+        )
+        diagStoryPublishRunnable.method.addInstructions(
+            tryEntryIndex + 1,
+            "invoke-static {}, $targetClassType->$enteredTryHelper()V",
+        )
+        diagStoryPublishRunnable.method.addInstructions(
+            traceCallIndex + 1,
+            "invoke-static {}, $targetClassType->$afterTraceHelper()V",
+        )
+        diagStoryPublishRunnable.method.addInstructions(
+            equalityBranchIndex + 1,
+            "invoke-static {}, $targetClassType->$afterEqualityBranchHelper()V",
+        )
         diagStoryPublishRunnable.method.addInstructions(
             compareA02ReadIndex + 3,
             "invoke-static {v$equalityResultRegister}, $targetClassType->$equalityResultHelper(Z)V",
-        )
-        diagStoryPublishRunnable.method.addInstructions(
-            compareA02ReadIndex,
-            "invoke-static {v$compareControllerRegister, v$selectedSnapshotRegister}, $targetClassType->$compareStateHelper(${targetClassType}LX/Bsm;)V",
         )
         diagStoryPublishRunnable.method.addInstructions(
             subscriberNullPathIndex,
