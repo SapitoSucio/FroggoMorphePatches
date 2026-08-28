@@ -1,3 +1,9 @@
+## [1.2.0-dev.7](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.6...v1.2.0-dev.7) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** filter story ads at provider boundary ([3a83043](https://github.com/SapitoSucio/FroggoMorphePatches/commit/3a830436ec674a2775d506cb37127485cb7d6b2b))
+
 ## [1.2.0-dev.6](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.5...v1.2.0-dev.6) (2026-08-28)
 
 ### 🐛 Bug Fixes
