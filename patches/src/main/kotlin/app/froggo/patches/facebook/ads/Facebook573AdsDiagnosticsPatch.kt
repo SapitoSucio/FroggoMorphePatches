@@ -7,7 +7,10 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
@@ -303,6 +306,9 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             reference?.definingClass == "LX/AkQ;" && reference.name == "A05"
         }
         require(subscriberSetIndex >= 0) { "Could not find Story AkQ subscriber assignment" }
+        val subscriberSetInstruction = fragmentInstructions[subscriberSetIndex] as? TwoRegisterInstruction
+            ?: error("Unexpected Story AkQ subscriber assignment instruction")
+        val subscriberControllerRegister = subscriberSetInstruction.registerB
 
         val publishRunnableInstructions = diagStoryPublishRunnable.method.implementation!!.instructions
         val subscriberReadIndex = publishRunnableInstructions.indexOfFirst { instruction ->
@@ -315,6 +321,28 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         require(publishRunnableInstructions[subscriberReadIndex + 1].opcode == Opcode.IF_NEZ) {
             "Unexpected Story AkQ subscriber branch in Am0.run"
         }
+
+        val compareA02ReadIndex = publishRunnableInstructions.indexOfFirst { instruction ->
+            if (instruction.opcode != Opcode.IGET_OBJECT) return@indexOfFirst false
+            val reference = (instruction as? ReferenceInstruction)?.reference as? FieldReference
+            reference?.definingClass == "LX/AkQ;" && reference.name == "A02"
+        }
+        require(compareA02ReadIndex >= 0) { "Could not find Story AkQ A02 comparison read in Am0.run" }
+        val compareA02Read = publishRunnableInstructions[compareA02ReadIndex] as? TwoRegisterInstruction
+            ?: error("Unexpected Story AkQ A02 comparison instruction")
+        val compareControllerRegister = compareA02Read.registerB
+        val equalityCall = publishRunnableInstructions[compareA02ReadIndex + 1] as? FiveRegisterInstruction
+            ?: error("Unexpected Story AkQ equality call")
+        require(publishRunnableInstructions[compareA02ReadIndex + 1].opcode == Opcode.INVOKE_STATIC) {
+            "Unexpected Story AkQ equality opcode"
+        }
+        val selectedSnapshotRegister = equalityCall.registerD
+        val equalityResult = publishRunnableInstructions[compareA02ReadIndex + 2] as? OneRegisterInstruction
+            ?: error("Unexpected Story AkQ equality result instruction")
+        require(publishRunnableInstructions[compareA02ReadIndex + 2].opcode == Opcode.MOVE_RESULT) {
+            "Unexpected Story AkQ equality result opcode"
+        }
+        val equalityResultRegister = equalityResult.registerA
 
         val targetClass = diagStoryPublish.classDef
         val targetClassType = targetClass.type
@@ -345,19 +373,171 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
 
         val subscriberSetHelper = "froggoStoryDiagSubscriberSet"
         val subscriberNullHelper = "froggoStoryDiagSubscriberNull"
-        addMarkerHelper(subscriberSetHelper, "SUBSCRIBER_SET")
+        val compareStateHelper = "froggoStoryDiagCompareState"
+        val equalityResultHelper = "froggoStoryDiagEqualityResult"
         addMarkerHelper(subscriberNullHelper, "AM0_SUBSCRIBER_NULL")
 
-        // Insert branch-specific calls before the generic method-entry markers so
-        // the original instruction indexes remain valid while patching. These
-        // calls do not modify any register in the original methods.
-        diagStoryFragmentCreate.method.addInstructions(
-            subscriberSetIndex + 1,
-            "invoke-static {}, $targetClassType->$subscriberSetHelper()V",
+        targetClass.methods.add(
+            ImmutableMethod(
+                targetClassType,
+                subscriberSetHelper,
+                listOf(targetClassType),
+                "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                null,
+                null,
+                MutableMethodImplementation(4),
+            ).toMutable().apply {
+                addInstructions(
+                    0,
+                    """
+                        const-string v0, "FroggoStoryDiag"
+                        const-string v1, "SUBSCRIBER_SET"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                        invoke-static {p0}, Ljava/lang/System;->identityHashCode(Ljava/lang/Object;)I
+                        move-result v1
+                        invoke-static {v1}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
+                        move-result-object v1
+                        const-string v0, "FroggoStoryDiagSubId"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                        return-void
+                    """.trimIndent(),
+                )
+            },
+        )
+
+        targetClass.methods.add(
+            ImmutableMethod(
+                targetClassType,
+                compareStateHelper,
+                listOf(targetClassType, "LX/Bsm;"),
+                "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                null,
+                null,
+                MutableMethodImplementation(6),
+            ).toMutable().apply {
+                addInstructions(
+                    0,
+                    """
+                        invoke-static {p0}, Ljava/lang/System;->identityHashCode(Ljava/lang/Object;)I
+                        move-result v1
+                        invoke-static {v1}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
+                        move-result-object v1
+                        const-string v0, "FroggoStoryDiagAm0Id"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+                        iget-object v2, p0, LX/AkQ;->A02:LX/Bsm;
+                        if-nez v2, :froggo_diag_a02_nonnull
+                        const-string v1, "CMP_A02_NULL"
+                        goto :froggo_diag_log_a02
+                        :froggo_diag_a02_nonnull
+                        const-string v1, "CMP_A02_NONNULL"
+                        :froggo_diag_log_a02
+                        const-string v0, "FroggoStoryDiag"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+                        if-nez p1, :froggo_diag_selected_nonnull
+                        const-string v1, "CMP_SELECTED_NULL"
+                        goto :froggo_diag_log_selected
+                        :froggo_diag_selected_nonnull
+                        const-string v1, "CMP_SELECTED_NONNULL"
+                        :froggo_diag_log_selected
+                        const-string v0, "FroggoStoryDiag"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+                        iget-object v2, p0, LX/AkQ;->A0Z:Ljava/util/concurrent/atomic/AtomicReference;
+                        invoke-virtual {v2}, Ljava/util/concurrent/atomic/AtomicReference;->get()Ljava/lang/Object;
+                        move-result-object v2
+                        if-nez v2, :froggo_diag_a0z_nonnull
+                        const-string v1, "CMP_A0Z_NULL"
+                        goto :froggo_diag_log_a0z
+                        :froggo_diag_a0z_nonnull
+                        const-string v1, "CMP_A0Z_NONNULL"
+                        :froggo_diag_log_a0z
+                        const-string v0, "FroggoStoryDiag"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+                        if-ne v2, p1, :froggo_diag_a0z_diff
+                        const-string v1, "CMP_A0Z_SAME_SELECTED"
+                        goto :froggo_diag_log_a0z_identity
+                        :froggo_diag_a0z_diff
+                        const-string v1, "CMP_A0Z_DIFF_SELECTED"
+                        :froggo_diag_log_a0z_identity
+                        const-string v0, "FroggoStoryDiag"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+                        iget-object v2, p0, LX/AkQ;->A02:LX/Bsm;
+                        if-ne v2, p1, :froggo_diag_a02_diff
+                        const-string v1, "CMP_A02_SAME_SELECTED"
+                        goto :froggo_diag_log_a02_identity
+                        :froggo_diag_a02_diff
+                        const-string v1, "CMP_A02_DIFF_SELECTED"
+                        :froggo_diag_log_a02_identity
+                        const-string v0, "FroggoStoryDiag"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+                        iget-object v2, p0, LX/AkQ;->A0Y:Ljava/util/concurrent/atomic/AtomicBoolean;
+                        invoke-virtual {v2}, Ljava/util/concurrent/atomic/AtomicBoolean;->get()Z
+                        move-result v2
+                        if-eqz v2, :froggo_diag_a0y_false
+                        const-string v1, "CMP_A0Y_TRUE"
+                        goto :froggo_diag_log_a0y
+                        :froggo_diag_a0y_false
+                        const-string v1, "CMP_A0Y_FALSE"
+                        :froggo_diag_log_a0y
+                        const-string v0, "FroggoStoryDiag"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                        return-void
+                    """.trimIndent(),
+                )
+            },
+        )
+
+        targetClass.methods.add(
+            ImmutableMethod(
+                targetClassType,
+                equalityResultHelper,
+                listOf("Z"),
+                "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                null,
+                null,
+                MutableMethodImplementation(3),
+            ).toMutable().apply {
+                addInstructions(
+                    0,
+                    """
+                        if-eqz p0, :froggo_diag_equal_false
+                        const-string v1, "CMP_EQUAL_TRUE"
+                        goto :froggo_diag_log_equal
+                        :froggo_diag_equal_false
+                        const-string v1, "CMP_EQUAL_FALSE"
+                        :froggo_diag_log_equal
+                        const-string v0, "FroggoStoryDiag"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                        return-void
+                    """.trimIndent(),
+                )
+            },
+        )
+
+        // Insert higher offsets first so each index still refers to the stock method.
+        diagStoryPublishRunnable.method.addInstructions(
+            compareA02ReadIndex + 3,
+            "invoke-static {v$equalityResultRegister}, $targetClassType->$equalityResultHelper(Z)V",
+        )
+        diagStoryPublishRunnable.method.addInstructions(
+            compareA02ReadIndex,
+            "invoke-static {v$compareControllerRegister, v$selectedSnapshotRegister}, $targetClassType->$compareStateHelper(${targetClassType}LX/Bsm;)V",
         )
         diagStoryPublishRunnable.method.addInstructions(
             subscriberNullPathIndex,
             "invoke-static {}, $targetClassType->$subscriberNullHelper()V",
+        )
+        diagStoryFragmentCreate.method.addInstructions(
+            subscriberSetIndex + 1,
+            "invoke-static/range {v$subscriberControllerRegister .. v$subscriberControllerRegister}, $targetClassType->$subscriberSetHelper($targetClassType)V",
         )
 
         diagStoryFragmentCreate.method.addInstructions(
