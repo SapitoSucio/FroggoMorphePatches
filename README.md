@@ -15,9 +15,9 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.2.0-dev.7](https://github.com/SapitoSucio/FroggoMorphePatches/releases/tag/v1.2.0-dev.7)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;8 patches total
+> **[v1.2.0-dev.8](https://github.com/SapitoSucio/FroggoMorphePatches/releases/tag/v1.2.0-dev.8)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;9 patches total
 <details open>
-<summary>📦 Facebook&nbsp;&nbsp;•&nbsp;&nbsp;8 patches</summary>
+<summary>📦 Facebook&nbsp;&nbsp;•&nbsp;&nbsp;9 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -35,6 +35,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 | [[Diag A3] Facebook 573 ads - Async controller](#diag-a3-facebook-573-ads-async-controller) | DEV diagnostic: only replaces FeedAsyncAdsController output with an empty C6Ke. |  |
 | [[Diag B] Facebook 573 ads - Final feed filter](#diag-b-facebook-573-ads-final-feed-filter) | DEV diagnostic: only filters SPONSORED/PROMOTION feed edges and MultiAds sponsored data. |  |
 | [[Diag C] Facebook 573 ads - Reels/video](#diag-c-facebook-573-ads-reels-video) | DEV diagnostic: only disables Reels/video and commercial-break ad fetch/success paths. |  |
+| [[Diag D] Facebook 573 Stories - publication lifecycle](#diag-d-facebook-573-stories-publication-lifecycle) | DEV diagnostic: logs Story bucket publication, cached replay and viewer notification without changing behavior. |  |
 
 </details>
 

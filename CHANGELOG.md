@@ -1,3 +1,9 @@
+## [1.2.0-dev.8](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.7...v1.2.0-dev.8) (2026-08-28)
+
+### ✨ New Features
+
+* **facebook:** add story publication diagnostics ([132fd61](https://github.com/SapitoSucio/FroggoMorphePatches/commit/132fd61fc961d547590d7c24b75e8686057e03be))
+
 ## [1.2.0-dev.7](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.6...v1.2.0-dev.7) (2026-08-28)
 
 ### 🐛 Bug Fixes

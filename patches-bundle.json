@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-28T04:29:16",
-  "description": "## [1.2.0-dev.7](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.6...v1.2.0-dev.7) (2026-08-28)\n\n### 🐛 Bug Fixes\n\n* **facebook:** filter story ads at provider boundary ([3a83043](https://github.com/SapitoSucio/FroggoMorphePatches/commit/3a830436ec674a2775d506cb37127485cb7d6b2b))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.7/patches-1.2.0-dev.7.mpp",
+  "created_at": "2026-08-28T04:46:50",
+  "description": "## [1.2.0-dev.8](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.7...v1.2.0-dev.8) (2026-08-28)\n\n### ✨ New Features\n\n* **facebook:** add story publication diagnostics ([132fd61](https://github.com/SapitoSucio/FroggoMorphePatches/commit/132fd61fc961d547590d7c24b75e8686057e03be))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.8/patches-1.2.0-dev.8.mpp",
   "signature_download_url": "",
-  "version": "1.2.0-dev.7"
+  "version": "1.2.0-dev.8"
 }
