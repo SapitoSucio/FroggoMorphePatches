@@ -1,3 +1,9 @@
+## [1.2.0-dev.14](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.13...v1.2.0-dev.14) (2026-08-28)
+
+### ✨ New Features
+
+* **facebook:** trace story subscriber handoff ([5b898bf](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5b898bf23f03348b643e2960b59f4adb64ad16e4))
+
 ## [1.2.0-dev.13](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.12...v1.2.0-dev.13) (2026-08-28)
 
 ### ✨ New Features
