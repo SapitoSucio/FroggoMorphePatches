@@ -325,7 +325,7 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
                 methodName,
                 emptyList(),
                 "V",
-                AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
                 null,
                 null,
                 MutableMethodImplementation(2),
