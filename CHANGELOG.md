@@ -1,3 +1,9 @@
+## [1.2.0-dev.9](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.8...v1.2.0-dev.9) (2026-08-28)
+
+### ✨ New Features
+
+* **facebook:** trace story subscriber race ([dbaf49b](https://github.com/SapitoSucio/FroggoMorphePatches/commit/dbaf49bcd36cb51cfd80b0dfece17d679cea9cdf))
+
 ## [1.2.0-dev.8](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.7...v1.2.0-dev.8) (2026-08-28)
 
 ### ✨ New Features
