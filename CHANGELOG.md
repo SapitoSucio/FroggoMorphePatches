@@ -1,3 +1,9 @@
+## [1.2.0-dev.13](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.12...v1.2.0-dev.13) (2026-08-28)
+
+### ✨ New Features
+
+* **facebook:** trace story publish fallthrough ([5ebb5d7](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5ebb5d7bc8a53ae676f430d63ab68e2c1e8da4bd))
+
 ## [1.2.0-dev.12](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.11...v1.2.0-dev.12) (2026-08-28)
 
 ### 🐛 Bug Fixes
