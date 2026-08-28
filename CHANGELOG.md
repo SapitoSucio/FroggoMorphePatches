@@ -1,3 +1,13 @@
+## [1.2.0-dev.11](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.10...v1.2.0-dev.11) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** define diagnostic helper parameters ([9187062](https://github.com/SapitoSucio/FroggoMorphePatches/commit/918706248a2499e9d6394a77dd58597989191fe1))
+
+### ✨ New Features
+
+* **facebook:** trace story snapshot equality ([52288e4](https://github.com/SapitoSucio/FroggoMorphePatches/commit/52288e4cd2017c9691705da03cfc9a777cecc98f))
+
 ## [1.2.0-dev.10](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.9...v1.2.0-dev.10) (2026-08-28)
 
 ### 🐛 Bug Fixes
