@@ -1,3 +1,9 @@
+## [1.2.0-dev.12](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.11...v1.2.0-dev.12) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** filter story ads inside x68 providers ([11b23cb](https://github.com/SapitoSucio/FroggoMorphePatches/commit/11b23cbbc94b807cdf8568c2afcb36e891fb7f4f))
+
 ## [1.2.0-dev.11](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.10...v1.2.0-dev.11) (2026-08-28)
 
 ### 🐛 Bug Fixes
