@@ -4,7 +4,14 @@ import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
+import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 
 /*
  * DEV-ONLY diagnostic split for Facebook 573 ads.
@@ -289,6 +296,70 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
     execute {
+        val fragmentInstructions = diagStoryFragmentCreate.method.implementation!!.instructions
+        val subscriberSetIndex = fragmentInstructions.indexOfFirst { instruction ->
+            if (instruction.opcode != Opcode.IPUT_OBJECT) return@indexOfFirst false
+            val reference = (instruction as? ReferenceInstruction)?.reference as? FieldReference
+            reference?.definingClass == "LX/AkQ;" && reference.name == "A05"
+        }
+        require(subscriberSetIndex >= 0) { "Could not find Story AkQ subscriber assignment" }
+
+        val publishRunnableInstructions = diagStoryPublishRunnable.method.implementation!!.instructions
+        val subscriberReadIndex = publishRunnableInstructions.indexOfFirst { instruction ->
+            if (instruction.opcode != Opcode.IGET_OBJECT) return@indexOfFirst false
+            val reference = (instruction as? ReferenceInstruction)?.reference as? FieldReference
+            reference?.definingClass == "LX/AkQ;" && reference.name == "A05"
+        }
+        require(subscriberReadIndex >= 0) { "Could not find Story AkQ subscriber read in Am0.run" }
+        val subscriberNullPathIndex = subscriberReadIndex + 2
+        require(publishRunnableInstructions[subscriberReadIndex + 1].opcode == Opcode.IF_NEZ) {
+            "Unexpected Story AkQ subscriber branch in Am0.run"
+        }
+
+        val targetClass = diagStoryPublish.classDef
+        val targetClassType = targetClass.type
+
+        fun addMarkerHelper(methodName: String, message: String) {
+            val helper = ImmutableMethod(
+                targetClassType,
+                methodName,
+                emptyList(),
+                "V",
+                AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
+                null,
+                null,
+                MutableMethodImplementation(2),
+            ).toMutable().apply {
+                addInstructions(
+                    0,
+                    """
+                        const-string v0, "FroggoStoryDiag"
+                        const-string v1, "$message"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                        return-void
+                    """.trimIndent(),
+                )
+            }
+            targetClass.methods.add(helper)
+        }
+
+        val subscriberSetHelper = "froggoStoryDiagSubscriberSet"
+        val subscriberNullHelper = "froggoStoryDiagSubscriberNull"
+        addMarkerHelper(subscriberSetHelper, "SUBSCRIBER_SET")
+        addMarkerHelper(subscriberNullHelper, "AM0_SUBSCRIBER_NULL")
+
+        // Insert branch-specific calls before the generic method-entry markers so
+        // the original instruction indexes remain valid while patching. These
+        // calls do not modify any register in the original methods.
+        diagStoryFragmentCreate.method.addInstructions(
+            subscriberSetIndex + 1,
+            "invoke-static {}, $targetClassType->$subscriberSetHelper()V",
+        )
+        diagStoryPublishRunnable.method.addInstructions(
+            subscriberNullPathIndex,
+            "invoke-static {}, $targetClassType->$subscriberNullHelper()V",
+        )
+
         diagStoryFragmentCreate.method.addInstructions(
             0,
             """
