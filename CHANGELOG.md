@@ -1,3 +1,9 @@
+## [1.2.0-dev.10](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.9...v1.2.0-dev.10) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** expose story diagnostic helpers ([b3527c0](https://github.com/SapitoSucio/FroggoMorphePatches/commit/b3527c00e5e90293af3915d8e7f6fd8c487a31be))
+
 ## [1.2.0-dev.9](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.8...v1.2.0-dev.9) (2026-08-28)
 
 ### ✨ New Features
