@@ -1,3 +1,9 @@
+## [1.2.0-dev.6](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.5...v1.2.0-dev.6) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** avoid invalid story filter branch labels ([1966df1](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1966df120c76681517dc3599d309b0b9dd28855e))
+
 ## [1.2.0-dev.5](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.4...v1.2.0-dev.5) (2026-08-28)
 
 ### 🐛 Bug Fixes
