@@ -1,3 +1,9 @@
+## [1.2.0-dev.5](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.4...v1.2.0-dev.5) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve story ads provider lifecycle ([55e90ad](https://github.com/SapitoSucio/FroggoMorphePatches/commit/55e90adf115a5ed8032a2fd07241d023c0642027))
+
 ## [1.2.0-dev.4](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.3...v1.2.0-dev.4) (2026-08-27)
 
 ### ✨ New Features

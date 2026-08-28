@@ -15,7 +15,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.2.0-dev.4](https://github.com/SapitoSucio/FroggoMorphePatches/releases/tag/v1.2.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;8 patches total
+> **[v1.2.0-dev.5](https://github.com/SapitoSucio/FroggoMorphePatches/releases/tag/v1.2.0-dev.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;8 patches total
 <details open>
 <summary>📦 Facebook&nbsp;&nbsp;•&nbsp;&nbsp;8 patches</summary>
 <br>
@@ -27,7 +27,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
-| [Block Facebook Story ads (573)](#block-facebook-story-ads-573) | Pre-release experiment: disables Facebook's native Story Ads eligibility gate. |  |
+| [Block Facebook Story ads (573)](#block-facebook-story-ads-573) | Pre-release experiment: filters Story ad buckets after provider processing and before viewer publication. |  |
 | [Block Facebook ads (573)](#block-facebook-ads-573) | Stops feed, Reels/video, and commercial-break ads without modifying the Story viewer pipeline. |  |
 | [Block Facebook automatic refresh (573)](#block-facebook-automatic-refresh-573) | Suppresses lifecycle feed refresh while preserving explicit refresh paths. |  |
 | [[Diag A1] Facebook 573 ads - CSR tail-load](#diag-a1-facebook-573-ads-csr-tail-load) | DEV diagnostic: only disables MainFeedCSRDataLoaderImpl async-ad tail-load dispatch. |  |
