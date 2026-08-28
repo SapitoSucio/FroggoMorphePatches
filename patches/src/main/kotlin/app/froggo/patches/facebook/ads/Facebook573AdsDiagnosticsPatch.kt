@@ -313,16 +313,21 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         val subscriberControllerRegister = subscriberSetInstruction.registerB
 
         val publishRunnableInstructions = diagStoryPublishRunnable.method.implementation!!.instructions
-        val subscriberReadIndex = publishRunnableInstructions.indexOfFirst { instruction ->
-            if (instruction.opcode != Opcode.IGET_OBJECT) return@indexOfFirst false
+        val subscriberReadIndices = publishRunnableInstructions.withIndex().mapNotNull { (index, instruction) ->
+            if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
             val reference = (instruction as? ReferenceInstruction)?.reference as? FieldReference
-            reference?.definingClass == "LX/AkQ;" && reference.name == "A05"
+            if (reference?.definingClass == "LX/AkQ;" && reference.name == "A05") index else null
         }
-        require(subscriberReadIndex >= 0) { "Could not find Story AkQ subscriber read in Am0.run" }
+        require(subscriberReadIndices.size >= 2) { "Could not find both Story AkQ subscriber reads in Am0.run" }
+        val subscriberReadIndex = subscriberReadIndices.first()
         val subscriberNullPathIndex = subscriberReadIndex + 2
         require(publishRunnableInstructions[subscriberReadIndex + 1].opcode == Opcode.IF_NEZ) {
             "Unexpected Story AkQ subscriber branch in Am0.run"
         }
+        val entrySubscriberRead = publishRunnableInstructions[subscriberReadIndex] as? TwoRegisterInstruction
+            ?: error("Unexpected Story AkQ entry subscriber read")
+        val entrySubscriberRegister = entrySubscriberRead.registerA
+        val entryControllerRegister = entrySubscriberRead.registerB
 
         val compareA02ReadIndex = publishRunnableInstructions.indexOfFirst { instruction ->
             if (instruction.opcode != Opcode.IGET_OBJECT) return@indexOfFirst false
@@ -373,6 +378,12 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             reference.name == "flowAnnotate"
         }?.index ?: error("Could not find Am0 flowAnnotate before viewer notification")
         val notifyCallIndex = findMethodCallAfter(flowAnnotateIndex, "LX/Al1;", "A00")
+        val notifySubscriberReadIndex = subscriberReadIndices.lastOrNull { it in (flowAnnotateIndex + 1) until notifyCallIndex }
+            ?: error("Could not find Story AkQ subscriber re-read before Al1.A00")
+        val notifySubscriberRead = publishRunnableInstructions[notifySubscriberReadIndex] as? TwoRegisterInstruction
+            ?: error("Unexpected Story AkQ notify subscriber read")
+        val notifySubscriberRegister = notifySubscriberRead.registerA
+        val notifyControllerRegister = notifySubscriberRead.registerB
 
         val targetClass = diagStoryPublish.classDef
         val targetClassType = targetClass.type
@@ -410,12 +421,83 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         val enteredTryHelper = "froggoStoryDiagEnteredTry"
         val afterBucketLookupHelper = "froggoStoryDiagAfterBucketLookup"
         val beforeNotifyHelper = "froggoStoryDiagBeforeNotify"
+        val entrySubscriberStateHelper = "froggoStoryDiagEntrySubscriberState"
+        val notifySubscriberStateHelper = "froggoStoryDiagNotifySubscriberState"
         addMarkerHelper(subscriberNullHelper, "AM0_SUBSCRIBER_NULL")
         addMarkerHelper(afterEqualityBranchHelper, "AM0_AFTER_EQUALITY_BRANCH")
         addMarkerHelper(afterTraceHelper, "AM0_AFTER_TRACE")
         addMarkerHelper(enteredTryHelper, "AM0_ENTERED_TRY")
         addMarkerHelper(afterBucketLookupHelper, "AM0_AFTER_BUCKET_LOOKUP")
         addMarkerHelper(beforeNotifyHelper, "AM0_BEFORE_NOTIFY")
+
+        fun addSubscriberStateHelper(
+            methodName: String,
+            nullMarker: String,
+            nonNullMarker: String,
+            controllerTag: String,
+            subscriberTag: String,
+        ) {
+            targetClass.methods.add(
+                ImmutableMethod(
+                    targetClassType,
+                    methodName,
+                    listOf(
+                        ImmutableMethodParameter(targetClassType, null, null),
+                        ImmutableMethodParameter("LX/Al1;", null, null),
+                    ),
+                    "V",
+                    AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                    null,
+                    null,
+                    MutableMethodImplementation(5),
+                ).toMutable().apply {
+                    addInstructions(
+                        0,
+                        """
+                            invoke-static {p0}, Ljava/lang/System;->identityHashCode(Ljava/lang/Object;)I
+                            move-result v1
+                            invoke-static {v1}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
+                            move-result-object v1
+                            const-string v0, "$controllerTag"
+                            invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+                            if-nez p1, :froggo_diag_subscriber_nonnull
+                            const-string v1, "$nullMarker"
+                            const-string v0, "FroggoStoryDiag"
+                            invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                            return-void
+
+                            :froggo_diag_subscriber_nonnull
+                            const-string v1, "$nonNullMarker"
+                            const-string v0, "FroggoStoryDiag"
+                            invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                            invoke-static {p1}, Ljava/lang/System;->identityHashCode(Ljava/lang/Object;)I
+                            move-result v1
+                            invoke-static {v1}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
+                            move-result-object v1
+                            const-string v0, "$subscriberTag"
+                            invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                            return-void
+                        """.trimIndent(),
+                    )
+                },
+            )
+        }
+
+        addSubscriberStateHelper(
+            entrySubscriberStateHelper,
+            "AM0_ENTRY_A05_NULL",
+            "AM0_ENTRY_A05_NONNULL",
+            "FroggoStoryDiagEntryAkQId",
+            "FroggoStoryDiagEntrySubId",
+        )
+        addSubscriberStateHelper(
+            notifySubscriberStateHelper,
+            "AM0_NOTIFY_A05_NULL",
+            "AM0_NOTIFY_A05_NONNULL",
+            "FroggoStoryDiagNotifyId",
+            "FroggoStoryDiagNotifySubId",
+        )
 
         targetClass.methods.add(
             ImmutableMethod(
@@ -570,6 +652,10 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         // before a branch target. This prevents existing labels from jumping over
         // the diagnostic call.
         diagStoryPublishRunnable.method.addInstructions(
+            notifySubscriberReadIndex + 1,
+            "invoke-static {v$notifyControllerRegister, v$notifySubscriberRegister}, $targetClassType->$notifySubscriberStateHelper(${targetClassType}LX/Al1;)V",
+        )
+        diagStoryPublishRunnable.method.addInstructions(
             flowAnnotateIndex + 1,
             "invoke-static {}, $targetClassType->$beforeNotifyHelper()V",
         )
@@ -596,6 +682,10 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         diagStoryPublishRunnable.method.addInstructions(
             subscriberNullPathIndex,
             "invoke-static {}, $targetClassType->$subscriberNullHelper()V",
+        )
+        diagStoryPublishRunnable.method.addInstructions(
+            subscriberReadIndex + 1,
+            "invoke-static {v$entryControllerRegister, v$entrySubscriberRegister}, $targetClassType->$entrySubscriberStateHelper(${targetClassType}LX/Al1;)V",
         )
         diagStoryFragmentCreate.method.addInstructions(
             subscriberSetIndex + 1,
