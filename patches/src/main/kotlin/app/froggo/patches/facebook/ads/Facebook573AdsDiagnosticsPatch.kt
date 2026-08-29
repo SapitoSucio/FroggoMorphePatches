@@ -7,7 +7,6 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
@@ -324,26 +323,15 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         require(publishRunnableInstructions[subscriberReadIndex + 1].opcode == Opcode.IF_NEZ) {
             "Unexpected Story AkQ subscriber branch in Am0.run"
         }
-        val entrySubscriberRead = publishRunnableInstructions[subscriberReadIndex] as? TwoRegisterInstruction
-            ?: error("Unexpected Story AkQ entry subscriber read")
-        val entrySubscriberRegister = entrySubscriberRead.registerA
-        val entryControllerRegister = entrySubscriberRead.registerB
-
         val compareA02ReadIndex = publishRunnableInstructions.indexOfFirst { instruction ->
             if (instruction.opcode != Opcode.IGET_OBJECT) return@indexOfFirst false
             val reference = (instruction as? ReferenceInstruction)?.reference as? FieldReference
             reference?.definingClass == "LX/AkQ;" && reference.name == "A02"
         }
         require(compareA02ReadIndex >= 0) { "Could not find Story AkQ A02 comparison read in Am0.run" }
-        val compareA02Read = publishRunnableInstructions[compareA02ReadIndex] as? TwoRegisterInstruction
-            ?: error("Unexpected Story AkQ A02 comparison instruction")
-        val compareControllerRegister = compareA02Read.registerB
-        val equalityCall = publishRunnableInstructions[compareA02ReadIndex + 1] as? FiveRegisterInstruction
-            ?: error("Unexpected Story AkQ equality call")
         require(publishRunnableInstructions[compareA02ReadIndex + 1].opcode == Opcode.INVOKE_STATIC) {
             "Unexpected Story AkQ equality opcode"
         }
-        val selectedSnapshotRegister = equalityCall.registerD
         val equalityResult = publishRunnableInstructions[compareA02ReadIndex + 2] as? OneRegisterInstruction
             ?: error("Unexpected Story AkQ equality result instruction")
         require(publishRunnableInstructions[compareA02ReadIndex + 2].opcode == Opcode.MOVE_RESULT) {
@@ -383,12 +371,75 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         }?.index ?: error("Could not find Am0 catchall move-exception")
         val catchThrowableRegister = (publishRunnableInstructions[catchMoveExceptionIndex] as? OneRegisterInstruction)?.registerA
             ?: error("Unexpected Am0 move-exception instruction")
-        val notifySubscriberReadIndex = subscriberReadIndices.lastOrNull { it in (flowAnnotateIndex + 1) until notifyCallIndex }
-            ?: error("Could not find Story AkQ subscriber re-read before Al1.A00")
-        val notifySubscriberRead = publishRunnableInstructions[notifySubscriberReadIndex] as? TwoRegisterInstruction
-            ?: error("Unexpected Story AkQ notify subscriber read")
-        val notifySubscriberRegister = notifySubscriberRead.registerA
-        val notifyControllerRegister = notifySubscriberRead.registerB
+        val storyNotifyInstructions = diagStoryNotify.method.implementation!!.instructions
+        val al1StateStoreIndex = storyNotifyInstructions.indexOfFirst { instruction ->
+            if (instruction.opcode != Opcode.IPUT_OBJECT) return@indexOfFirst false
+            val reference = (instruction as? ReferenceInstruction)?.reference as? FieldReference
+            reference?.definingClass == "LX/Aky;" && reference.name == "A0F"
+        }
+        require(al1StateStoreIndex >= 0) { "Could not find Story Aky.A0F state store in Al1.A00" }
+
+        val al1ViewReadIndex = storyNotifyInstructions.withIndex().firstOrNull { (index, instruction) ->
+            if (index <= al1StateStoreIndex || instruction.opcode != Opcode.IGET_OBJECT) return@firstOrNull false
+            val reference = (instruction as? ReferenceInstruction)?.reference as? FieldReference
+            reference?.definingClass == "Landroidx/fragment/app/Fragment;" && reference.name == "mView"
+        }?.index ?: error("Could not find Story Fragment.mView read in Al1.A00")
+        val al1ViewRead = storyNotifyInstructions[al1ViewReadIndex] as? TwoRegisterInstruction
+            ?: error("Unexpected Story Fragment.mView read in Al1.A00")
+        val al1ViewRegister = al1ViewRead.registerA
+
+        fun findStoryNotifyMethodCallAfter(startIndex: Int, definingClass: String, methodName: String): Int =
+            storyNotifyInstructions.withIndex().firstOrNull { (index, instruction) ->
+                if (index <= startIndex || instruction !is ReferenceInstruction) return@firstOrNull false
+                val reference = instruction.reference as? MethodReference ?: return@firstOrNull false
+                reference.definingClass == definingClass && reference.name == methodName
+            }?.index ?: error("Could not find $definingClass->$methodName after instruction $startIndex in Al1.A00")
+
+        val al1StateRefreshIndex = findStoryNotifyMethodCallAfter(al1ViewReadIndex, "LX/Aky;", "A0I")
+        val al1InitializedReadIndex = storyNotifyInstructions.withIndex().firstOrNull { (index, instruction) ->
+            if (index <= al1StateRefreshIndex || instruction.opcode != Opcode.IGET_BOOLEAN) return@firstOrNull false
+            val reference = (instruction as? ReferenceInstruction)?.reference as? FieldReference
+            reference?.definingClass == "LX/Aky;" && reference.name == "A0w"
+        }?.index ?: error("Could not find Story Aky.A0w read in Al1.A00")
+        val al1InitializedRead = storyNotifyInstructions[al1InitializedReadIndex] as? TwoRegisterInstruction
+            ?: error("Unexpected Story Aky.A0w read in Al1.A00")
+        val al1InitializedRegister = al1InitializedRead.registerA
+
+        val al1InitialIndexCallIndex = findStoryNotifyMethodCallAfter(al1InitializedReadIndex, "LX/Alz;", "A00")
+        require(storyNotifyInstructions[al1InitialIndexCallIndex + 1].opcode == Opcode.MOVE_RESULT) {
+            "Unexpected Story initial-index result sequence in Al1.A00"
+        }
+        val al1InitialIndexResult = storyNotifyInstructions[al1InitialIndexCallIndex + 1] as? OneRegisterInstruction
+            ?: error("Unexpected Story initial-index result instruction in Al1.A00")
+        val al1InitialIndexRegister = al1InitialIndexResult.registerA
+
+        val al1PagerUpdateCallIndex = findStoryNotifyMethodCallAfter(al1InitializedReadIndex, "LX/Al4;", "A07")
+        val al1A06CallIndices = storyNotifyInstructions.withIndex().mapNotNull { (index, instruction) ->
+            if (instruction !is ReferenceInstruction) return@mapNotNull null
+            val reference = instruction.reference as? MethodReference ?: return@mapNotNull null
+            if (reference.definingClass == "LX/Aky;" && reference.name == "A06") index else null
+        }
+        require(al1A06CallIndices.size == 2) { "Expected exactly two Story Aky.A06 calls in Al1.A00" }
+        val al1PrimaryA06CallIndex = al1A06CallIndices.first()
+        val al1FallbackA06CallIndex = al1A06CallIndices.last()
+
+        val al1InitializedGuardCompareIndex = storyNotifyInstructions.withIndex().firstOrNull { (index, instruction) ->
+            if (index <= al1InitializedReadIndex || index >= al1PagerUpdateCallIndex || instruction !is ReferenceInstruction) {
+                return@firstOrNull false
+            }
+            val reference = instruction.reference as? MethodReference ?: return@firstOrNull false
+            reference.definingClass == "Ljava/lang/Integer;" && reference.name == "compareTo"
+        }?.index ?: error("Could not find initialized Story early-return guard in Al1.A00")
+        require(storyNotifyInstructions[al1InitializedGuardCompareIndex + 1].opcode == Opcode.MOVE_RESULT) {
+            "Unexpected initialized Story guard result in Al1.A00"
+        }
+        require(storyNotifyInstructions[al1InitializedGuardCompareIndex + 2].opcode == Opcode.IF_LTZ) {
+            "Unexpected initialized Story guard branch in Al1.A00"
+        }
+        require(storyNotifyInstructions[al1InitializedGuardCompareIndex + 3].opcode == Opcode.RETURN_VOID) {
+            "Unexpected initialized Story guard return in Al1.A00"
+        }
+        val al1InitializedGuardReturnIndex = al1InitializedGuardCompareIndex + 3
 
         val targetClass = diagStoryPublish.classDef
         val targetClassType = targetClass.type
@@ -419,24 +470,34 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
 
         val subscriberSetHelper = "froggoStoryDiagSubscriberSet"
         val subscriberNullHelper = "froggoStoryDiagSubscriberNull"
-        val compareStateHelper = "froggoStoryDiagCompareState"
         val equalityResultHelper = "froggoStoryDiagEqualityResult"
-        val afterEqualityBranchHelper = "froggoStoryDiagAfterEqualityBranch"
-        val afterTraceHelper = "froggoStoryDiagAfterTrace"
-        val enteredTryHelper = "froggoStoryDiagEnteredTry"
-        val afterBucketLookupHelper = "froggoStoryDiagAfterBucketLookup"
         val beforeNotifyHelper = "froggoStoryDiagBeforeNotify"
         val afterNotifyCallHelper = "froggoStoryDiagAfterNotifyCall"
         val throwableHelper = "froggoStoryDiagThrowable"
-        val entrySubscriberStateHelper = "froggoStoryDiagEntrySubscriberState"
-        val notifySubscriberStateHelper = "froggoStoryDiagNotifySubscriberState"
+        val al1EnterHelper = "froggoStoryDiagAl1Enter"
+        val al1AfterStateStoreHelper = "froggoStoryDiagAl1AfterStateStore"
+        val al1ViewStateHelper = "froggoStoryDiagAl1ViewState"
+        val al1InitializedStateHelper = "froggoStoryDiagAl1InitializedState"
+        val al1InitialIndexHelper = "froggoStoryDiagAl1InitialIndex"
+        val al1BeforePagerUpdateHelper = "froggoStoryDiagAl1BeforePagerUpdate"
+        val al1AfterPagerUpdateHelper = "froggoStoryDiagAl1AfterPagerUpdate"
+        val al1InitializedGuardReturnHelper = "froggoStoryDiagAl1InitializedGuardReturn"
+        val al1BeforePrimaryA06Helper = "froggoStoryDiagAl1BeforePrimaryA06"
+        val al1AfterPrimaryA06Helper = "froggoStoryDiagAl1AfterPrimaryA06"
+        val al1BeforeFallbackA06Helper = "froggoStoryDiagAl1BeforeFallbackA06"
+        val al1AfterFallbackA06Helper = "froggoStoryDiagAl1AfterFallbackA06"
         addMarkerHelper(subscriberNullHelper, "AM0_SUBSCRIBER_NULL")
-        addMarkerHelper(afterEqualityBranchHelper, "AM0_AFTER_EQUALITY_BRANCH")
-        addMarkerHelper(afterTraceHelper, "AM0_AFTER_TRACE")
-        addMarkerHelper(enteredTryHelper, "AM0_ENTERED_TRY")
-        addMarkerHelper(afterBucketLookupHelper, "AM0_AFTER_BUCKET_LOOKUP")
         addMarkerHelper(beforeNotifyHelper, "AM0_BEFORE_NOTIFY")
         addMarkerHelper(afterNotifyCallHelper, "AM0_AFTER_NOTIFY_CALL")
+        addMarkerHelper(al1EnterHelper, "AL1_ENTER")
+        addMarkerHelper(al1AfterStateStoreHelper, "AL1_AFTER_AKY_STATE_STORE")
+        addMarkerHelper(al1BeforePagerUpdateHelper, "AL1_BEFORE_PAGER_UPDATE")
+        addMarkerHelper(al1AfterPagerUpdateHelper, "AL1_AFTER_PAGER_UPDATE")
+        addMarkerHelper(al1InitializedGuardReturnHelper, "AL1_INITIALIZED_GUARD_RETURN")
+        addMarkerHelper(al1BeforePrimaryA06Helper, "AL1_BEFORE_AKY_A06_PRIMARY")
+        addMarkerHelper(al1AfterPrimaryA06Helper, "AL1_AFTER_AKY_A06_PRIMARY")
+        addMarkerHelper(al1BeforeFallbackA06Helper, "AL1_BEFORE_AKY_A06_FALLBACK")
+        addMarkerHelper(al1AfterFallbackA06Helper, "AL1_AFTER_AKY_A06_FALLBACK")
 
         targetClass.methods.add(
             ImmutableMethod(
@@ -461,73 +522,87 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             },
         )
 
-        fun addSubscriberStateHelper(
-            methodName: String,
-            nullMarker: String,
-            nonNullMarker: String,
-            controllerTag: String,
-            subscriberTag: String,
-        ) {
-            targetClass.methods.add(
-                ImmutableMethod(
-                    targetClassType,
-                    methodName,
-                    listOf(
-                        ImmutableMethodParameter(targetClassType, null, null),
-                        ImmutableMethodParameter("LX/Al1;", null, null),
-                    ),
-                    "V",
-                    AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
-                    null,
-                    null,
-                    MutableMethodImplementation(5),
-                ).toMutable().apply {
-                    addInstructions(
-                        0,
-                        """
-                            invoke-static {p0}, Ljava/lang/System;->identityHashCode(Ljava/lang/Object;)I
-                            move-result v1
-                            invoke-static {v1}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
-                            move-result-object v1
-                            const-string v0, "$controllerTag"
-                            invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-
-                            if-nez p1, :froggo_diag_subscriber_nonnull
-                            const-string v1, "$nullMarker"
-                            const-string v0, "FroggoStoryDiag"
-                            invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-                            return-void
-
-                            :froggo_diag_subscriber_nonnull
-                            const-string v1, "$nonNullMarker"
-                            const-string v0, "FroggoStoryDiag"
-                            invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-                            invoke-static {p1}, Ljava/lang/System;->identityHashCode(Ljava/lang/Object;)I
-                            move-result v1
-                            invoke-static {v1}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
-                            move-result-object v1
-                            const-string v0, "$subscriberTag"
-                            invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-                            return-void
-                        """.trimIndent(),
-                    )
-                },
-            )
-        }
-
-        addSubscriberStateHelper(
-            entrySubscriberStateHelper,
-            "AM0_ENTRY_A05_NULL",
-            "AM0_ENTRY_A05_NONNULL",
-            "FroggoStoryDiagEntryAkQId",
-            "FroggoStoryDiagEntrySubId",
+        targetClass.methods.add(
+            ImmutableMethod(
+                targetClassType,
+                al1ViewStateHelper,
+                listOf(ImmutableMethodParameter("Ljava/lang/Object;", null, null)),
+                "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                null,
+                null,
+                MutableMethodImplementation(3),
+            ).toMutable().apply {
+                addInstructions(
+                    0,
+                    """
+                        if-nez p0, :froggo_diag_al1_view_nonnull
+                        const-string v1, "AL1_VIEW_NULL"
+                        goto :froggo_diag_al1_log_view
+                        :froggo_diag_al1_view_nonnull
+                        const-string v1, "AL1_VIEW_NONNULL"
+                        :froggo_diag_al1_log_view
+                        const-string v0, "FroggoStoryDiag"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                        return-void
+                    """.trimIndent(),
+                )
+            },
         )
-        addSubscriberStateHelper(
-            notifySubscriberStateHelper,
-            "AM0_NOTIFY_A05_NULL",
-            "AM0_NOTIFY_A05_NONNULL",
-            "FroggoStoryDiagNotifyId",
-            "FroggoStoryDiagNotifySubId",
+
+        targetClass.methods.add(
+            ImmutableMethod(
+                targetClassType,
+                al1InitializedStateHelper,
+                listOf(ImmutableMethodParameter("Z", null, null)),
+                "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                null,
+                null,
+                MutableMethodImplementation(3),
+            ).toMutable().apply {
+                addInstructions(
+                    0,
+                    """
+                        if-eqz p0, :froggo_diag_al1_initializing
+                        const-string v1, "AL1_ALREADY_INITIALIZED"
+                        goto :froggo_diag_al1_log_initialized
+                        :froggo_diag_al1_initializing
+                        const-string v1, "AL1_INITIALIZING"
+                        :froggo_diag_al1_log_initialized
+                        const-string v0, "FroggoStoryDiag"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                        return-void
+                    """.trimIndent(),
+                )
+            },
+        )
+
+        targetClass.methods.add(
+            ImmutableMethod(
+                targetClassType,
+                al1InitialIndexHelper,
+                listOf(ImmutableMethodParameter("I", null, null)),
+                "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                null,
+                null,
+                MutableMethodImplementation(3),
+            ).toMutable().apply {
+                addInstructions(
+                    0,
+                    """
+                        const-string v0, "FroggoStoryDiag"
+                        const-string v1, "AL1_INITIAL_INDEX"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                        invoke-static {p0}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
+                        move-result-object v1
+                        const-string v0, "FroggoStoryDiagInitialIndex"
+                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+                        return-void
+                    """.trimIndent(),
+                )
+            },
         )
 
         targetClass.methods.add(
@@ -551,98 +626,7 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
                         move-result v1
                         invoke-static {v1}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
                         move-result-object v1
-                        const-string v0, "FroggoStoryDiagSubId"
-                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-                        return-void
-                    """.trimIndent(),
-                )
-            },
-        )
-
-        targetClass.methods.add(
-            ImmutableMethod(
-                targetClassType,
-                compareStateHelper,
-                listOf(
-                    ImmutableMethodParameter(targetClassType, null, null),
-                    ImmutableMethodParameter("LX/Bsm;", null, null),
-                ),
-                "V",
-                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
-                null,
-                null,
-                MutableMethodImplementation(6),
-            ).toMutable().apply {
-                addInstructions(
-                    0,
-                    """
-                        invoke-static {p0}, Ljava/lang/System;->identityHashCode(Ljava/lang/Object;)I
-                        move-result v1
-                        invoke-static {v1}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
-                        move-result-object v1
-                        const-string v0, "FroggoStoryDiagAm0Id"
-                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-
-                        iget-object v2, p0, LX/AkQ;->A02:LX/Bsm;
-                        if-nez v2, :froggo_diag_a02_nonnull
-                        const-string v1, "CMP_A02_NULL"
-                        goto :froggo_diag_log_a02
-                        :froggo_diag_a02_nonnull
-                        const-string v1, "CMP_A02_NONNULL"
-                        :froggo_diag_log_a02
-                        const-string v0, "FroggoStoryDiag"
-                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-
-                        if-nez p1, :froggo_diag_selected_nonnull
-                        const-string v1, "CMP_SELECTED_NULL"
-                        goto :froggo_diag_log_selected
-                        :froggo_diag_selected_nonnull
-                        const-string v1, "CMP_SELECTED_NONNULL"
-                        :froggo_diag_log_selected
-                        const-string v0, "FroggoStoryDiag"
-                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-
-                        iget-object v2, p0, LX/AkQ;->A0Z:Ljava/util/concurrent/atomic/AtomicReference;
-                        invoke-virtual {v2}, Ljava/util/concurrent/atomic/AtomicReference;->get()Ljava/lang/Object;
-                        move-result-object v2
-                        if-nez v2, :froggo_diag_a0z_nonnull
-                        const-string v1, "CMP_A0Z_NULL"
-                        goto :froggo_diag_log_a0z
-                        :froggo_diag_a0z_nonnull
-                        const-string v1, "CMP_A0Z_NONNULL"
-                        :froggo_diag_log_a0z
-                        const-string v0, "FroggoStoryDiag"
-                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-
-                        if-ne v2, p1, :froggo_diag_a0z_diff
-                        const-string v1, "CMP_A0Z_SAME_SELECTED"
-                        goto :froggo_diag_log_a0z_identity
-                        :froggo_diag_a0z_diff
-                        const-string v1, "CMP_A0Z_DIFF_SELECTED"
-                        :froggo_diag_log_a0z_identity
-                        const-string v0, "FroggoStoryDiag"
-                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-
-                        iget-object v2, p0, LX/AkQ;->A02:LX/Bsm;
-                        if-ne v2, p1, :froggo_diag_a02_diff
-                        const-string v1, "CMP_A02_SAME_SELECTED"
-                        goto :froggo_diag_log_a02_identity
-                        :froggo_diag_a02_diff
-                        const-string v1, "CMP_A02_DIFF_SELECTED"
-                        :froggo_diag_log_a02_identity
-                        const-string v0, "FroggoStoryDiag"
-                        invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-
-                        iget-object v2, p0, LX/AkQ;->A0Y:Ljava/util/concurrent/atomic/AtomicBoolean;
-                        invoke-virtual {v2}, Ljava/util/concurrent/atomic/AtomicBoolean;->get()Z
-                        move-result v2
-                        if-eqz v2, :froggo_diag_a0y_false
-                        const-string v1, "CMP_A0Y_TRUE"
-                        goto :froggo_diag_log_a0y
-                        :froggo_diag_a0y_false
-                        const-string v1, "CMP_A0Y_FALSE"
-                        :froggo_diag_log_a0y
-                        const-string v0, "FroggoStoryDiag"
+                        const-string v0, "FroggoStoryDiagFragmentAkQId"
                         invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
                         return-void
                     """.trimIndent(),
@@ -678,6 +662,59 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             },
         )
 
+        // Instrument Al1 from higher offsets to lower offsets so every index still
+        // refers to the stock method. Entry is deliberately placed after the first
+        // stock instruction and all branch-state probes are helper calls, matching
+        // the marker mechanism that is already reliable in Am0.
+        diagStoryNotify.method.addInstructions(
+            al1FallbackA06CallIndex + 1,
+            "invoke-static {}, $targetClassType->$al1AfterFallbackA06Helper()V",
+        )
+        diagStoryNotify.method.addInstructions(
+            al1FallbackA06CallIndex,
+            "invoke-static {}, $targetClassType->$al1BeforeFallbackA06Helper()V",
+        )
+        diagStoryNotify.method.addInstructions(
+            al1PrimaryA06CallIndex + 1,
+            "invoke-static {}, $targetClassType->$al1AfterPrimaryA06Helper()V",
+        )
+        diagStoryNotify.method.addInstructions(
+            al1PrimaryA06CallIndex,
+            "invoke-static {}, $targetClassType->$al1BeforePrimaryA06Helper()V",
+        )
+        diagStoryNotify.method.addInstructions(
+            al1InitialIndexCallIndex + 2,
+            "invoke-static/range {v$al1InitialIndexRegister .. v$al1InitialIndexRegister}, $targetClassType->$al1InitialIndexHelper(I)V",
+        )
+        diagStoryNotify.method.addInstructions(
+            al1PagerUpdateCallIndex + 1,
+            "invoke-static {}, $targetClassType->$al1AfterPagerUpdateHelper()V",
+        )
+        diagStoryNotify.method.addInstructions(
+            al1PagerUpdateCallIndex,
+            "invoke-static {}, $targetClassType->$al1BeforePagerUpdateHelper()V",
+        )
+        diagStoryNotify.method.addInstructions(
+            al1InitializedGuardReturnIndex,
+            "invoke-static {}, $targetClassType->$al1InitializedGuardReturnHelper()V",
+        )
+        diagStoryNotify.method.addInstructions(
+            al1InitializedReadIndex + 1,
+            "invoke-static/range {v$al1InitializedRegister .. v$al1InitializedRegister}, $targetClassType->$al1InitializedStateHelper(Z)V",
+        )
+        diagStoryNotify.method.addInstructions(
+            al1ViewReadIndex + 1,
+            "invoke-static/range {v$al1ViewRegister .. v$al1ViewRegister}, $targetClassType->$al1ViewStateHelper(Ljava/lang/Object;)V",
+        )
+        diagStoryNotify.method.addInstructions(
+            al1StateStoreIndex + 1,
+            "invoke-static {}, $targetClassType->$al1AfterStateStoreHelper()V",
+        )
+        diagStoryNotify.method.addInstructions(
+            1,
+            "invoke-static {}, $targetClassType->$al1EnterHelper()V",
+        )
+
         // Insert higher offsets first so each index still refers to the stock method.
         // Every new flow marker is placed *after* a stock instruction rather than
         // before a branch target. This prevents existing labels from jumping over
@@ -691,28 +728,8 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             "invoke-static {}, $targetClassType->$afterNotifyCallHelper()V",
         )
         diagStoryPublishRunnable.method.addInstructions(
-            notifySubscriberReadIndex + 1,
-            "invoke-static {v$notifyControllerRegister, v$notifySubscriberRegister}, $targetClassType->$notifySubscriberStateHelper(${targetClassType}LX/Al1;)V",
-        )
-        diagStoryPublishRunnable.method.addInstructions(
             flowAnnotateIndex + 1,
             "invoke-static {}, $targetClassType->$beforeNotifyHelper()V",
-        )
-        diagStoryPublishRunnable.method.addInstructions(
-            bucketLookupIndex + 2,
-            "invoke-static {}, $targetClassType->$afterBucketLookupHelper()V",
-        )
-        diagStoryPublishRunnable.method.addInstructions(
-            tryEntryIndex + 1,
-            "invoke-static {}, $targetClassType->$enteredTryHelper()V",
-        )
-        diagStoryPublishRunnable.method.addInstructions(
-            traceCallIndex + 1,
-            "invoke-static {}, $targetClassType->$afterTraceHelper()V",
-        )
-        diagStoryPublishRunnable.method.addInstructions(
-            equalityBranchIndex + 1,
-            "invoke-static {}, $targetClassType->$afterEqualityBranchHelper()V",
         )
         diagStoryPublishRunnable.method.addInstructions(
             compareA02ReadIndex + 3,
@@ -721,10 +738,6 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
         diagStoryPublishRunnable.method.addInstructions(
             subscriberNullPathIndex,
             "invoke-static {}, $targetClassType->$subscriberNullHelper()V",
-        )
-        diagStoryPublishRunnable.method.addInstructions(
-            subscriberReadIndex + 1,
-            "invoke-static {v$entryControllerRegister, v$entrySubscriberRegister}, $targetClassType->$entrySubscriberStateHelper(${targetClassType}LX/Al1;)V",
         )
         diagStoryFragmentCreate.method.addInstructions(
             subscriberSetIndex + 1,
@@ -763,15 +776,6 @@ val diagnoseFacebookAds573DStoryPublicationPatch = bytecodePatch(
             """
                 const-string v0, "FroggoStoryDiag"
                 const-string v1, "AKQ_REPLAY_CACHED"
-                invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-                move-result v0
-            """.trimIndent(),
-        )
-        diagStoryNotify.method.addInstructions(
-            0,
-            """
-                const-string v0, "FroggoStoryDiag"
-                const-string v1, "AL1_NOTIFY"
                 invoke-static {v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
                 move-result v0
             """.trimIndent(),
