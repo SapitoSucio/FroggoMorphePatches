@@ -45,8 +45,8 @@ private val automaticStalePostRefresh = Fingerprint(
 @Suppress("unused")
 val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     name = "Block Facebook automatic refresh (573)",
-    description = "Suppresses lifecycle feed refresh while preserving explicit refresh paths.",
-    default = true,
+    description = "Experimental: suppresses lifecycle feed refresh while preserving explicit refresh paths; currently unstable on some devices.",
+    default = false,
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
 
