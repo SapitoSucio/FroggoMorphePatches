@@ -1,3 +1,9 @@
+## [1.2.0-dev.25](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.24...v1.2.0-dev.25) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** block stale tab data refresh ([a40d9cc](https://github.com/SapitoSucio/FroggoMorphePatches/commit/a40d9ccf68ecb740d5f17aba44164d40eb43fc7f))
+
 ## [1.2.0-dev.24](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.23...v1.2.0-dev.24) (2026-08-29)
 
 ### 🐛 Bug Fixes
