@@ -1,3 +1,9 @@
+## [1.2.0-dev.23](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.22...v1.2.0-dev.23) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** suppress main feed warm refresh ([7fc47af](https://github.com/SapitoSucio/FroggoMorphePatches/commit/7fc47af5bdc220d481f798f6a0cee6ceb7674cdb))
+
 ## [1.2.0-dev.22](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.21...v1.2.0-dev.22) (2026-08-29)
 
 ### 🐛 Bug Fixes
