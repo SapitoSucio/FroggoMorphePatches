@@ -13,10 +13,10 @@
  * shared refreshForRevisit method caused VerifyError crashes on some devices.
  *
  * Keep X.2UL completely stock. Neutralize only automatic lifecycle decisions:
- * foreground revisit, onResume revisit, hot-start/tab visibility refresh,
- * warm-start refresh on Main Feed entry, the onPause stale-post worker, and the
- * persisted FeedBackgroundPrefetch WorkManager job. Activity-result, fullscreen
- * close and manual refresh remain untouched.
+ * foreground revisit, onResume revisit, hot-start/tab visibility refresh, the
+ * onPause stale-post worker, and the stale NewsFeedTabDataFetch AUTO_REFRESH.
+ * Activity-result, fullscreen close, cold initialization and manual refresh remain
+ * untouched.
  */
 package app.froggo.patches.facebook.refresh
 
@@ -47,11 +47,11 @@ private val newsFeedOnResume = Fingerprint(
     },
 )
 
-private val mainFeedOnUserEnteredFeed = Fingerprint(
+private val newsFeedTabDataFetchDispatch = Fingerprint(
     returnType = "V",
-    parameters = emptyList(),
+    parameters = listOf("LX/4RQ;", "LX/cbp;"),
     custom = { method, classDef ->
-        classDef.type == "LX/1uS;" && method.name == "A0E"
+        classDef.type == "LX/4RQ;" && method.name == "A00"
     },
 )
 
@@ -71,18 +71,10 @@ private val newsFeedOnPauseStaleRefresh = Fingerprint(
     },
 )
 
-private val feedBackgroundPrefetchScheduler = Fingerprint(
-    returnType = "V",
-    parameters = listOf("J"),
-    custom = { method, classDef ->
-        classDef.type == "LX/87p;" && method.name == "A01"
-    },
-)
-
 @Suppress("unused")
 val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     name = "Block Facebook automatic refresh (573)",
-    description = "Experimental: blocks automatic foreground/hot-start/warm-start/stale-post and background-prefetch feed refresh while preserving manual, activity-result and fullscreen refresh paths.",
+    description = "Experimental: blocks automatic foreground/hot-start/stale-tab/stale-post feed refresh while preserving cold initialization, manual, activity-result and fullscreen refresh paths.",
     default = false,
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
@@ -137,27 +129,52 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
             """.trimIndent(),
         )
 
-        val mainFeedEntryInstructions = mainFeedOnUserEnteredFeed.method.implementation!!.instructions
-        require(mainFeedEntryInstructions.firstOrNull()?.opcode == Opcode.INVOKE_SUPER) {
-            "Unexpected MainFeedCSRDataLoaderAdapter.onUserEnteredFeed prologue"
+        val tabDataFetchInstructions = newsFeedTabDataFetchDispatch.method.implementation!!.instructions
+        val tabDataAutoRefreshCalls = tabDataFetchInstructions.withIndex().mapNotNull { (index, instruction) ->
+            val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+            if (
+                reference?.definingClass == "LX/cbp;" &&
+                reference.name == "A0M" &&
+                reference.parameterTypes == listOf("LX/1cP;", "Ljava/lang/String;")
+            ) {
+                index
+            } else {
+                null
+            }
+        }
+        require(tabDataAutoRefreshCalls.size == 1) {
+            "Expected exactly one NewsFeedTabDataFetch AUTO_REFRESH dispatch"
+        }
+        val tabDataAutoRefreshCallIndex = tabDataAutoRefreshCalls.single()
+        val tabDataAutoRefreshCall = tabDataFetchInstructions[tabDataAutoRefreshCallIndex] as? FiveRegisterInstruction
+            ?: error("Expected fixed-register NewsFeedTabDataFetch AUTO_REFRESH invoke")
+        require(
+            tabDataAutoRefreshCall.registerCount == 3 &&
+                tabDataAutoRefreshCall.registerC == 3 &&
+                tabDataAutoRefreshCall.registerD == 0 &&
+                tabDataAutoRefreshCall.registerE == 1,
+        ) {
+            "Unexpected NewsFeedTabDataFetch AUTO_REFRESH registers"
         }
 
-        // BaseFeedCSRDataLoaderAdapter.onUserEnteredFeed immediately evaluates
-        // maybeRefreshForWarmStart using the stored last-interaction timestamp.
-        // Refresh that timestamp immediately before the stock super call, making
-        // the time-away delta approximately zero. Empty-feed initialization still
-        // works because that branch is evaluated independently of the time-away gate.
-        mainFeedOnUserEnteredFeed.method.addInstructions(
-            0,
+        // NewsFeedTabDataFetch is mounted by NewsFeedFragment. Its delegate's A0A()
+        // returns stale (3) after a MobileConfig TTL; the generic DataFetch framework
+        // then calls emitter.Aok(2), which ultimately reaches this initialized-feed
+        // branch and unconditionally forceRefresh(AUTO_REFRESH, "NewsFeedTabDataFetchSpec").
+        //
+        // Preserve the stock uninitialized branch (cold feed initialization). When
+        // control reaches this callsite the data loader is already initialized, so
+        // run the same common CqR callback that stock code executes after the refresh
+        // and return without starting a new head load. No labels or large-method edits.
+        newsFeedTabDataFetchDispatch.method.addInstructions(
+            tabDataAutoRefreshCallIndex,
             """
-                iget-object v0, p0, LX/cbp;->A09:LX/3P2;
-                invoke-static {v0}, LX/3P2;->A0e(LX/3P2;)Ljava/lang/Object;
+                iget-object v1, p0, LX/4RQ;->A0A:LX/1rC;
+                iget-object v0, p0, LX/4RQ;->A03:Lcom/facebook/api/feedtype/FeedType;
+                invoke-virtual {v1, v0}, LX/1rC;->A01(Lcom/facebook/api/feedtype/FeedType;)LX/3yT;
                 move-result-object v0
-                check-cast v0, LX/27E;
-                iget-object v1, p0, LX/cbp;->A08:LX/3P2;
-                invoke-static {v1}, LX/3P2;->A02(LX/3P2;)J
-                move-result-wide v1
-                invoke-virtual {v0, v1, v2}, LX/27E;->A03(J)V
+                invoke-interface {v0}, LX/3yT;->CqR()V
+                return-void
             """.trimIndent(),
         )
 
@@ -230,17 +247,5 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
             "const/4 v${pauseStaleRefreshCall.registerD}, 0x7",
         )
 
-        // C87p.A01(long) exists only to enqueue the unique periodic WorkManager job
-        // "FeedBackgroundPrefetch" (including Casper-predicted scheduling). Logcat
-        // confirmed this worker wakes Facebook in the background and feeds new CSR
-        // stories before the user returns. Cancel any already-persisted unique work
-        // and reject every future scheduling attempt. APS() is the stock cancel path.
-        feedBackgroundPrefetchScheduler.method.addInstructions(
-            0,
-            """
-                invoke-virtual {p0}, LX/87p;->APS()V
-                return-void
-            """.trimIndent(),
-        )
     }
 }
