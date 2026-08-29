@@ -1,3 +1,9 @@
+## [1.2.0-dev.24](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.23...v1.2.0-dev.24) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** cancel feed background prefetch ([9ef38d1](https://github.com/SapitoSucio/FroggoMorphePatches/commit/9ef38d1a441f016efa542763e7b793dd39ffabbf))
+
 ## [1.2.0-dev.23](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.22...v1.2.0-dev.23) (2026-08-29)
 
 ### 🐛 Bug Fixes
