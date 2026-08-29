@@ -1,3 +1,9 @@
+## [1.2.0-dev.20](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.19...v1.2.0-dev.20) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** avoid empty refresh labels ([744f3f2](https://github.com/SapitoSucio/FroggoMorphePatches/commit/744f3f2bc667b718cba844b27da61da4b1c70e82))
+
 ## [1.2.0-dev.19](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.18...v1.2.0-dev.19) (2026-08-29)
 
 ### 🐛 Bug Fixes

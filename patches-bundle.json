@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-29T07:47:30",
-  "description": "## [1.2.0-dev.19](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.18...v1.2.0-dev.19) (2026-08-29)\n\n### 🐛 Bug Fixes\n\n* **facebook:** isolate automatic refresh callsites ([0542975](https://github.com/SapitoSucio/FroggoMorphePatches/commit/0542975284616c11087eacc0e5bb9f226cf79c38))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.19/patches-1.2.0-dev.19.mpp",
+  "created_at": "2026-08-29T07:57:50",
+  "description": "## [1.2.0-dev.20](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.19...v1.2.0-dev.20) (2026-08-29)\n\n### 🐛 Bug Fixes\n\n* **facebook:** avoid empty refresh labels ([744f3f2](https://github.com/SapitoSucio/FroggoMorphePatches/commit/744f3f2bc667b718cba844b27da61da4b1c70e82))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.20/patches-1.2.0-dev.20.mpp",
   "signature_download_url": "",
-  "version": "1.2.0-dev.19"
+  "version": "1.2.0-dev.20"
 }
