@@ -20,9 +20,10 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 /*
  * DEV-ONLY diagnostic split for Facebook 573 ads.
  *
- * Keep Block Facebook ads (573) disabled while testing these patches. Each
- * diagnostic patch owns a disjoint subset of the stable patch so runtime A/B
- * tests can identify the exact family that poisons Story viewer state.
+ * Keep the Facebook 573 Feed/Reels ad patches disabled while testing these
+ * diagnostics. Each diagnostic patch owns a disjoint subset of the stable
+ * patches so runtime A/B tests can identify the exact family that poisons
+ * Story viewer state.
  */
 private fun diagRedexRunnable(originalName: String) = Fingerprint(
     returnType = "V",
