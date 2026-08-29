@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.24...v1.2.0) (2026-08-29)
+
+### ✨ New Features
+
+* **facebook:** promote validated ad patches ([a8621cf](https://github.com/SapitoSucio/FroggoMorphePatches/commit/a8621cfc6f1c6a1fb49af764f0914f3b6c7066d1))
+
 ## [1.1.24](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.23...v1.1.24) (2026-08-27)
 
 ### 🐛 Bug Fixes

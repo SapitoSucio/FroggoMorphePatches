@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-27T07:25:52",
-  "description": "## [1.1.24](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.23...v1.1.24) (2026-08-27)\n\n### 🐛 Bug Fixes\n\n* **facebook:** preserve partial story model state ([41f7d42](https://github.com/SapitoSucio/FroggoMorphePatches/commit/41f7d42348801f581649fbbe1a11ef5c50ddf57e))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.1.24/patches-1.1.24.mpp",
+  "created_at": "2026-08-29T22:27:12",
+  "description": "## [1.2.0](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.24...v1.2.0) (2026-08-29)\n\n### ✨ New Features\n\n* **facebook:** promote validated ad patches ([a8621cf](https://github.com/SapitoSucio/FroggoMorphePatches/commit/a8621cfc6f1c6a1fb49af764f0914f3b6c7066d1))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0/patches-1.2.0.mpp",
   "signature_download_url": "",
-  "version": "1.1.24"
+  "version": "1.2.0"
 }
