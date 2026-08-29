@@ -1,9 +1,6 @@
 name: Open a PR to main
 
 on:
-  push:
-    branches:
-      - dev
   workflow_dispatch:
 
 permissions:
