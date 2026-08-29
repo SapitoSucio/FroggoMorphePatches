@@ -1,3 +1,9 @@
+## [1.2.0-dev.26](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.25...v1.2.0-dev.26) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** block automatic CSR response refresh ([95f623e](https://github.com/SapitoSucio/FroggoMorphePatches/commit/95f623e22a1b4a190e9e9ba9b3c05f613e079b42))
+
 ## [1.2.0-dev.25](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.24...v1.2.0-dev.25) (2026-08-29)
 
 ### 🐛 Bug Fixes
