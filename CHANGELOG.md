@@ -1,3 +1,9 @@
+## [1.2.0-dev.19](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.18...v1.2.0-dev.19) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** isolate automatic refresh callsites ([0542975](https://github.com/SapitoSucio/FroggoMorphePatches/commit/0542975284616c11087eacc0e5bb9f226cf79c38))
+
 ## [1.2.0-dev.18](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.17...v1.2.0-dev.18) (2026-08-29)
 
 ### 🐛 Bug Fixes

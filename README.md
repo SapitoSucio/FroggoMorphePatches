@@ -15,7 +15,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.2.0-dev.18](https://github.com/SapitoSucio/FroggoMorphePatches/releases/tag/v1.2.0-dev.18)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;4 patches total
+> **[v1.2.0-dev.19](https://github.com/SapitoSucio/FroggoMorphePatches/releases/tag/v1.2.0-dev.19)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;4 patches total
 <details open>
 <summary>📦 Facebook&nbsp;&nbsp;•&nbsp;&nbsp;4 patches</summary>
 <br>
@@ -30,7 +30,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 | [Block Facebook Feed ads (573)](#block-facebook-feed-ads-573) | Blocks sponsored and promoted units in the Facebook 573 Feed without touching Reels or Stories. |  |
 | [Block Facebook Reels ads (573)](#block-facebook-reels-ads-573) | Blocks sponsored Reels in the swipe feed plus Reels/video banners, video ads, and commercial breaks. |  |
 | [Block Facebook Story ads (573)](#block-facebook-story-ads-573) | Filters Story ad buckets only at the concrete X68 provider return boundary. |  |
-| [Block Facebook automatic refresh (573)](#block-facebook-automatic-refresh-573) | Experimental: suppresses lifecycle feed refresh while preserving explicit refresh paths; currently unstable on some devices. |  |
+| [Block Facebook automatic refresh (573)](#block-facebook-automatic-refresh-573) | Experimental: blocks only foreground/onResume feed revisit refresh while preserving manual, tab, activity-result and fullscreen refresh paths. |  |
 
 </details>
 
