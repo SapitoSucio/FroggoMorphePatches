@@ -1,3 +1,9 @@
+## [1.2.0-dev.18](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.17...v1.2.0-dev.18) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** mark refresh patch unstable ([495247c](https://github.com/SapitoSucio/FroggoMorphePatches/commit/495247ce11cb1e933d9235fba1d0c2344a8b9ffc))
+
 ## [1.2.0-dev.17](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.16...v1.2.0-dev.17) (2026-08-29)
 
 ### ✨ New Features

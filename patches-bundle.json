@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-29T07:05:11",
-  "description": "## [1.2.0-dev.17](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.16...v1.2.0-dev.17) (2026-08-29)\n\n### ✨ New Features\n\n* **facebook:** split feed and reels ad patches ([203df53](https://github.com/SapitoSucio/FroggoMorphePatches/commit/203df5386a180c4bc66270f3d8c9488cdb898f72))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.17/patches-1.2.0-dev.17.mpp",
+  "created_at": "2026-08-29T07:29:53",
+  "description": "## [1.2.0-dev.18](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.17...v1.2.0-dev.18) (2026-08-29)\n\n### 🐛 Bug Fixes\n\n* **facebook:** mark refresh patch unstable ([495247c](https://github.com/SapitoSucio/FroggoMorphePatches/commit/495247ce11cb1e933d9235fba1d0c2344a8b9ffc))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.18/patches-1.2.0-dev.18.mpp",
   "signature_download_url": "",
-  "version": "1.2.0-dev.17"
+  "version": "1.2.0-dev.18"
 }
