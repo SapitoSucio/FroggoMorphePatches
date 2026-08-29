@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-29T06:11:07",
-  "description": "## [1.2.0-dev.16](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.15...v1.2.0-dev.16) (2026-08-29)\n\n### ✨ New Features\n\n* **facebook:** trace story notify internals ([d296b61](https://github.com/SapitoSucio/FroggoMorphePatches/commit/d296b611efcb1d2619935fd8d83e8eff7eb7a468))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.16/patches-1.2.0-dev.16.mpp",
+  "created_at": "2026-08-29T07:05:11",
+  "description": "## [1.2.0-dev.17](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.16...v1.2.0-dev.17) (2026-08-29)\n\n### ✨ New Features\n\n* **facebook:** split feed and reels ad patches ([203df53](https://github.com/SapitoSucio/FroggoMorphePatches/commit/203df5386a180c4bc66270f3d8c9488cdb898f72))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.17/patches-1.2.0-dev.17.mpp",
   "signature_download_url": "",
-  "version": "1.2.0-dev.16"
+  "version": "1.2.0-dev.17"
 }

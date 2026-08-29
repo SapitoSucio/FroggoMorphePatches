@@ -1,3 +1,9 @@
+## [1.2.0-dev.17](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.16...v1.2.0-dev.17) (2026-08-29)
+
+### ✨ New Features
+
+* **facebook:** split feed and reels ad patches ([203df53](https://github.com/SapitoSucio/FroggoMorphePatches/commit/203df5386a180c4bc66270f3d8c9488cdb898f72))
+
 ## [1.2.0-dev.16](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.15...v1.2.0-dev.16) (2026-08-29)
 
 ### ✨ New Features
