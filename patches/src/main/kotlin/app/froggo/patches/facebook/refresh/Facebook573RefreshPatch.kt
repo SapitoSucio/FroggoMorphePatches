@@ -71,6 +71,14 @@ private val newsFeedOnPauseStaleRefresh = Fingerprint(
     },
 )
 
+private val mainFeedNetworkResponse = Fingerprint(
+    returnType = "V",
+    parameters = listOf("Lcom/google/common/collect/ImmutableList;", "LX/1bF;"),
+    custom = { method, classDef ->
+        classDef.type == "LX/1wV;" && method.name == "CNG"
+    },
+)
+
 @Suppress("unused")
 val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     name = "Block Facebook automatic refresh (573)",
@@ -80,6 +88,29 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
 
     execute {
+        // Automatic causes can still reach the MainFeed network-response boundary
+        // after the lifecycle/tab callsite guards. Once the loader is initialized,
+        // CNG passes that response to the CSR coordinator, which adds/re-vends it;
+        // this is enough to re-materialize the visible Feed even when the pool size
+        // does not change. Drop only the five automatic causes at this concrete main
+        // Feed boundary. Initialization and manual/network-error paths are untouched.
+        mainFeedNetworkResponse.method.addInstructions(
+            0,
+            """
+                iget-object v0, p2, LX/1bF;->A03:LX/1bD;
+                iget-object v0, v0, LX/1bD;->A02:LX/1an;
+                invoke-virtual {v0}, LX/1an;->A00()Z
+                move-result v0
+                if-eqz v0, :froggo_refresh573_keep_network_response
+                invoke-virtual {p0}, LX/cbp;->A0U()Z
+                move-result v0
+                if-eqz v0, :froggo_refresh573_keep_network_response
+                return-void
+
+                :froggo_refresh573_keep_network_response
+            """.trimIndent(),
+        )
+
         val foregroundInstructions = newsFeedOnAppForeground.method.implementation!!.instructions
         val foregroundRefreshCalls = foregroundInstructions.withIndex().mapNotNull { (index, instruction) ->
             val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
