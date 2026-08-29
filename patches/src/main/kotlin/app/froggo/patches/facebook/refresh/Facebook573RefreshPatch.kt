@@ -11,7 +11,7 @@
  */
 package app.froggo.patches.facebook.refresh
 
-import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
+import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
@@ -48,7 +48,7 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     description = "Suppresses lifecycle feed refresh while preserving explicit refresh paths.",
     default = true,
 ) {
-    compatibleWith(COMPATIBILITY_FACEBOOK_573)
+    compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
 
     execute {
         automaticStalePostRefresh.method.addInstructions(

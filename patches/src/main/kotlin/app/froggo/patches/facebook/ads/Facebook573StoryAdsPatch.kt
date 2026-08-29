@@ -13,19 +13,16 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 
 /*
- * Pre-release only: this file lives on the dev branch and is intentionally
- * absent from main/stable.
- *
  * Facebook 573.0.0.37.74 / 473623755:
  *
  * AmP=false removed the X68 Story Ads provider entirely and broke its lifecycle.
- * The previous provider-boundary experiment preserved X68 but injected a helper
+ * The previous provider-boundary approach preserved X68 but injected a helper
  * call into AkQ.A00 after every provider B46(...), including the initial
  * AkS/AkT/AkV pass that runs before X68 exists. Cold-start logging showed that
  * the first Story can fail before deferred/X68 initialization, so this variant
  * leaves AkQ.A00 completely stock.
  *
- * AuI and WXO are the two concrete X68 implementations. This experiment lets
+ * AuI and WXO are the two concrete X68 implementations. This patch lets
  * each provider execute its stock B46(...) fully, then removes only C9XO from
  * the provider's own normal return value. Downstream AkT/AkV/WUB therefore see
  * an ad-free collection, while the early AkQ publication path is untouched.
@@ -57,7 +54,7 @@ private val storyAdsWXO = Fingerprint(
 @Suppress("unused")
 val blockFacebookStoryAds573Patch = bytecodePatch(
     name = "Block Facebook Story ads (573)",
-    description = "Pre-release experiment: filters Story ad buckets only at the concrete X68 provider return boundary.",
+    description = "Filters Story ad buckets only at the concrete X68 provider return boundary.",
     default = false,
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
