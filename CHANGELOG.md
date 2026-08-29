@@ -1,3 +1,9 @@
+## [1.2.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.1...v1.2.2) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **release:** stop failing backmerge workflow ([a23b4c4](https://github.com/SapitoSucio/FroggoMorphePatches/commit/a23b4c46b764e532efa095f5e73327e9e833b3e9))
+
 ## [1.2.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0...v1.2.1) (2026-08-29)
 
 ### 🐛 Bug Fixes
