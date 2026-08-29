@@ -95,8 +95,8 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
         newsFeedOnResume.method.addInstructions(
             resumeCallIndex,
             """
-                const/4 v16, 0x0
-                const/4 v21, 0x0
+                move/from16 v16, v2
+                move/from16 v21, v2
             """.trimIndent(),
         )
     }
