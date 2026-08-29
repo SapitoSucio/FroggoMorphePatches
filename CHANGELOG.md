@@ -1,3 +1,9 @@
+## [1.2.0-dev.27](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.26...v1.2.0-dev.27) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** use encodable refresh guard registers ([9597008](https://github.com/SapitoSucio/FroggoMorphePatches/commit/959700823f739670716476fddad7c9ff9bcd7a4c))
+
 ## [1.2.0-dev.26](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.25...v1.2.0-dev.26) (2026-08-29)
 
 ### 🐛 Bug Fixes
