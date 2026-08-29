@@ -1,3 +1,9 @@
+## [1.2.0-dev.22](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.21...v1.2.0-dev.22) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** cover hot start stale refresh ([8937947](https://github.com/SapitoSucio/FroggoMorphePatches/commit/8937947ab7f23d05b99dbb8b7162b6e95de81934))
+
 ## [1.2.0-dev.21](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.20...v1.2.0-dev.21) (2026-08-29)
 
 ### 🐛 Bug Fixes

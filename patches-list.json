@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.2.0-dev.21",
+  "version": "1.2.0-dev.22",
   "patches": [
     {
       "name": "Block Facebook Feed ads (573)",
@@ -88,7 +88,7 @@
     },
     {
       "name": "Block Facebook automatic refresh (573)",
-      "description": "Experimental: blocks only foreground/onResume feed revisit refresh while preserving manual, tab, activity-result and fullscreen refresh paths.",
+      "description": "Experimental: blocks automatic foreground/hot-start/stale-post feed refresh while preserving manual, activity-result and fullscreen refresh paths.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": [
