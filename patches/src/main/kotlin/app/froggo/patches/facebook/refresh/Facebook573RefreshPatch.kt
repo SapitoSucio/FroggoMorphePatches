@@ -14,8 +14,9 @@
  *
  * Keep X.2UL completely stock. Neutralize only automatic lifecycle decisions:
  * foreground revisit, onResume revisit, hot-start/tab visibility refresh,
- * warm-start refresh on Main Feed entry, and the onPause stale-post worker.
- * Activity-result, fullscreen close and manual refresh remain untouched.
+ * warm-start refresh on Main Feed entry, the onPause stale-post worker, and the
+ * persisted FeedBackgroundPrefetch WorkManager job. Activity-result, fullscreen
+ * close and manual refresh remain untouched.
  */
 package app.froggo.patches.facebook.refresh
 
@@ -70,10 +71,18 @@ private val newsFeedOnPauseStaleRefresh = Fingerprint(
     },
 )
 
+private val feedBackgroundPrefetchScheduler = Fingerprint(
+    returnType = "V",
+    parameters = listOf("J"),
+    custom = { method, classDef ->
+        classDef.type == "LX/87p;" && method.name == "A01"
+    },
+)
+
 @Suppress("unused")
 val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     name = "Block Facebook automatic refresh (573)",
-    description = "Experimental: blocks automatic foreground/hot-start/warm-start/stale-post feed refresh while preserving manual, activity-result and fullscreen refresh paths.",
+    description = "Experimental: blocks automatic foreground/hot-start/warm-start/stale-post and background-prefetch feed refresh while preserving manual, activity-result and fullscreen refresh paths.",
     default = false,
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
@@ -219,6 +228,19 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
         newsFeedOnPauseStaleRefresh.method.addInstructions(
             pauseStaleRefreshCallIndex,
             "const/4 v${pauseStaleRefreshCall.registerD}, 0x7",
+        )
+
+        // C87p.A01(long) exists only to enqueue the unique periodic WorkManager job
+        // "FeedBackgroundPrefetch" (including Casper-predicted scheduling). Logcat
+        // confirmed this worker wakes Facebook in the background and feeds new CSR
+        // stories before the user returns. Cancel any already-persisted unique work
+        // and reject every future scheduling attempt. APS() is the stock cancel path.
+        feedBackgroundPrefetchScheduler.method.addInstructions(
+            0,
+            """
+                invoke-virtual {p0}, LX/87p;->APS()V
+                return-void
+            """.trimIndent(),
         )
     }
 }
