@@ -22,9 +22,8 @@ import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573_EXPERIMENT
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private val newsFeedOnAppForeground = Fingerprint(
@@ -61,15 +60,18 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
             "Expected exactly one refreshForRevisit call in NewsFeedFragment.A0n"
         }
         val foregroundCallIndex = foregroundRefreshCalls.single()
+        val foregroundCall = foregroundInstructions[foregroundCallIndex] as? RegisterRangeInstruction
+            ?: error("Expected range invoke for NewsFeedFragment.A0n refreshForRevisit")
+        require(foregroundCall.startRegister == 1 && foregroundCall.registerCount == 7) {
+            "Unexpected NewsFeedFragment.A0n refreshForRevisit register range"
+        }
 
-        // The return value is unused in A0n(), so jump over the stock call only.
-        newsFeedOnAppForeground.method.addInstructions(
-            foregroundCallIndex + 1,
-            ":froggo_refresh573_after_app_foreground",
-        )
+        // Keep refreshForRevisit stock, but neutralize its explicit-refresh gate.
+        // In this callsite z/z2/z3 are already false; forcing z4=false makes the
+        // method return false without starting a revisit refresh.
         newsFeedOnAppForeground.method.addInstructions(
             foregroundCallIndex,
-            "goto :froggo_refresh573_after_app_foreground",
+            "const/4 v7, 0x0",
         )
 
         val resumeInstructions = newsFeedOnResume.method.implementation!!.instructions
@@ -81,24 +83,20 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
             "Expected exactly one refreshForRevisit call in NewsFeedFragment.onResume"
         }
         val resumeCallIndex = resumeRefreshCalls.single()
-        require(resumeInstructions[resumeCallIndex + 1].opcode == Opcode.MOVE_RESULT) {
-            "Unexpected refreshForRevisit result sequence in NewsFeedFragment.onResume"
+        val resumeCall = resumeInstructions[resumeCallIndex] as? RegisterRangeInstruction
+            ?: error("Expected range invoke for NewsFeedFragment.onResume refreshForRevisit")
+        require(resumeCall.startRegister == 15 && resumeCall.registerCount == 7) {
+            "Unexpected NewsFeedFragment.onResume refreshForRevisit register range"
         }
-        val resumeResultRegister =
-            (resumeInstructions[resumeCallIndex + 1] as? OneRegisterInstruction)?.registerA
-                ?: error("Could not resolve onResume refresh result register")
 
-        // onResume consumes the boolean result after the call. Preserve that control
-        // flow by supplying false, then jump over both invoke + move-result.
-        newsFeedOnResume.method.addInstructions(
-            resumeCallIndex + 2,
-            ":froggo_refresh573_after_on_resume",
-        )
+        // Keep the stock invoke + move-result sequence. Setting z=false and z4=false
+        // makes the normal refreshForRevisit path return false without refreshing,
+        // while avoiding labels, register remapping or edits inside X.2UL itself.
         newsFeedOnResume.method.addInstructions(
             resumeCallIndex,
             """
-                const/4 v$resumeResultRegister, 0x0
-                goto :froggo_refresh573_after_on_resume
+                const/4 v16, 0x0
+                const/4 v21, 0x0
             """.trimIndent(),
         )
     }
