@@ -13,9 +13,9 @@
  * shared refreshForRevisit method caused VerifyError crashes on some devices.
  *
  * Keep X.2UL completely stock. Neutralize only automatic lifecycle decisions:
- * foreground revisit, onResume revisit, hot-start/tab visibility refresh, and
- * the onPause stale-post refresh worker. Activity-result, fullscreen close and
- * manual refresh remain untouched.
+ * foreground revisit, onResume revisit, hot-start/tab visibility refresh,
+ * warm-start refresh on Main Feed entry, and the onPause stale-post worker.
+ * Activity-result, fullscreen close and manual refresh remain untouched.
  */
 package app.froggo.patches.facebook.refresh
 
@@ -46,6 +46,14 @@ private val newsFeedOnResume = Fingerprint(
     },
 )
 
+private val mainFeedOnUserEnteredFeed = Fingerprint(
+    returnType = "V",
+    parameters = emptyList(),
+    custom = { method, classDef ->
+        classDef.type == "LX/1uS;" && method.name == "A0E"
+    },
+)
+
 private val newsFeedVisibilityChanged = Fingerprint(
     returnType = "V",
     parameters = listOf("Z", "Z"),
@@ -65,7 +73,7 @@ private val newsFeedOnPauseStaleRefresh = Fingerprint(
 @Suppress("unused")
 val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     name = "Block Facebook automatic refresh (573)",
-    description = "Experimental: blocks automatic foreground/hot-start/stale-post feed refresh while preserving manual, activity-result and fullscreen refresh paths.",
+    description = "Experimental: blocks automatic foreground/hot-start/warm-start/stale-post feed refresh while preserving manual, activity-result and fullscreen refresh paths.",
     default = false,
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
@@ -117,6 +125,30 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
             """
                 move/from16 v16, v2
                 move/from16 v21, v2
+            """.trimIndent(),
+        )
+
+        val mainFeedEntryInstructions = mainFeedOnUserEnteredFeed.method.implementation!!.instructions
+        require(mainFeedEntryInstructions.firstOrNull()?.opcode == Opcode.INVOKE_SUPER) {
+            "Unexpected MainFeedCSRDataLoaderAdapter.onUserEnteredFeed prologue"
+        }
+
+        // BaseFeedCSRDataLoaderAdapter.onUserEnteredFeed immediately evaluates
+        // maybeRefreshForWarmStart using the stored last-interaction timestamp.
+        // Refresh that timestamp immediately before the stock super call, making
+        // the time-away delta approximately zero. Empty-feed initialization still
+        // works because that branch is evaluated independently of the time-away gate.
+        mainFeedOnUserEnteredFeed.method.addInstructions(
+            0,
+            """
+                iget-object v0, p0, LX/cbp;->A09:LX/3P2;
+                invoke-static {v0}, LX/3P2;->A0e(LX/3P2;)Ljava/lang/Object;
+                move-result-object v0
+                check-cast v0, LX/27E;
+                iget-object v1, p0, LX/cbp;->A08:LX/3P2;
+                invoke-static {v1}, LX/3P2;->A02(LX/3P2;)J
+                move-result-wide v1
+                invoke-virtual {v0, v1, v2}, LX/27E;->A03(J)V
             """.trimIndent(),
         )
 
