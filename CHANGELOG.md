@@ -1,3 +1,9 @@
+## [1.2.0-dev.28](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.27...v1.2.0-dev.28) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** block background warm refresh ([d569cea](https://github.com/SapitoSucio/FroggoMorphePatches/commit/d569ceadddef1d34804f6d35ebb3a750d50438bf))
+
 ## [1.2.0-dev.27](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.26...v1.2.0-dev.27) (2026-08-29)
 
 ### 🐛 Bug Fixes
