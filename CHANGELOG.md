@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0...v1.2.1) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** promote validated refresh patch ([9b1fa3f](https://github.com/SapitoSucio/FroggoMorphePatches/commit/9b1fa3f9d816ab447272d00dc3fa465d9b1cd4a3))
+
 ## [1.2.0](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.24...v1.2.0) (2026-08-29)
 
 ### ✨ New Features
