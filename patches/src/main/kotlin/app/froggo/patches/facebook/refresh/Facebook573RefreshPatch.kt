@@ -97,12 +97,14 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
         mainFeedNetworkResponse.method.addInstructions(
             0,
             """
-                iget-object v0, p2, LX/1bF;->A03:LX/1bD;
+                move-object/from16 v1, p2
+                iget-object v0, v1, LX/1bF;->A03:LX/1bD;
                 iget-object v0, v0, LX/1bD;->A02:LX/1an;
                 invoke-virtual {v0}, LX/1an;->A00()Z
                 move-result v0
                 if-eqz v0, :froggo_refresh573_keep_network_response
-                invoke-virtual {p0}, LX/cbp;->A0U()Z
+                move-object/from16 v1, p0
+                invoke-virtual {v1}, LX/cbp;->A0U()Z
                 move-result v0
                 if-eqz v0, :froggo_refresh573_keep_network_response
                 return-void
