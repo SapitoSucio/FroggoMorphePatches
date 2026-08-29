@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-29T07:57:50",
-  "description": "## [1.2.0-dev.20](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.19...v1.2.0-dev.20) (2026-08-29)\n\n### 🐛 Bug Fixes\n\n* **facebook:** avoid empty refresh labels ([744f3f2](https://github.com/SapitoSucio/FroggoMorphePatches/commit/744f3f2bc667b718cba844b27da61da4b1c70e82))",
-  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.20/patches-1.2.0-dev.20.mpp",
+  "created_at": "2026-08-29T08:03:59",
+  "description": "## [1.2.0-dev.21](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.20...v1.2.0-dev.21) (2026-08-29)\n\n### 🐛 Bug Fixes\n\n* **facebook:** encode refresh register moves ([1ada422](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1ada422e958ae8a2c3c1643f120d77615cfc9499))",
+  "download_url": "https://github.com/SapitoSucio/FroggoMorphePatches/releases/download/v1.2.0-dev.21/patches-1.2.0-dev.21.mpp",
   "signature_download_url": "",
-  "version": "1.2.0-dev.20"
+  "version": "1.2.0-dev.21"
 }

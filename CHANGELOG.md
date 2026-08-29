@@ -1,3 +1,9 @@
+## [1.2.0-dev.21](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.20...v1.2.0-dev.21) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** encode refresh register moves ([1ada422](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1ada422e958ae8a2c3c1643f120d77615cfc9499))
+
 ## [1.2.0-dev.20](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.19...v1.2.0-dev.20) (2026-08-29)
 
 ### 🐛 Bug Fixes
