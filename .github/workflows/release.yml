@@ -7,6 +7,8 @@ on:
 jobs:
   release:
     name: Release
+    outputs:
+      new_release_published: ${{ steps.release.outputs.new_release_published }}
     permissions:
       contents: write
       packages: write
@@ -56,3 +58,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :patches:buildAndroid clean --no-daemon
+
+  sync-dev:
+    name: Sync main into dev
+    needs: release
+    if: github.ref == 'refs/heads/main' && needs.release.outputs.new_release_published == 'true'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v7
+        with:
+          ref: dev
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge main into dev
+        run: bash .github/scripts/sync-main-to-dev.sh
