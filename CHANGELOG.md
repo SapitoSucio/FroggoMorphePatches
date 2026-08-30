@@ -1,3 +1,9 @@
+## [1.3.0-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.1...v1.3.0-dev.2) (2026-08-30)
+
+### ✨ New Features
+
+* **patches:** enhance Facebook 573 patches to block automatic refresh and stop story auto-advance ([01ad4f5](https://github.com/SapitoSucio/FroggoMorphePatches/commit/01ad4f5871933f7a0e1381e0525bc645814fc113))
+
 ## [1.3.0-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.2...v1.3.0-dev.1) (2026-08-30)
 
 ### 🐛 Bug Fixes
