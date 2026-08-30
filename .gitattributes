@@ -7,3 +7,6 @@
 # These are Windows script files and should use crlf
 *.bat           text eol=crlf
 
+# GitHub Actions scripts must use lf so Bash can execute them on Linux
+*.sh            text eol=lf
+
