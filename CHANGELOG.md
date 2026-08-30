@@ -1,3 +1,9 @@
+## [1.2.0-dev.29](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.28...v1.2.0-dev.29) (2026-08-30)
+
+### ✨ New Features
+
+* **universal:** add clone app patch ([dde52c6](https://github.com/SapitoSucio/FroggoMorphePatches/commit/dde52c6cf3b8369553ea63137890a8668c28d8ed))
+
 ## [1.2.0-dev.28](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.27...v1.2.0-dev.28) (2026-08-29)
 
 ### 🐛 Bug Fixes
