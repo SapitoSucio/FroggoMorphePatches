@@ -14,7 +14,8 @@
  *
  * Keep X.2UL completely stock. Neutralize only automatic lifecycle decisions:
  * foreground revisit, onResume revisit, hot-start/tab visibility refresh, the
- * onPause stale-post worker, and the stale NewsFeedTabDataFetch AUTO_REFRESH.
+ * onPause stale-post worker, the friendly-feed prefetch on app entry, and the
+ * stale NewsFeedTabDataFetch AUTO_REFRESH.
  * Activity-result, fullscreen close, cold initialization and manual refresh remain
  * untouched.
  */
@@ -71,11 +72,27 @@ private val newsFeedOnPauseStaleRefresh = Fingerprint(
     },
 )
 
+private val newsFeedOnAppExit = Fingerprint(
+    returnType = "V",
+    parameters = emptyList(),
+    custom = { method, classDef ->
+        classDef.type == "LX/2Q7;" && method.name == "A0m"
+    },
+)
+
 private val mainFeedNetworkResponse = Fingerprint(
     returnType = "V",
     parameters = listOf("Lcom/google/common/collect/ImmutableList;", "LX/1bF;"),
     custom = { method, classDef ->
         classDef.type == "LX/1wV;" && method.name == "CNG"
+    },
+)
+
+private val mainFeedHeadLoad = Fingerprint(
+    returnType = "I",
+    parameters = listOf("LX/1an;", "Ljava/lang/String;"),
+    custom = { method, classDef ->
+        classDef.type == "LX/1wV;" && method.name == "A0M"
     },
 )
 
@@ -88,6 +105,62 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
 
     execute {
+        // MainFeedCSRDataLoaderImpl.A0M mutates the cursor before delegating to
+        // the generic loader. Drop only automatic causes after initialization so
+        // that a background/foreground revisit cannot clear or rebuild the feed.
+        // INITIAL, manual, pull-to-refresh, tab-click and network-error causes
+        // retain the stock path. FRIENDLY_FEED_PREFETCH is also dropped only
+        // after initialization; cold initialization must remain stock.
+        mainFeedHeadLoad.method.addInstructions(
+            0,
+            """
+                move-object v1, p1
+                invoke-virtual {v1}, LX/1an;->A00()Z
+                move-result v0
+                if-nez v0, :froggo_refresh573_check_initialized_head_load
+                sget-object v0, LX/1an;->A0d:LX/1an;
+                if-eq v1, v0, :froggo_refresh573_check_initialized_head_load
+                sget-object v0, LX/1an;->A0E:LX/1an;
+                if-ne v1, v0, :froggo_refresh573_keep_head_load
+                :froggo_refresh573_check_initialized_head_load
+                invoke-virtual {p0}, LX/cbg;->A0R()LX/1l5;
+                move-result-object v0
+                sget-object v1, LX/1l5;->INITIAL:LX/1l5;
+                if-eq v0, v1, :froggo_refresh573_keep_head_load
+                const/4 v0, 0x0
+                return v0
+
+                :froggo_refresh573_keep_head_load
+            """.trimIndent(),
+        )
+
+        val appExitInstructions = newsFeedOnAppExit.method.implementation!!.instructions
+        val appExitTeardownCalls = appExitInstructions.withIndex().mapNotNull { (index, instruction) ->
+            val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+            if (
+                reference?.definingClass == "LX/cbp;" &&
+                    reference.name == "A0Q" &&
+                    reference.parameterTypes == listOf("Z")
+            ) {
+                index
+            } else {
+                null
+            }
+        }
+        require(appExitTeardownCalls.size == 1) {
+            "Expected exactly one delayed Main Feed teardown call on app exit"
+        }
+
+        // JADX shows that C2Q7.A0m is the app-state exit callback. Its final
+        // A0Q() schedules the delayed loader teardown; after that teardown the
+        // next foreground is a new INITIAL load and replaces the visible feed.
+        // Skip only this automatic teardown call. Keep supplemental prefetch,
+        // cold initialization and all manual refresh paths intact.
+        newsFeedOnAppExit.method.addInstructions(
+            appExitTeardownCalls.single(),
+            "return-void",
+        )
+
         // Automatic causes can still reach the MainFeed network-response boundary
         // after the lifecycle/tab callsite guards. Once the loader is initialized,
         // CNG passes that response to the CSR coordinator, which adds/re-vends it;
@@ -103,13 +176,15 @@ val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
                 move-object v2, v0
                 invoke-virtual {v0}, LX/1an;->A00()Z
                 move-result v0
-                if-nez v0, :froggo_refresh573_drop_network_response
+                if-nez v0, :froggo_refresh573_check_initialized_network_response
                 sget-object v0, LX/1an;->A0d:LX/1an;
                 if-ne v2, v0, :froggo_refresh573_keep_network_response
+                :froggo_refresh573_check_initialized_network_response
                 move-object/from16 v1, p0
-                invoke-virtual {v1}, LX/cbp;->A0U()Z
-                move-result v0
-                if-eqz v0, :froggo_refresh573_keep_network_response
+                invoke-virtual {v1}, LX/cbg;->A0R()LX/1l5;
+                move-result-object v0
+                sget-object v1, LX/1l5;->INITIAL:LX/1l5;
+                if-eq v0, v1, :froggo_refresh573_keep_network_response
                 :froggo_refresh573_drop_network_response
                 return-void
 
