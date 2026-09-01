@@ -1,3 +1,9 @@
+## [1.3.0-dev.4](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.3...v1.3.0-dev.4) (2026-09-01)
+
+### 🐛 Bug Fixes
+
+* **facebook:** loop completed stories ([5ea897c](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5ea897c3200e926a4e792b9cdedf251198e715fa))
+
 ## [1.3.0-dev.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.2...v1.3.0-dev.3) (2026-09-01)
 
 ### ✨ New Features
