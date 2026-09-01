@@ -752,6 +752,19 @@ private fun compactStoryDownloadWorkerInstructions(
     sget-object v5, LX/8OX;->A0D:LX/8OX;
     if-ne v10, v5, :froggo_story_download_photo
     iget-object v11, v9, LX/9Uo;->A05:Ljava/lang/String;
+    invoke-virtual {v1}, Lcom/facebook/stories/model/StoryCard;->A0S()LX/CP6;
+    move-result-object v12
+    if-eqz v12, :froggo_story_download_video_url_ready
+    check-cast v12, LX/a7W;
+    const v13, -0x7cc94363
+    invoke-virtual {v12, v13}, LX/a7W;->getCachedNullableString(I)Ljava/lang/String;
+    move-result-object v12
+    if-eqz v12, :froggo_story_download_video_url_ready
+    invoke-virtual {v12}, Ljava/lang/String;->length()I
+    move-result v13
+    if-lez v13, :froggo_story_download_video_url_ready
+    move-object v11, v12
+    :froggo_story_download_video_url_ready
     const/4 v8, 0x1
     goto :froggo_story_download_type_ready
 
@@ -3207,7 +3220,7 @@ val downloadFacebookMedia573Patch = bytecodePatch(
             AccessFlags.PUBLIC.value,
             null,
             null,
-            MutableMethodImplementation(16),
+            MutableMethodImplementation(25),
         ).toMutable().apply {
             addInstructions(0, compactVideoDownloadWorkerInstructions)
         }
