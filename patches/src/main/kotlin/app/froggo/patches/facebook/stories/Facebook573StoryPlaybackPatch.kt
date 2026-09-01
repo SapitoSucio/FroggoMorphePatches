@@ -4,6 +4,7 @@ import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.booleanOption
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
@@ -27,6 +28,13 @@ val stopFacebookStoryAutoAdvance573Patch = bytecodePatch(
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
+    val loopStoriesOption = booleanOption(
+        key = "loopStories",
+        default = false,
+        title = "Loop Stories",
+        description = "When enabled, completed Stories follow Facebook's automatic playback instead of staying on the last frame.",
+    )
+
     execute {
         val instructions = storyProgressCompletion.method.implementation!!.instructions
         val autoAdvanceCalls = instructions.withIndex().mapNotNull { (index, instruction) ->
@@ -49,9 +57,11 @@ val stopFacebookStoryAutoAdvance573Patch = bytecodePatch(
         // C9UW reaches this call only after the broadcaster reports 1000. Returning
         // here preserves A00 (the last progress value) and leaves E2g's manual
         // navigation path untouched.
-        storyProgressCompletion.method.addInstructions(
-            autoAdvanceCalls.single(),
-            "return-void",
-        )
+        if (loopStoriesOption.value != true) {
+            storyProgressCompletion.method.addInstructions(
+                autoAdvanceCalls.single(),
+                "return-void",
+            )
+        }
     }
 }
