@@ -1,3 +1,9 @@
+## [1.3.0-dev.5](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.4...v1.3.0-dev.5) (2026-09-01)
+
+### 🐛 Bug Fixes
+
+* **stories:** improve playback handling for auto-looping stories ([0fa9ca6](https://github.com/SapitoSucio/FroggoMorphePatches/commit/0fa9ca6f7740c04b63796441550a72613890d18f))
+
 ## [1.3.0-dev.4](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.3...v1.3.0-dev.4) (2026-09-01)
 
 ### 🐛 Bug Fixes
