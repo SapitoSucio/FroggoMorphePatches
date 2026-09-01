@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.3.0-dev.3",
+  "version": "1.3.0-dev.4",
   "patches": [
     {
       "name": "Block Facebook Feed ads (573)",
@@ -235,7 +235,7 @@
         {
           "key": "loopStories",
           "title": "Loop Stories",
-          "description": "When enabled, completed Stories follow Facebook's automatic playback instead of staying on the last frame.",
+          "description": "When enabled, each completed Story restarts instead of advancing to the next Story.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
