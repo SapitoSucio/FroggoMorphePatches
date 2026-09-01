@@ -1,3 +1,9 @@
+## [1.3.0-dev.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.2...v1.3.0-dev.3) (2026-09-01)
+
+### ✨ New Features
+
+* **facebook:** finalize media downloads for 573 ([6141e8f](https://github.com/SapitoSucio/FroggoMorphePatches/commit/6141e8ff46789e73573411b6c1943034ca419a19))
+
 ## [1.3.0-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.1...v1.3.0-dev.2) (2026-08-30)
 
 ### ✨ New Features
