@@ -1,3 +1,9 @@
+## [1.2.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.2...v1.2.3) (2026-09-01)
+
+### 🐛 Bug Fixes
+
+* **ci:** preserve experimental dev changes [skip ci] ([cff8b2a](https://github.com/SapitoSucio/FroggoMorphePatches/commit/cff8b2ad1e12fc95fad791b7713e0da721807ee0))
+
 ## [1.2.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.1...v1.2.2) (2026-08-29)
 
 ### 🐛 Bug Fixes
