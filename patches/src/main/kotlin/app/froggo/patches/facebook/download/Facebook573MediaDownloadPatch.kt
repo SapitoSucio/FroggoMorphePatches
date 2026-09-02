@@ -734,6 +734,7 @@ private fun compactStoryDownloadWorkerInstructions(
     check-cast v10, Lcom/facebook/stories/viewer/ui/buckets/regular/topbar/menu/StoryViewerMoreButtonCallback;
     iget-object v0, v10, Lcom/facebook/stories/viewer/ui/buckets/regular/topbar/menu/StoryViewerMoreButtonCallback;->A09:Landroid/content/Context;
     iget-object v1, v10, Lcom/facebook/stories/viewer/ui/buckets/regular/topbar/menu/StoryViewerMoreButtonCallback;->A02:Lcom/facebook/stories/model/StoryCard;
+    const/4 v15, 0x0
     const-string v4, "FroggoPatches"
     const-string v5, "story-worker-start"
     invoke-static {v4, v5}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
@@ -1004,9 +1005,9 @@ private fun compactStoryDownloadWorkerInstructions(
     move-result-object v5
     invoke-virtual {v11, v10, v5}, Landroid/content/ContentValues;->put(Ljava/lang/String;Ljava/lang/Integer;)V
     invoke-virtual {v2, v3, v11}, Landroid/content/ContentResolver;->insert(Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;
-    move-result-object v11
-    if-eqz v11, :froggo_story_download_fail
-    invoke-virtual {v2, v11}, Landroid/content/ContentResolver;->openOutputStream(Landroid/net/Uri;)Ljava/io/OutputStream;
+    move-result-object v15
+    if-eqz v15, :froggo_story_download_fail
+    invoke-virtual {v2, v15}, Landroid/content/ContentResolver;->openOutputStream(Landroid/net/Uri;)Ljava/io/OutputStream;
     move-result-object v5
     if-eqz v5, :froggo_story_download_fail
     invoke-virtual {v14}, Ljava/net/HttpURLConnection;->getInputStream()Ljava/io/InputStream;
@@ -1035,11 +1036,11 @@ private fun compactStoryDownloadWorkerInstructions(
     move-result-object v5
     invoke-virtual {v10, v4, v5}, Landroid/content/ContentValues;->put(Ljava/lang/String;Ljava/lang/Integer;)V
     const/4 v4, 0x0
-    invoke-virtual {v2, v11, v10, v4, v4}, Landroid/content/ContentResolver;->update(Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I
-    const/4 v15, 0x1
-    invoke-static {v15}, LX/WKI;->froggoShowDownloadFeedbackResult(Z)V
-    const/4 v15, 0x0
-    invoke-static {v0, v15}, LX/WKI;->froggoPostLocalizedDownloadSuccess(Landroid/content/Context;Z)V
+    invoke-virtual {v2, v15, v10, v4, v4}, Landroid/content/ContentResolver;->update(Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I
+    const/4 v10, 0x1
+    invoke-static {v10}, LX/WKI;->froggoShowDownloadFeedbackResult(Z)V
+    const/4 v10, 0x0
+    invoke-static {v0, v10}, LX/WKI;->froggoPostLocalizedDownloadSuccess(Landroid/content/Context;Z)V
     goto :froggo_story_download_finish
 
     :froggo_story_download_finish
@@ -1055,14 +1056,14 @@ private fun compactStoryDownloadWorkerInstructions(
     const/4 v14, 0x0
 
     :froggo_story_download_pending
-    if-eqz v11, :froggo_story_download_fail_notice
+    if-eqz v15, :froggo_story_download_fail_notice
     const/4 v4, 0x0
-    invoke-virtual {v2, v11, v4, v4}, Landroid/content/ContentResolver;->delete(Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I
-    const/4 v11, 0x0
+    invoke-virtual {v2, v15, v4, v4}, Landroid/content/ContentResolver;->delete(Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I
+    const/4 v15, 0x0
 
     :froggo_story_download_fail_notice
-    const/4 v15, 0x0
-    invoke-static {v15}, LX/WKI;->froggoShowDownloadFeedbackResult(Z)V
+    const/4 v10, 0x0
+    invoke-static {v10}, LX/WKI;->froggoShowDownloadFeedbackResult(Z)V
     const-string v4, "🐸 No se pudo descargar la Historia"
     invoke-static {v0, v4}, LX/WKI;->froggoPostToast(Landroid/content/Context;Ljava/lang/CharSequence;)V
     goto :froggo_story_download_finish
@@ -1246,6 +1247,7 @@ private val compactVideoDownloadWorkerInstructions = """
     const/4 v6, 0x0
     const/4 v9, 0x0
     const/4 v14, 0x0
+    const/4 v15, 0x0
 
     :froggo_video_download_try_start
     iget-object v2, v1, LX/a8s;->A0B:Lcom/facebook/video/engine/api/VideoPlayerParams;
@@ -1519,12 +1521,12 @@ private val compactVideoDownloadWorkerInstructions = """
     move-result-object v8
     invoke-virtual {v7, v10, v8}, Landroid/content/ContentValues;->put(Ljava/lang/String;Ljava/lang/Integer;)V
     invoke-virtual {v5, v6, v7}, Landroid/content/ContentResolver;->insert(Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;
-    move-result-object v11
-    if-eqz v11, :froggo_video_download_fail
+    move-result-object v15
+    if-eqz v15, :froggo_video_download_fail
     const-string v10, "FroggoPatches"
     const-string v12, "inserted"
     invoke-static {v10, v12}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
-    invoke-virtual {v5, v11}, Landroid/content/ContentResolver;->openOutputStream(Landroid/net/Uri;)Ljava/io/OutputStream;
+    invoke-virtual {v5, v15}, Landroid/content/ContentResolver;->openOutputStream(Landroid/net/Uri;)Ljava/io/OutputStream;
     move-result-object v8
     if-eqz v8, :froggo_video_download_fail
     const/16 v10, 0x2000
@@ -1554,7 +1556,7 @@ private val compactVideoDownloadWorkerInstructions = """
     move-result-object v8
     invoke-virtual {v7, v10, v8}, Landroid/content/ContentValues;->put(Ljava/lang/String;Ljava/lang/Integer;)V
     const/4 v1, 0x0
-    invoke-virtual {v5, v11, v7, v1, v1}, Landroid/content/ContentResolver;->update(Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I
+    invoke-virtual {v5, v15, v7, v1, v1}, Landroid/content/ContentResolver;->update(Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I
     const-string v12, "🐸 Descarga finalizada"
     invoke-static {v0, v12}, LX/WKI;->froggoPostToast(Landroid/content/Context;Ljava/lang/CharSequence;)V
     const-string v10, "FroggoPatches"
@@ -1575,10 +1577,10 @@ private val compactVideoDownloadWorkerInstructions = """
     const/4 v14, 0x0
 
     :froggo_video_download_delete_pending
-    if-eqz v11, :froggo_video_download_fail_notice
+    if-eqz v15, :froggo_video_download_fail_notice
     const/4 v1, 0x0
-    invoke-virtual {v5, v11, v1, v1}, Landroid/content/ContentResolver;->delete(Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I
-    const/4 v11, 0x0
+    invoke-virtual {v5, v15, v1, v1}, Landroid/content/ContentResolver;->delete(Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I
+    const/4 v15, 0x0
 
     :froggo_video_download_fail_notice
     goto :froggo_video_download_finish
@@ -2656,7 +2658,7 @@ val downloadFacebookMedia573Patch = bytecodePatch(
             AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
             null,
             null,
-            MutableMethodImplementation(16),
+            MutableMethodImplementation(17),
         ).toMutable().apply {
             addInstructions(0, compactStoryDownloadWorkerInstructions(imagePathPrefix, videoPathPrefix))
         }
@@ -2684,7 +2686,7 @@ val downloadFacebookMedia573Patch = bytecodePatch(
             AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
             null,
             null,
-            MutableMethodImplementation(16),
+            MutableMethodImplementation(17),
         ).toMutable().apply {
             addInstructions(0, fullscreenStoryDownloadWorkerInstructions(imagePathPrefix, videoPathPrefix))
         }
@@ -2933,7 +2935,7 @@ val downloadFacebookMedia573Patch = bytecodePatch(
             AccessFlags.PUBLIC.value,
             null,
             null,
-            MutableMethodImplementation(16),
+            MutableMethodImplementation(17),
         ).toMutable().apply {
             addInstructions(0, compactVideoDownloadWorkerInstructions)
         }
