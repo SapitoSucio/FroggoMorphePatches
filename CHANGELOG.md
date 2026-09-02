@@ -1,3 +1,9 @@
+## [1.3.0-dev.6](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.5...v1.3.0-dev.6) (2026-09-02)
+
+### ✨ New Features
+
+* **theme:** add Facebook 573 theme patch with AMOLED Black and Material You options ([ec94ef8](https://github.com/SapitoSucio/FroggoMorphePatches/commit/ec94ef843d1040b5d262c8dc9cbe3b52cfc0ec39))
+
 ## [1.3.0-dev.5](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.4...v1.3.0-dev.5) (2026-09-01)
 
 ### 🐛 Bug Fixes
