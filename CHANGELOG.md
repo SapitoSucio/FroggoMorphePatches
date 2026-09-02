@@ -1,3 +1,9 @@
+## [1.2.4](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.3...v1.2.4) (2026-09-02)
+
+### 🐛 Bug Fixes
+
+* **facebook:** add Android 17-safe media download patch ([9c00395](https://github.com/SapitoSucio/FroggoMorphePatches/commit/9c00395c4a1869e03a7f22f35c134ee97c2b80d5))
+
 ## [1.2.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.2...v1.2.3) (2026-09-01)
 
 ### 🐛 Bug Fixes
