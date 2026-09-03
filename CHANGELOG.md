@@ -1,3 +1,10 @@
+## [1.3.1-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0...v1.3.1-dev.1) (2026-09-03)
+
+### 🐛 Bug Fixes
+
+* **facebook:** add Android 17-safe media download patch ([9c00395](https://github.com/SapitoSucio/FroggoMorphePatches/commit/9c00395c4a1869e03a7f22f35c134ee97c2b80d5))
+* **facebook:** update download worker instructions for improved context handling, hopefully this fixes [#16](https://github.com/SapitoSucio/FroggoMorphePatches/issues/16) ([bb81922](https://github.com/SapitoSucio/FroggoMorphePatches/commit/bb81922e3a99d0b36832f44b321f3ca21ea08fc7))
+
 ## [1.3.0-dev.6](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.5...v1.3.0-dev.6) (2026-09-02)
 
 ### ✨ New Features
