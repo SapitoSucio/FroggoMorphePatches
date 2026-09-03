@@ -1,3 +1,9 @@
+## [1.3.1-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.1-dev.1...v1.3.1-dev.2) (2026-09-03)
+
+### 🐛 Bug Fixes
+
+* **release:** restore automatic dev pull requests ([059a747](https://github.com/SapitoSucio/FroggoMorphePatches/commit/059a7471ca5065e75cc88814b45dc8d38ed6132e))
+
 ## [1.3.1-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0...v1.3.1-dev.1) (2026-09-03)
 
 ### 🐛 Bug Fixes
