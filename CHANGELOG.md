@@ -1,3 +1,9 @@
+## [1.4.0-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.1-dev.2...v1.4.0-dev.1) (2026-09-03)
+
+### ✨ New Features
+
+* **facebook:** enhance theme patch with Material You support and improved color handling ([d2b1730](https://github.com/SapitoSucio/FroggoMorphePatches/commit/d2b1730bcce2e6a73292c4f606f6c6dd044a08bc))
+
 ## [1.3.1-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.1-dev.1...v1.3.1-dev.2) (2026-09-03)
 
 ### 🐛 Bug Fixes
