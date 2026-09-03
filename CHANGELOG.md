@@ -1,50 +1,272 @@
-## [1.2.4](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.3...v1.2.4) (2026-09-02)
+## [1.4.0-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.1-dev.2...v1.4.0-dev.1) (2026-09-03)
+
+### ✨ New Features
+
+* **facebook:** enhance theme patch with Material You support and improved color handling ([d2b1730](https://github.com/SapitoSucio/FroggoMorphePatches/commit/d2b1730bcce2e6a73292c4f606f6c6dd044a08bc))
+
+## [1.3.1-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.1-dev.1...v1.3.1-dev.2) (2026-09-03)
+
+### 🐛 Bug Fixes
+
+* **release:** restore automatic dev pull requests ([059a747](https://github.com/SapitoSucio/FroggoMorphePatches/commit/059a7471ca5065e75cc88814b45dc8d38ed6132e))
+
+## [1.3.1-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0...v1.3.1-dev.1) (2026-09-03)
 
 ### 🐛 Bug Fixes
 
 * **facebook:** add Android 17-safe media download patch ([9c00395](https://github.com/SapitoSucio/FroggoMorphePatches/commit/9c00395c4a1869e03a7f22f35c134ee97c2b80d5))
+* **facebook:** update download worker instructions for improved context handling, hopefully this fixes [#16](https://github.com/SapitoSucio/FroggoMorphePatches/issues/16) ([bb81922](https://github.com/SapitoSucio/FroggoMorphePatches/commit/bb81922e3a99d0b36832f44b321f3ca21ea08fc7))
 
-## [1.2.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.2...v1.2.3) (2026-09-01)
+## [1.3.0-dev.6](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.5...v1.3.0-dev.6) (2026-09-02)
+
+### ✨ New Features
+
+* **theme:** add Facebook 573 theme patch with AMOLED Black and Material You options ([ec94ef8](https://github.com/SapitoSucio/FroggoMorphePatches/commit/ec94ef843d1040b5d262c8dc9cbe3b52cfc0ec39))
+
+## [1.3.0-dev.5](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.4...v1.3.0-dev.5) (2026-09-01)
+
+### 🐛 Bug Fixes
+
+* **stories:** improve playback handling for auto-looping stories ([0fa9ca6](https://github.com/SapitoSucio/FroggoMorphePatches/commit/0fa9ca6f7740c04b63796441550a72613890d18f))
+
+## [1.3.0-dev.4](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.3...v1.3.0-dev.4) (2026-09-01)
+
+### 🐛 Bug Fixes
+
+* **facebook:** loop completed stories ([5ea897c](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5ea897c3200e926a4e792b9cdedf251198e715fa))
+
+## [1.3.0-dev.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.2...v1.3.0-dev.3) (2026-09-01)
+
+### ✨ New Features
+
+* **facebook:** finalize media downloads for 573 ([6141e8f](https://github.com/SapitoSucio/FroggoMorphePatches/commit/6141e8ff46789e73573411b6c1943034ca419a19))
+
+## [1.3.0-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.0-dev.1...v1.3.0-dev.2) (2026-08-30)
+
+### ✨ New Features
+
+* **patches:** enhance Facebook 573 patches to block automatic refresh and stop story auto-advance ([01ad4f5](https://github.com/SapitoSucio/FroggoMorphePatches/commit/01ad4f5871933f7a0e1381e0525bc645814fc113))
+
+## [1.3.0-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.2...v1.3.0-dev.1) (2026-08-30)
 
 ### 🐛 Bug Fixes
 
 * **ci:** preserve experimental dev changes [skip ci] ([cff8b2a](https://github.com/SapitoSucio/FroggoMorphePatches/commit/cff8b2ad1e12fc95fad791b7713e0da721807ee0))
-
-## [1.2.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.1...v1.2.2) (2026-08-29)
-
-### 🐛 Bug Fixes
-
-* **release:** stop failing backmerge workflow ([a23b4c4](https://github.com/SapitoSucio/FroggoMorphePatches/commit/a23b4c46b764e532efa095f5e73327e9e833b3e9))
-
-## [1.2.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0...v1.2.1) (2026-08-29)
-
-### 🐛 Bug Fixes
-
-* **facebook:** promote validated refresh patch ([9b1fa3f](https://github.com/SapitoSucio/FroggoMorphePatches/commit/9b1fa3f9d816ab447272d00dc3fa465d9b1cd4a3))
-
-## [1.2.0](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.24...v1.2.0) (2026-08-29)
+* **ci:** preserve experimental dev changes [skip ci] ([0720d93](https://github.com/SapitoSucio/FroggoMorphePatches/commit/0720d93ff152a6552a76c97db3cf5569626596ee))
+* **facebook:** avoid empty refresh labels ([744f3f2](https://github.com/SapitoSucio/FroggoMorphePatches/commit/744f3f2bc667b718cba844b27da61da4b1c70e82))
+* **facebook:** avoid invalid story filter branch labels ([1966df1](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1966df120c76681517dc3599d309b0b9dd28855e))
+* **facebook:** block automatic CSR response refresh ([95f623e](https://github.com/SapitoSucio/FroggoMorphePatches/commit/95f623e22a1b4a190e9e9ba9b3c05f613e079b42))
+* **facebook:** block background warm refresh ([d569cea](https://github.com/SapitoSucio/FroggoMorphePatches/commit/d569ceadddef1d34804f6d35ebb3a750d50438bf))
+* **facebook:** block stale tab data refresh ([a40d9cc](https://github.com/SapitoSucio/FroggoMorphePatches/commit/a40d9ccf68ecb740d5f17aba44164d40eb43fc7f))
+* **facebook:** cancel feed background prefetch ([9ef38d1](https://github.com/SapitoSucio/FroggoMorphePatches/commit/9ef38d1a441f016efa542763e7b793dd39ffabbf))
+* **facebook:** cover hot start stale refresh ([8937947](https://github.com/SapitoSucio/FroggoMorphePatches/commit/8937947ab7f23d05b99dbb8b7162b6e95de81934))
+* **facebook:** define diagnostic helper parameters ([9187062](https://github.com/SapitoSucio/FroggoMorphePatches/commit/918706248a2499e9d6394a77dd58597989191fe1))
+* **facebook:** encode refresh register moves ([1ada422](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1ada422e958ae8a2c3c1643f120d77615cfc9499))
+* **facebook:** expose story diagnostic helpers ([b3527c0](https://github.com/SapitoSucio/FroggoMorphePatches/commit/b3527c00e5e90293af3915d8e7f6fd8c487a31be))
+* **facebook:** filter story ads at provider boundary ([3a83043](https://github.com/SapitoSucio/FroggoMorphePatches/commit/3a830436ec674a2775d506cb37127485cb7d6b2b))
+* **facebook:** filter story ads inside x68 providers ([11b23cb](https://github.com/SapitoSucio/FroggoMorphePatches/commit/11b23cbbc94b807cdf8568c2afcb36e891fb7f4f))
+* **facebook:** isolate automatic refresh callsites ([0542975](https://github.com/SapitoSucio/FroggoMorphePatches/commit/0542975284616c11087eacc0e5bb9f226cf79c38))
+* **facebook:** mark refresh patch unstable ([495247c](https://github.com/SapitoSucio/FroggoMorphePatches/commit/495247ce11cb1e933d9235fba1d0c2344a8b9ffc))
+* **facebook:** preserve story ads provider lifecycle ([55e90ad](https://github.com/SapitoSucio/FroggoMorphePatches/commit/55e90adf115a5ed8032a2fd07241d023c0642027))
+* **facebook:** suppress main feed warm refresh ([7fc47af](https://github.com/SapitoSucio/FroggoMorphePatches/commit/7fc47af5bdc220d481f798f6a0cee6ceb7674cdb))
+* **facebook:** use encodable refresh guard registers ([9597008](https://github.com/SapitoSucio/FroggoMorphePatches/commit/959700823f739670716476fddad7c9ff9bcd7a4c))
+* **release:** align dev channel with stable ([21953e1](https://github.com/SapitoSucio/FroggoMorphePatches/commit/21953e15ea2622850d90688d1444b5d019427101))
 
 ### ✨ New Features
 
-* **facebook:** promote validated ad patches ([a8621cf](https://github.com/SapitoSucio/FroggoMorphePatches/commit/a8621cfc6f1c6a1fb49af764f0914f3b6c7066d1))
+* **facebook:** add ads diagnostic split ([779a453](https://github.com/SapitoSucio/FroggoMorphePatches/commit/779a45315a57e09e73e86c08f54769b163169712))
+* **facebook:** add pre-release story ads experiment ([fcf99da](https://github.com/SapitoSucio/FroggoMorphePatches/commit/fcf99da6a7ca2c47c692f84380dd2aa6d9f871b6))
+* **facebook:** add story publication diagnostics ([132fd61](https://github.com/SapitoSucio/FroggoMorphePatches/commit/132fd61fc961d547590d7c24b75e8686057e03be))
+* **facebook:** split feed and reels ad patches ([203df53](https://github.com/SapitoSucio/FroggoMorphePatches/commit/203df5386a180c4bc66270f3d8c9488cdb898f72))
+* **facebook:** trace story notify exceptions ([980c5af](https://github.com/SapitoSucio/FroggoMorphePatches/commit/980c5af4e2cb9ecafe83445351457c925eb0929b))
+* **facebook:** trace story notify internals ([d296b61](https://github.com/SapitoSucio/FroggoMorphePatches/commit/d296b611efcb1d2619935fd8d83e8eff7eb7a468))
+* **facebook:** trace story publish fallthrough ([5ebb5d7](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5ebb5d7bc8a53ae676f430d63ab68e2c1e8da4bd))
+* **facebook:** trace story snapshot equality ([52288e4](https://github.com/SapitoSucio/FroggoMorphePatches/commit/52288e4cd2017c9691705da03cfc9a777cecc98f))
+* **facebook:** trace story subscriber handoff ([5b898bf](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5b898bf23f03348b643e2960b59f4adb64ad16e4))
+* **facebook:** trace story subscriber race ([dbaf49b](https://github.com/SapitoSucio/FroggoMorphePatches/commit/dbaf49bcd36cb51cfd80b0dfece17d679cea9cdf))
+* **universal:** add clone app patch ([dde52c6](https://github.com/SapitoSucio/FroggoMorphePatches/commit/dde52c6cf3b8369553ea63137890a8668c28d8ed))
 
-## [1.1.24](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.23...v1.1.24) (2026-08-27)
+## [1.2.0-dev.29](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.28...v1.2.0-dev.29) (2026-08-30)
+
+### ✨ New Features
+
+* **universal:** add clone app patch ([dde52c6](https://github.com/SapitoSucio/FroggoMorphePatches/commit/dde52c6cf3b8369553ea63137890a8668c28d8ed))
+
+## [1.2.0-dev.28](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.27...v1.2.0-dev.28) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** block background warm refresh ([d569cea](https://github.com/SapitoSucio/FroggoMorphePatches/commit/d569ceadddef1d34804f6d35ebb3a750d50438bf))
+
+## [1.2.0-dev.27](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.26...v1.2.0-dev.27) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** use encodable refresh guard registers ([9597008](https://github.com/SapitoSucio/FroggoMorphePatches/commit/959700823f739670716476fddad7c9ff9bcd7a4c))
+
+## [1.2.0-dev.26](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.25...v1.2.0-dev.26) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** block automatic CSR response refresh ([95f623e](https://github.com/SapitoSucio/FroggoMorphePatches/commit/95f623e22a1b4a190e9e9ba9b3c05f613e079b42))
+
+## [1.2.0-dev.25](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.24...v1.2.0-dev.25) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** block stale tab data refresh ([a40d9cc](https://github.com/SapitoSucio/FroggoMorphePatches/commit/a40d9ccf68ecb740d5f17aba44164d40eb43fc7f))
+
+## [1.2.0-dev.24](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.23...v1.2.0-dev.24) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** cancel feed background prefetch ([9ef38d1](https://github.com/SapitoSucio/FroggoMorphePatches/commit/9ef38d1a441f016efa542763e7b793dd39ffabbf))
+
+## [1.2.0-dev.23](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.22...v1.2.0-dev.23) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** suppress main feed warm refresh ([7fc47af](https://github.com/SapitoSucio/FroggoMorphePatches/commit/7fc47af5bdc220d481f798f6a0cee6ceb7674cdb))
+
+## [1.2.0-dev.22](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.21...v1.2.0-dev.22) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** cover hot start stale refresh ([8937947](https://github.com/SapitoSucio/FroggoMorphePatches/commit/8937947ab7f23d05b99dbb8b7162b6e95de81934))
+
+## [1.2.0-dev.21](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.20...v1.2.0-dev.21) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** encode refresh register moves ([1ada422](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1ada422e958ae8a2c3c1643f120d77615cfc9499))
+
+## [1.2.0-dev.20](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.19...v1.2.0-dev.20) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** avoid empty refresh labels ([744f3f2](https://github.com/SapitoSucio/FroggoMorphePatches/commit/744f3f2bc667b718cba844b27da61da4b1c70e82))
+
+## [1.2.0-dev.19](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.18...v1.2.0-dev.19) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** isolate automatic refresh callsites ([0542975](https://github.com/SapitoSucio/FroggoMorphePatches/commit/0542975284616c11087eacc0e5bb9f226cf79c38))
+
+## [1.2.0-dev.18](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.17...v1.2.0-dev.18) (2026-08-29)
+
+### 🐛 Bug Fixes
+
+* **facebook:** mark refresh patch unstable ([495247c](https://github.com/SapitoSucio/FroggoMorphePatches/commit/495247ce11cb1e933d9235fba1d0c2344a8b9ffc))
+
+## [1.2.0-dev.17](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.16...v1.2.0-dev.17) (2026-08-29)
+
+### ✨ New Features
+
+* **facebook:** split feed and reels ad patches ([203df53](https://github.com/SapitoSucio/FroggoMorphePatches/commit/203df5386a180c4bc66270f3d8c9488cdb898f72))
+
+## [1.2.0-dev.16](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.15...v1.2.0-dev.16) (2026-08-29)
+
+### ✨ New Features
+
+* **facebook:** trace story notify internals ([d296b61](https://github.com/SapitoSucio/FroggoMorphePatches/commit/d296b611efcb1d2619935fd8d83e8eff7eb7a468))
+
+## [1.2.0-dev.15](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.14...v1.2.0-dev.15) (2026-08-28)
+
+### ✨ New Features
+
+* **facebook:** trace story notify exceptions ([980c5af](https://github.com/SapitoSucio/FroggoMorphePatches/commit/980c5af4e2cb9ecafe83445351457c925eb0929b))
+
+## [1.2.0-dev.14](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.13...v1.2.0-dev.14) (2026-08-28)
+
+### ✨ New Features
+
+* **facebook:** trace story subscriber handoff ([5b898bf](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5b898bf23f03348b643e2960b59f4adb64ad16e4))
+
+## [1.2.0-dev.13](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.12...v1.2.0-dev.13) (2026-08-28)
+
+### ✨ New Features
+
+* **facebook:** trace story publish fallthrough ([5ebb5d7](https://github.com/SapitoSucio/FroggoMorphePatches/commit/5ebb5d7bc8a53ae676f430d63ab68e2c1e8da4bd))
+
+## [1.2.0-dev.12](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.11...v1.2.0-dev.12) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** filter story ads inside x68 providers ([11b23cb](https://github.com/SapitoSucio/FroggoMorphePatches/commit/11b23cbbc94b807cdf8568c2afcb36e891fb7f4f))
+
+## [1.2.0-dev.11](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.10...v1.2.0-dev.11) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** define diagnostic helper parameters ([9187062](https://github.com/SapitoSucio/FroggoMorphePatches/commit/918706248a2499e9d6394a77dd58597989191fe1))
+
+### ✨ New Features
+
+* **facebook:** trace story snapshot equality ([52288e4](https://github.com/SapitoSucio/FroggoMorphePatches/commit/52288e4cd2017c9691705da03cfc9a777cecc98f))
+
+## [1.2.0-dev.10](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.9...v1.2.0-dev.10) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** expose story diagnostic helpers ([b3527c0](https://github.com/SapitoSucio/FroggoMorphePatches/commit/b3527c00e5e90293af3915d8e7f6fd8c487a31be))
+
+## [1.2.0-dev.9](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.8...v1.2.0-dev.9) (2026-08-28)
+
+### ✨ New Features
+
+* **facebook:** trace story subscriber race ([dbaf49b](https://github.com/SapitoSucio/FroggoMorphePatches/commit/dbaf49bcd36cb51cfd80b0dfece17d679cea9cdf))
+
+## [1.2.0-dev.8](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.7...v1.2.0-dev.8) (2026-08-28)
+
+### ✨ New Features
+
+* **facebook:** add story publication diagnostics ([132fd61](https://github.com/SapitoSucio/FroggoMorphePatches/commit/132fd61fc961d547590d7c24b75e8686057e03be))
+
+## [1.2.0-dev.7](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.6...v1.2.0-dev.7) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** filter story ads at provider boundary ([3a83043](https://github.com/SapitoSucio/FroggoMorphePatches/commit/3a830436ec674a2775d506cb37127485cb7d6b2b))
+
+## [1.2.0-dev.6](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.5...v1.2.0-dev.6) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** avoid invalid story filter branch labels ([1966df1](https://github.com/SapitoSucio/FroggoMorphePatches/commit/1966df120c76681517dc3599d309b0b9dd28855e))
+
+## [1.2.0-dev.5](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.4...v1.2.0-dev.5) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **facebook:** preserve story ads provider lifecycle ([55e90ad](https://github.com/SapitoSucio/FroggoMorphePatches/commit/55e90adf115a5ed8032a2fd07241d023c0642027))
+
+## [1.2.0-dev.4](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.3...v1.2.0-dev.4) (2026-08-27)
+
+### ✨ New Features
+
+* **facebook:** add ads diagnostic split ([779a453](https://github.com/SapitoSucio/FroggoMorphePatches/commit/779a45315a57e09e73e86c08f54769b163169712))
+
+## [1.2.0-dev.3](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.2...v1.2.0-dev.3) (2026-08-27)
 
 ### 🐛 Bug Fixes
 
 * **facebook:** preserve partial story model state ([41f7d42](https://github.com/SapitoSucio/FroggoMorphePatches/commit/41f7d42348801f581649fbbe1a11ef5c50ddf57e))
 
-## [1.1.23](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.22...v1.1.23) (2026-08-27)
+## [1.2.0-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.2.0-dev.1...v1.2.0-dev.2) (2026-08-27)
 
 ### 🐛 Bug Fixes
 
 * **facebook:** preserve csr tail-load state ([2094270](https://github.com/SapitoSucio/FroggoMorphePatches/commit/209427047608ac687d232090fdd1a3a59cd50eb0))
 
-## [1.1.22](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.21...v1.1.22) (2026-08-27)
+## [1.2.0-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.21...v1.2.0-dev.1) (2026-08-27)
 
 ### 🐛 Bug Fixes
 
 * **facebook:** keep story ads patch pre-release only ([ae16e62](https://github.com/SapitoSucio/FroggoMorphePatches/commit/ae16e6285f446f817c7698c841fb04d6be9fc6f5))
+
+### ✨ New Features
+
+* **facebook:** add pre-release story ads experiment ([fcf99da](https://github.com/SapitoSucio/FroggoMorphePatches/commit/fcf99da6a7ca2c47c692f84380dd2aa6d9f871b6))
 
 ## [1.1.21](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.1.20...v1.1.21) (2026-08-27)
 

@@ -21,7 +21,7 @@
  */
 package app.froggo.patches.facebook.refresh
 
-import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
+import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
@@ -99,10 +99,10 @@ private val mainFeedHeadLoad = Fingerprint(
 @Suppress("unused")
 val blockFacebookAutomaticRefresh573Patch = bytecodePatch(
     name = "Block Facebook automatic refresh (573)",
-    description = "Suppresses lifecycle feed refresh while preserving explicit refresh paths.",
-    default = true,
+    description = "Experimental: blocks automatic foreground/hot-start/stale-tab/stale-post feed refresh while preserving cold initialization, manual, activity-result and fullscreen refresh paths.",
+    default = false,
 ) {
-    compatibleWith(COMPATIBILITY_FACEBOOK_573)
+    compatibleWith(COMPATIBILITY_FACEBOOK_573_EXPERIMENTAL)
 
     execute {
         // MainFeedCSRDataLoaderImpl.A0M mutates the cursor before delegating to

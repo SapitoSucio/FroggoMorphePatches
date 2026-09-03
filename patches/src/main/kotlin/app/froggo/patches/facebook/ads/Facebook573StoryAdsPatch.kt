@@ -55,7 +55,7 @@ private val storyAdsWXO = Fingerprint(
 val blockFacebookStoryAds573Patch = bytecodePatch(
     name = "Block Facebook Story ads (573)",
     description = "Filters Story ad buckets only at the concrete X68 provider return boundary.",
-    default = true,
+    default = false,
 ) {
     compatibleWith(COMPATIBILITY_FACEBOOK_573)
 
