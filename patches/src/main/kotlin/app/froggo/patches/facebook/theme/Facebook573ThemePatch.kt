@@ -79,6 +79,42 @@ private val postBodyText = Fingerprint(
     custom = { method, classDef -> classDef.type == "LX/30L;" && method.name == "A1K" },
 )
 
+private val fdsButtonTextIconColor = Fingerprint(
+    returnType = "I",
+    parameters = listOf("LX/4K0;", "LX/4K5;", "LX/276;", "Z", "Z"),
+    custom = { method, classDef -> classDef.type == "LX/5Rs;" && method.name == "A00" },
+)
+
+private val fdsButtonBackgroundDrawable = Fingerprint(
+    returnType = "LX/2RJ;",
+    parameters = listOf("LX/5Rs;", "LX/276;", "I"),
+    custom = { method, classDef -> classDef.type == "LX/5Rs;" && method.name == "A05" },
+)
+
+private val contextualFdsColor = Fingerprint(
+    returnType = "I",
+    parameters = listOf("LX/1y5;"),
+    custom = { method, classDef -> classDef.type == "LX/1yu;" && method.name == "A00" },
+)
+
+private val baseFdsColor = Fingerprint(
+    returnType = "I",
+    parameters = listOf("Landroid/content/Context;", "LX/1y5;"),
+    custom = { method, classDef -> classDef.type == "LX/1z0;" && method.name == "A03" },
+)
+
+private val cdsButtonVariant = Fingerprint(
+    returnType = "Ljava/lang/Object;",
+    parameters = listOf("Landroid/content/Context;", "LX/a0p;"),
+    custom = { method, classDef -> classDef.type == "LX/ZQi;" && method.name == "ETY" },
+)
+
+private val cdsButtonTextStyle = Fingerprint(
+    returnType = "LX/BNF;",
+    parameters = listOf("Landroid/content/Context;", "LX/a0p;"),
+    custom = { method, classDef -> classDef.type == "LX/ZQo;" && method.name == "A00" },
+)
+
 private fun org.w3c.dom.Document.replaceStyleItem(styleName: String, itemName: String, value: String) {
     val styles = getElementsByTagName("style.2")
     for (styleIndex in 0 until styles.length) {
@@ -281,6 +317,229 @@ val changeFacebookTheme573Patch = resourcePatch(
                         :froggo_original_navigation
                     """.trimIndent())
                 }
+
+                // Litho/FDS can resolve semantic colors through a contextual spectrum
+                // (LX/1yu) before the normal FDSColors fallback. Theme the normal
+                // PRIMARY/SECONDARY button roles here so server/context spectra cannot
+                // reintroduce Facebook blue. Media/color variants keep Facebook contrast.
+                val contextualFdsColorMethod = contextualFdsColor.method
+                require(contextualFdsColorMethod.implementation!!.registerCount >= 4)
+                contextualFdsColorMethod.addInstructions(0, """
+                    iget-object v0, p0, LX/1yu;->A00:Landroid/content/Context;
+                    invoke-static {v0}, LX/1yy;->A06(Landroid/content/Context;)Z
+                    move-result v1
+                    if-eqz v1, :froggo_original_contextual_fds_color
+                    sget-object v1, LX/1y5;->A3J:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_primary_background
+                    sget-object v1, LX/1y5;->A3Q:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_primary_foreground
+                    sget-object v1, LX/1y5;->A3M:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_primary_foreground
+                    sget-object v1, LX/1y5;->A3z:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_secondary_background
+                    sget-object v1, LX/1y5;->A49:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_secondary_foreground
+                    sget-object v1, LX/1y5;->A45:LX/1y5;
+                    if-ne p1, v1, :froggo_original_contextual_fds_color
+                    :froggo_contextual_fds_secondary_foreground
+                    sget v1, Landroid/R${'$'}color;->system_accent1_200:I
+                    goto :froggo_resolve_contextual_fds_color
+                    :froggo_contextual_fds_secondary_background
+                    sget v1, Landroid/R${'$'}color;->system_neutral1_700:I
+                    goto :froggo_resolve_contextual_fds_color
+                    :froggo_contextual_fds_primary_foreground
+                    sget v1, Landroid/R${'$'}color;->system_neutral1_900:I
+                    goto :froggo_resolve_contextual_fds_color
+                    :froggo_contextual_fds_primary_background
+                    sget v1, Landroid/R${'$'}color;->system_accent1_200:I
+                    :froggo_resolve_contextual_fds_color
+                    invoke-virtual {v0, v1}, Landroid/content/Context;->getColor(I)I
+                    move-result v0
+                    return v0
+                    :froggo_original_contextual_fds_color
+                """.trimIndent())
+
+                // LX/1z0.A03 is the central FDS resolver. It may return a cached value or
+                // delegate to the runtime resolver before styled attributes are consulted.
+                // Resolve only normal semantic UI roles through Monet in dark mode. Media,
+                // on-color, badge and reaction tokens remain on Facebook's original path.
+                val baseFdsColorMethod = baseFdsColor.method
+                require(baseFdsColorMethod.implementation!!.registerCount >= 5)
+                baseFdsColorMethod.addInstructions(0, """
+                    if-eqz p1, :froggo_original_base_fds_color
+                    invoke-static {p1}, LX/1yy;->A06(Landroid/content/Context;)Z
+                    move-result v0
+                    if-eqz v0, :froggo_original_base_fds_color
+
+                    sget-object v0, LX/1y5;->A01:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_accent
+                    sget-object v0, LX/1y5;->A3J:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_accent
+
+                    sget-object v0, LX/1y5;->A3M:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_primary_foreground
+                    sget-object v0, LX/1y5;->A3Q:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_primary_foreground
+
+                    sget-object v0, LX/1y5;->A3z:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_background
+                    sget-object v0, LX/1y5;->A40:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_background
+                    sget-object v0, LX/1y5;->A44:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_background
+                    sget-object v0, LX/1y5;->A45:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_foreground
+                    sget-object v0, LX/1y5;->A49:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_foreground
+
+                    sget-object v0, LX/1y5;->A0B:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_surface
+                    sget-object v0, LX/1y5;->A0P:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_surface
+                    sget-object v0, LX/1y5;->A0O:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_card_surface
+                    sget-object v0, LX/1y5;->A0Q:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_card_surface
+                    sget-object v0, LX/1y5;->A4U:LX/1y5;
+                    if-ne p2, v0, :froggo_original_base_fds_color
+
+                    :froggo_base_fds_card_surface
+                    sget v0, Landroid/R${'$'}color;->system_neutral2_900:I
+                    goto :froggo_resolve_base_fds_color
+
+                    :froggo_base_fds_secondary_surface
+                    sget v0, Landroid/R${'$'}color;->system_neutral1_800:I
+                    goto :froggo_resolve_base_fds_color
+
+                    :froggo_base_fds_secondary_foreground
+                    sget v0, Landroid/R${'$'}color;->system_accent1_200:I
+                    goto :froggo_resolve_base_fds_color
+
+                    :froggo_base_fds_secondary_background
+                    sget v0, Landroid/R${'$'}color;->system_neutral1_700:I
+                    goto :froggo_resolve_base_fds_color
+
+                    :froggo_base_fds_primary_foreground
+                    sget v0, Landroid/R${'$'}color;->system_neutral1_900:I
+                    goto :froggo_resolve_base_fds_color
+
+                    :froggo_base_fds_accent
+                    sget v0, Landroid/R${'$'}color;->system_accent1_200:I
+
+                    :froggo_resolve_base_fds_color
+                    invoke-virtual {p1, v0}, Landroid/content/Context;->getColor(I)I
+                    move-result v0
+                    return v0
+
+                    :froggo_original_base_fds_color
+                """.trimIndent())
+
+                // FDSButton resolves normal PRIMARY/SECONDARY variants through contextual
+                // spectra before theme attrs. Override only those semantic variants in dark
+                // mode; disabled, *_ON_MEDIA and *_ON_COLOR continue through Facebook.
+                val fdsButtonTextIconMethod = fdsButtonTextIconColor.method
+                require(fdsButtonTextIconMethod.implementation!!.registerCount == 7)
+                fdsButtonTextIconMethod.addInstructions(0, """
+                    if-eqz p3, :froggo_original_fds_button_foreground
+                    iget-object v0, p2, LX/276;->A05:LX/3QZ;
+                    iget-object v0, v0, LX/3QZ;->A0C:Landroid/content/Context;
+                    invoke-static {v0}, LX/1yy;->A06(Landroid/content/Context;)Z
+                    move-result v1
+                    if-eqz v1, :froggo_original_fds_button_foreground
+                    sget-object v1, LX/4K5;->A02:LX/4K5;
+                    if-eq p1, v1, :froggo_primary_fds_button_foreground
+                    sget-object v1, LX/4K5;->A06:LX/4K5;
+                    if-ne p1, v1, :froggo_original_fds_button_foreground
+                    sget v1, Landroid/R${'$'}color;->system_accent1_200:I
+                    goto :froggo_resolve_fds_button_foreground
+                    :froggo_primary_fds_button_foreground
+                    sget v1, Landroid/R${'$'}color;->system_neutral1_900:I
+                    :froggo_resolve_fds_button_foreground
+                    invoke-virtual {v0, v1}, Landroid/content/Context;->getColor(I)I
+                    move-result v0
+                    return v0
+                    :froggo_original_fds_button_foreground
+                """.trimIndent())
+
+                val fdsButtonBackgroundMethod = fdsButtonBackgroundDrawable.method
+                require(fdsButtonBackgroundMethod.implementation!!.registerCount == 6)
+                fdsButtonBackgroundMethod.addInstructions(0, """
+                    iget-boolean v0, p0, LX/5Rs;->A0B:Z
+                    if-eqz v0, :froggo_original_fds_button_background
+                    iget-object v0, p1, LX/276;->A05:LX/3QZ;
+                    iget-object v0, v0, LX/3QZ;->A0C:Landroid/content/Context;
+                    invoke-static {v0}, LX/1yy;->A06(Landroid/content/Context;)Z
+                    move-result v1
+                    if-eqz v1, :froggo_original_fds_button_background
+                    iget-object v1, p0, LX/5Rs;->A05:LX/4K5;
+                    sget-object v2, LX/4K5;->A02:LX/4K5;
+                    if-eq v1, v2, :froggo_primary_fds_button_background
+                    sget-object v2, LX/4K5;->A06:LX/4K5;
+                    if-ne v1, v2, :froggo_original_fds_button_background
+                    sget v2, Landroid/R${'$'}color;->system_neutral1_700:I
+                    goto :froggo_resolve_fds_button_background
+                    :froggo_primary_fds_button_background
+                    sget v2, Landroid/R${'$'}color;->system_accent1_200:I
+                    :froggo_resolve_fds_button_background
+                    invoke-virtual {v0, v2}, Landroid/content/Context;->getColor(I)I
+                    move-result p2
+                    :froggo_original_fds_button_background
+                """.trimIndent())
+
+                // CDS buttons use a separate semantic resolver on other Facebook surfaces.
+                // Override only normal PRIMARY/SECONDARY roles in dark mode; *_ON_MEDIA
+                // variants continue through Facebook unchanged.
+                val cdsButtonMethod = cdsButtonVariant.method
+
+                require(cdsButtonMethod.implementation!!.registerCount == 33)
+                val cdsButtonColorResolvers = cdsButtonMethod.implementation!!.instructions.withIndex().filter { (_, instruction) ->
+                    (instruction as? ReferenceInstruction)?.reference.toString() == "LX/Ytn;->A00(LX/YL0;LX/a0p;)I"
+                }.toList()
+                require(cdsButtonColorResolvers.size == 2) {
+                    "Expected exactly two CDS color resolver calls in ZQi.ETY"
+                }
+                val cdsButtonBackgroundResult = cdsButtonColorResolvers.first().index + 2
+                cdsButtonMethod.addInstructions(cdsButtonBackgroundResult, """
+                    move-object/from16 v14, p1
+                    invoke-static {v14}, LX/1yy;->A06(Landroid/content/Context;)Z
+                    move-result v14
+                    if-eqz v14, :froggo_original_cds_button_background
+                    if-eqz v10, :froggo_primary_cds_button_background
+                    sget v15, Landroid/R${'$'}color;->system_neutral1_700:I
+                    goto :froggo_resolve_cds_button_background
+                    :froggo_primary_cds_button_background
+                    sget v15, Landroid/R${'$'}color;->system_accent1_200:I
+                    :froggo_resolve_cds_button_background
+                    move-object/from16 v14, p1
+                    invoke-virtual {v14, v15}, Landroid/content/Context;->getColor(I)I
+                    move-result v15
+                    :froggo_original_cds_button_background
+                """.trimIndent())
+
+                val cdsButtonTextMethod = cdsButtonTextStyle.method
+                require(cdsButtonTextMethod.implementation!!.registerCount == 11)
+                val cdsButtonTextResolver = cdsButtonTextMethod.implementation!!.instructions.withIndex().filter { (_, instruction) ->
+                    (instruction as? ReferenceInstruction)?.reference.toString() == "LX/Ytn;->A00(LX/YL0;LX/a0p;)I"
+                }.single().index + 2
+                cdsButtonTextMethod.addInstructions(cdsButtonTextResolver, """
+                    invoke-static {p1}, LX/1yy;->A06(Landroid/content/Context;)Z
+                    move-result v0
+                    if-eqz v0, :froggo_original_cds_button_text
+                    iget-object v0, p0, LX/ZQo;->A00:LX/YL0;
+                    sget-object v1, LX/YL0;->A2B:LX/YL0;
+                    if-eq v0, v1, :froggo_primary_cds_button_text
+                    sget-object v1, LX/YL0;->A3E:LX/YL0;
+                    if-ne v0, v1, :froggo_original_cds_button_text
+                    sget v0, Landroid/R${'$'}color;->system_accent1_200:I
+                    goto :froggo_resolve_cds_button_text
+                    :froggo_primary_cds_button_text
+                    sget v0, Landroid/R${'$'}color;->system_neutral1_900:I
+                    :froggo_resolve_cds_button_text
+                    invoke-virtual {p1, v0}, Landroid/content/Context;->getColor(I)I
+                    move-result v6
+                    :froggo_original_cds_button_text
+                """.trimIndent())
+
                 val splitCardInstructions = addToStorySplitCard.method.implementation!!.instructions
                 val splitCardLiterals = splitCardInstructions.withIndex().mapNotNull { (index, instruction) ->
                     if ((instruction as? NarrowLiteralInstruction)?.narrowLiteral == FACEBOOK_DARK_CARD_COLOR) {
@@ -381,10 +640,6 @@ val changeFacebookTheme573Patch = resourcePatch(
                     colors.replaceColorValue("color_0x7f060003", "@android:color/system_neutral1_50")
                     colors.replaceColorValue("color_0x7f060004", "@android:color/system_neutral1_10")
                     colors.replaceColorValue("color_0x7f060005", "@android:color/system_neutral2_200")
-                    colors.replaceColorValue("color_0x7f060463", "@android:color/system_neutral1_900")
-                    colors.replaceColorValue("color_0x7f060464", "@android:color/system_accent1_200")
-                    colors.replaceColorValue("color_0x7f060465", "@android:color/system_neutral1_800")
-                    colors.replaceColorValue("color_0x7f060466", "@android:color/system_neutral1_50")
                 }
             }
 
