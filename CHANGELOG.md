@@ -1,3 +1,11 @@
+## [1.4.0-dev.2](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.4.0-dev.1...v1.4.0-dev.2) (2026-09-07)
+
+### ✨ New Features
+
+* **facebook:** add FDS button color handling and contextual color resolution for dark mode ([677b563](https://github.com/SapitoSucio/FroggoMorphePatches/commit/677b563fd891d2c33e42008aad1282a8d6440b9c))
+* **facebook:** add notification CTA color handling and integrate bloks themed color resolver ([99009cd](https://github.com/SapitoSucio/FroggoMorphePatches/commit/99009cd08741bc05c06cc503cbbf0ef22bc8f956))
+* **facebook:** enhance Material You style application and improve color handling for contextual elements ([f021fcf](https://github.com/SapitoSucio/FroggoMorphePatches/commit/f021fcf4d5da4f3955be0184039b2c089832beb3))
+
 ## [1.4.0-dev.1](https://github.com/SapitoSucio/FroggoMorphePatches/compare/v1.3.1-dev.2...v1.4.0-dev.1) (2026-09-03)
 
 ### ✨ New Features
