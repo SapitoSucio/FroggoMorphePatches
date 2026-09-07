@@ -115,6 +115,14 @@ private val cdsButtonTextStyle = Fingerprint(
     custom = { method, classDef -> classDef.type == "LX/ZQo;" && method.name == "A00" },
 )
 
+private val bloksThemedColorResolver = Fingerprint(
+    returnType = "I",
+    parameters = listOf("LX/3Q5;", "LX/a5T;", "I"),
+    custom = { method, classDef ->
+        classDef.type == "LX/6zL;" && method.name == "A00"
+    },
+)
+
 private fun org.w3c.dom.Document.replaceStyleItem(styleName: String, itemName: String, value: String) {
     val styles = getElementsByTagName("style.2")
     for (styleIndex in 0 until styles.length) {
@@ -268,6 +276,154 @@ val changeFacebookTheme573Patch = resourcePatch(
                     """.trimIndent())
                 }
                 postBodyText.classDef.methods.add(bodyColor)
+
+                val notificationCtaVariant = ImmutableMethod(
+                    postBodyText.classDef.type,
+                    "froggoNotificationCtaVariant",
+                    listOf(ImmutableMethodParameter("LX/3Q5;", null, null)),
+                    "I",
+                    AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                    null, null, MutableMethodImplementation(6),
+                ).toMutable().apply {
+                    addInstructions(0, """
+                        if-eqz p0, :froggo_cta_variant_none
+                        iget-object v0, p0, LX/3Q5;->A01:LX/9Br;
+                        const/16 v3, 0x80
+                        :froggo_cta_variant_loop
+                        if-eqz v0, :froggo_cta_variant_none
+                        invoke-interface {v0}, LX/9Br;->CEh()Ljava/lang/String;
+                        move-result-object v1
+                        if-eqz v1, :froggo_cta_variant_next
+                        const-string v2, "32:0:13320"
+                        invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                        move-result v4
+                        if-nez v4, :froggo_cta_variant_primary
+                        const-string v2, "32:1:13320"
+                        invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                        move-result v4
+                        if-nez v4, :froggo_cta_variant_secondary
+                        const-string v2, "32:2:13320"
+                        invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                        move-result v4
+                        if-nez v4, :froggo_cta_variant_none
+                        const-string v2, "32:4:13320"
+                        invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                        move-result v4
+                        if-nez v4, :froggo_cta_variant_none
+                        const-string v2, "32:6:13320"
+                        invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                        move-result v4
+                        if-nez v4, :froggo_cta_variant_none
+                        :froggo_cta_variant_next
+                        invoke-interface {v0}, LX/9Br;->BnV()LX/9Br;
+                        move-result-object v0
+                        add-int/lit8 v3, v3, -0x1
+                        if-gtz v3, :froggo_cta_variant_loop
+                        goto :froggo_cta_variant_none
+                        :froggo_cta_variant_primary
+                        const/4 v0, 0x1
+                        return v0
+                        :froggo_cta_variant_secondary
+                        const/4 v0, 0x2
+                        return v0
+                        :froggo_cta_variant_none
+                        const/4 v0, 0x0
+                        return v0
+                    """.trimIndent())
+                }
+                postBodyText.classDef.methods.add(notificationCtaVariant)
+
+                val notificationCtaBloksColor = ImmutableMethod(
+                    postBodyText.classDef.type,
+                    "froggoNotificationCtaBloksColor",
+                    listOf(
+                        ImmutableMethodParameter("LX/3Q5;", null, null),
+                        ImmutableMethodParameter("LX/a5T;", null, null),
+                        ImmutableMethodParameter("I", null, null),
+                    ),
+                    "I",
+                    AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                    null, null, MutableMethodImplementation(8),
+                ).toMutable().apply {
+                    addInstructions(0, """
+                        if-eqz p0, :froggo_cta_color_original
+                        if-eqz p1, :froggo_cta_color_original
+                        invoke-interface {p1}, LX/a5T;->CVE()Z
+                        move-result v0
+                        if-eqz v0, :froggo_cta_color_original
+                        iget v0, p0, LX/3Q5;->A05:I
+                        const/16 v1, 0x3435
+                        if-ne v0, v1, :froggo_cta_color_original
+                        iget-object v0, p0, LX/3Q5;->A01:LX/9Br;
+                        if-eqz v0, :froggo_cta_color_original
+                        invoke-interface {v0}, LX/9Br;->CEh()Ljava/lang/String;
+                        move-result-object v1
+                        const-string v2, "35:13365"
+                        invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                        move-result v3
+                        if-nez v3, :froggo_cta_color_background
+                        const-string v2, "44:13365"
+                        invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                        move-result v3
+                        if-eqz v3, :froggo_cta_color_original
+                        const/4 v4, 0x0
+                        goto :froggo_cta_color_role
+                        :froggo_cta_color_background
+                        const/4 v4, 0x1
+                        :froggo_cta_color_role
+                        invoke-static {p0}, LX/30L;->froggoNotificationCtaVariant(LX/3Q5;)I
+                        move-result v1
+                        if-eqz v1, :froggo_cta_color_original
+                        if-eqz v4, :froggo_cta_color_foreground
+                        const v2, 0xff0866ff
+                        if-eq p2, v2, :froggo_cta_color_primary_background
+                        const v2, 0xffb8c6ee
+                        if-eq p2, v2, :froggo_cta_color_primary_background
+                        const v2, 0xff252728
+                        if-eq p2, v2, :froggo_cta_color_secondary_background
+                        const v2, 0xff393946
+                        if-ne p2, v2, :froggo_cta_color_original
+                        :froggo_cta_color_secondary_background
+                        const v1, 0x01060419
+                        goto :froggo_cta_color_resolve
+                        :froggo_cta_color_primary_background
+                        const v1, 0x01060396
+                        goto :froggo_cta_color_resolve
+                        :froggo_cta_color_foreground
+                        const/4 v2, -0x1
+                        if-ne p2, v2, :froggo_cta_color_secondary_foreground
+                        const v1, 0x0106041d
+                        goto :froggo_cta_color_resolve
+                        :froggo_cta_color_secondary_foreground
+                        const v2, 0xfff2f4f7
+                        if-ne p2, v2, :froggo_cta_color_original
+                        const v1, 0x01060396
+                        :froggo_cta_color_resolve
+                        instance-of v0, p1, LX/4Dw;
+                        if-eqz v0, :froggo_cta_color_original
+                        check-cast p1, LX/4Dw;
+                        iget-object v0, p1, LX/4Dw;->A00:Landroid/content/Context;
+                        invoke-virtual {v0, v1}, Landroid/content/Context;->getColor(I)I
+                        move-result v0
+                        return v0
+                        :froggo_cta_color_original
+                        return p2
+                    """.trimIndent())
+                }
+                postBodyText.classDef.methods.add(notificationCtaBloksColor)
+
+                val themedColorMethod = bloksThemedColorResolver.method
+                val themedColorCalls = themedColorMethod.implementation!!.instructions.withIndex().filter { (_, instruction) ->
+                    (instruction as? ReferenceInstruction)?.reference.toString() ==
+                        "LX/7dA;->A08(Ljava/lang/String;I)I"
+                }.map { it.index }.toList()
+                require(themedColorCalls.size == 2)
+                themedColorCalls.asReversed().forEach { callIndex ->
+                    themedColorMethod.addInstructions(callIndex + 2, """
+                        invoke-static {p0, p1, v0}, ${postBodyText.classDef.type}->froggoNotificationCtaBloksColor(LX/3Q5;LX/a5T;I)I
+                        move-result v0
+                    """.trimIndent())
+                }
 
                 // A23(0) selects the default body color; explicit media/custom colors survive.
                 val postMethod = postBodyText.method
