@@ -173,13 +173,14 @@ private fun org.w3c.dom.Document.applyMaterialYouStyle(styleName: String) {
     replaceStyleItem(styleName, "attr_0x7f04061c", background)
     replaceStyleItem(styleName, "attr_0x7f040628", background)
     replaceStyleItem(styleName, "attr_0x7f0405de", primaryIcon)
+    replaceStyleItem(styleName, "attr_0x7f0405df", primaryIcon)
     replaceStyleItem(styleName, "attr_0x7f0405e1", primaryName)
     replaceStyleItem(styleName, "attr_0x7f04057a", primaryName)
     replaceStyleItem(styleName, "attr_0x7f0405cb", metadata)
     replaceStyleItem(styleName, "attr_0x7f0405a7", metadata)
     replaceStyleItem(styleName, "attr_0x7f040601", secondaryText)
     replaceStyleItem(styleName, "attr_0x7f040605", accent)
-    replaceStyleItem(styleName, "attr_0x7f04060a", secondaryText)
+    replaceStyleItem(styleName, "attr_0x7f04060a", primaryIcon)
     replaceStyleItem(styleName, "attr_0x7f04060d", metadata)
     replaceStyleItem(styleName, "attr_0x7f04062b", tertiaryIcon)
     replaceStyleItem(styleName, "attr_0x7f04062c", tertiaryText)
@@ -191,7 +192,7 @@ private fun org.w3c.dom.Document.applyMaterialYouStyle(styleName: String) {
     replaceStyleItem(styleName, "attr_0x7f04062a", secondaryText)
 
     // Semantic accent/border/story roles that are consumed directly by FDS.
-    replaceStyleItem(styleName, "attr_0x7f040500", secondaryText) // accent deemphasized
+    replaceStyleItem(styleName, "attr_0x7f040500", "@android:color/system_accent2_800") // accent deemphasized
     replaceStyleItem(styleName, "attr_0x7f040501", accent) // active dot
     replaceStyleItem(styleName, "attr_0x7f04050a", "@android:color/system_neutral1_800") // background deemphasized
     replaceStyleItem(styleName, "attr_0x7f040510", secondaryText) // focus border
@@ -361,6 +362,49 @@ val changeFacebookTheme573Patch = resourcePatch(
                         const-string v2, "35:13365"
                         invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
                         move-result v3
+                        if-eqz v3, :froggo_bloks_icon_color
+                        const v2, 0xff0866ff
+                        if-eq p2, v2, :froggo_bloks_accent_background
+                        const v2, 0xff252728
+                        if-eq p2, v2, :froggo_bloks_neutral_background
+                        const/4 v2, -0x1
+                        if-ne p2, v2, :froggo_cta_color_provenance
+                        invoke-static {p0}, LX/30L;->froggoNotificationCtaVariant(LX/3Q5;)I
+                        move-result v2
+                        if-nez v2, :froggo_cta_color_provenance
+                        const v1, 0x01060396
+                        goto :froggo_cta_color_resolve
+                        :froggo_bloks_neutral_background
+                        const v1, 0x01060419
+                        goto :froggo_cta_color_resolve
+                        :froggo_bloks_accent_background
+                        const v1, 0x01060396
+                        goto :froggo_cta_color_resolve
+                        :froggo_bloks_icon_color
+                        const-string v2, "71:13365"
+                        invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                        move-result v3
+                        if-eqz v3, :froggo_bloks_foreground_icon_color
+                        const/4 v2, -0x1
+                        if-ne p2, v2, :froggo_cta_color_provenance
+                        const v1, 0x01060396
+                        goto :froggo_cta_color_resolve
+                        :froggo_bloks_foreground_icon_color
+                        const-string v2, "44:13365"
+                        invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                        move-result v3
+                        if-eqz v3, :froggo_cta_color_provenance
+                        const/4 v2, -0x1
+                        if-ne p2, v2, :froggo_cta_color_provenance
+                        invoke-static {p0}, LX/30L;->froggoNotificationCtaVariant(LX/3Q5;)I
+                        move-result v2
+                        if-nez v2, :froggo_cta_color_provenance
+                        const v1, 0x01060396
+                        goto :froggo_cta_color_resolve
+                        :froggo_cta_color_provenance
+                        const-string v2, "35:13365"
+                        invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                        move-result v3
                         if-nez v3, :froggo_cta_color_background
                         const-string v2, "44:13365"
                         invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -384,9 +428,13 @@ val changeFacebookTheme573Patch = resourcePatch(
                         const v2, 0xff393946
                         if-ne p2, v2, :froggo_cta_color_original
                         :froggo_cta_color_secondary_background
+                        const/4 v2, 0x2
+                        if-ne v1, v2, :froggo_cta_color_original
                         const v1, 0x01060419
                         goto :froggo_cta_color_resolve
                         :froggo_cta_color_primary_background
+                        const/4 v2, 0x1
+                        if-ne v1, v2, :froggo_cta_color_original
                         const v1, 0x01060396
                         goto :froggo_cta_color_resolve
                         :froggo_cta_color_foreground
@@ -487,6 +535,8 @@ val changeFacebookTheme573Patch = resourcePatch(
                     if-eqz v1, :froggo_original_contextual_fds_color
                     sget-object v1, LX/1y5;->A3J:LX/1y5;
                     if-eq p1, v1, :froggo_contextual_fds_primary_background
+                    sget-object v1, LX/1y5;->A02:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_deemphasized_accent
                     sget-object v1, LX/1y5;->A3Q:LX/1y5;
                     if-eq p1, v1, :froggo_contextual_fds_primary_foreground
                     sget-object v1, LX/1y5;->A3M:LX/1y5;
@@ -496,12 +546,32 @@ val changeFacebookTheme573Patch = resourcePatch(
                     sget-object v1, LX/1y5;->A49:LX/1y5;
                     if-eq p1, v1, :froggo_contextual_fds_secondary_foreground
                     sget-object v1, LX/1y5;->A45:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_secondary_foreground
+                    sget-object v1, LX/1y5;->A2m:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_notification_background
+                    sget-object v1, LX/1y5;->A3W:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_secondary_foreground
+                    sget-object v1, LX/1y5;->A3X:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_secondary_foreground
+                    sget-object v1, LX/1y5;->A4C:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_secondary_foreground
+                    sget-object v1, LX/1y5;->A3Y:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_secondary_foreground
+                    sget-object v1, LX/1y5;->A3b:LX/1y5;
+                    if-eq p1, v1, :froggo_contextual_fds_secondary_foreground
+                    sget-object v1, LX/1y5;->A4H:LX/1y5;
                     if-ne p1, v1, :froggo_original_contextual_fds_color
                     :froggo_contextual_fds_secondary_foreground
                     sget v1, Landroid/R${'$'}color;->system_accent1_200:I
                     goto :froggo_resolve_contextual_fds_color
                     :froggo_contextual_fds_secondary_background
                     sget v1, Landroid/R${'$'}color;->system_neutral1_700:I
+                    goto :froggo_resolve_contextual_fds_color
+                    :froggo_contextual_fds_notification_background
+                    sget v1, Landroid/R${'$'}color;->system_neutral2_800:I
+                    goto :froggo_resolve_contextual_fds_color
+                    :froggo_contextual_fds_deemphasized_accent
+                    sget v1, Landroid/R${'$'}color;->system_accent2_800:I
                     goto :froggo_resolve_contextual_fds_color
                     :froggo_contextual_fds_primary_foreground
                     sget v1, Landroid/R${'$'}color;->system_neutral1_900:I
@@ -529,6 +599,8 @@ val changeFacebookTheme573Patch = resourcePatch(
 
                     sget-object v0, LX/1y5;->A01:LX/1y5;
                     if-eq p2, v0, :froggo_base_fds_accent
+                    sget-object v0, LX/1y5;->A02:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_deemphasized_accent
                     sget-object v0, LX/1y5;->A3J:LX/1y5;
                     if-eq p2, v0, :froggo_base_fds_accent
 
@@ -547,6 +619,20 @@ val changeFacebookTheme573Patch = resourcePatch(
                     if-eq p2, v0, :froggo_base_fds_secondary_foreground
                     sget-object v0, LX/1y5;->A49:LX/1y5;
                     if-eq p2, v0, :froggo_base_fds_secondary_foreground
+                    sget-object v0, LX/1y5;->A3W:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_foreground
+                    sget-object v0, LX/1y5;->A3X:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_foreground
+                    sget-object v0, LX/1y5;->A4C:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_foreground
+                    sget-object v0, LX/1y5;->A3Y:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_foreground
+                    sget-object v0, LX/1y5;->A3b:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_foreground
+                    sget-object v0, LX/1y5;->A4H:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_secondary_foreground
+                    sget-object v0, LX/1y5;->A2m:LX/1y5;
+                    if-eq p2, v0, :froggo_base_fds_notification_background
 
                     sget-object v0, LX/1y5;->A0B:LX/1y5;
                     if-eq p2, v0, :froggo_base_fds_secondary_surface
@@ -557,9 +643,14 @@ val changeFacebookTheme573Patch = resourcePatch(
                     sget-object v0, LX/1y5;->A0Q:LX/1y5;
                     if-eq p2, v0, :froggo_base_fds_card_surface
                     sget-object v0, LX/1y5;->A4U:LX/1y5;
-                    if-ne p2, v0, :froggo_original_base_fds_color
+                    if-eq p2, v0, :froggo_base_fds_surface
+                    goto :froggo_original_base_fds_color
 
                     :froggo_base_fds_card_surface
+                    sget v0, Landroid/R${'$'}color;->system_neutral1_700:I
+                    goto :froggo_resolve_base_fds_color
+
+                    :froggo_base_fds_surface
                     sget v0, Landroid/R${'$'}color;->system_neutral2_900:I
                     goto :froggo_resolve_base_fds_color
 
@@ -573,6 +664,14 @@ val changeFacebookTheme573Patch = resourcePatch(
 
                     :froggo_base_fds_secondary_background
                     sget v0, Landroid/R${'$'}color;->system_neutral1_700:I
+                    goto :froggo_resolve_base_fds_color
+
+                    :froggo_base_fds_notification_background
+                    sget v0, Landroid/R${'$'}color;->system_neutral2_800:I
+                    goto :froggo_resolve_base_fds_color
+
+                    :froggo_base_fds_deemphasized_accent
+                    sget v0, Landroid/R${'$'}color;->system_accent2_800:I
                     goto :froggo_resolve_base_fds_color
 
                     :froggo_base_fds_primary_foreground
