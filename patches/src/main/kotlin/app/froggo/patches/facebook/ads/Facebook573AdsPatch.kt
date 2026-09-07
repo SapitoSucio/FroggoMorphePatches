@@ -4,6 +4,18 @@ import app.froggo.patches.shared.Constants.COMPATIBILITY_FACEBOOK_573
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction10t
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11n
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22t
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22x
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReference
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableStringReference
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 
 /*
@@ -72,6 +84,11 @@ private val asyncFeedAdsController = feedExactMethod(
     ),
 )
 
+private val multiAdsSponsoredData = feedExactMethod(
+    "Lcom/facebook/graphql/model/GraphQLFBMultiAdsFeedUnit;",
+    "A00",
+)
+
 private val feedEdgeInsertion = feedExactMethod(
     "LX/1vv;",
     "addNewEdgeToCollection",
@@ -80,11 +97,6 @@ private val feedEdgeInsertion = feedExactMethod(
         "Lcom/facebook/graphql/model/GraphQLFeedUnitEdge;",
         "LX/1cP;",
     ),
-)
-
-private val multiAdsSponsoredData = feedExactMethod(
-    "Lcom/facebook/graphql/model/GraphQLFBMultiAdsFeedUnit;",
-    "A00",
 )
 
 @Suppress("unused")
@@ -122,25 +134,38 @@ val blockFacebookFeedAds573Patch = bytecodePatch(
                 return-object v0
             """.trimIndent(),
         )
-        feedEdgeInsertion.method.addInstructions(
-            0,
-            """
-                move-object/from16 v0, p2
-                invoke-virtual {v0}, Lcom/facebook/graphql/model/GraphQLFeedUnitEdge;->B6k()Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;
-                move-result-object v1
-                sget-object v2, Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;->A0K:Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;
-                if-eq v1, v2, :froggo_feedads573_drop_edge
-                sget-object v2, Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;->A0I:Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;
-                if-eq v1, v2, :froggo_feedads573_drop_edge
-                goto :froggo_feedads573_keep_edge
+        val edgeMethod = feedEdgeInsertion.method
+        val edgeBody = requireNotNull(edgeMethod.implementation)
+        require(edgeMethod.returnType == "Z" && !AccessFlags.STATIC.isSet(edgeMethod.accessFlags)) {
+            "Unexpected Facebook Feed edge insertion signature"
+        }
+        require(edgeBody.registerCount >= 7) { "Feed edge guard needs three local registers" }
+        val category = "Lcom/crossapp/graphql/facebook/enums/GraphQLFeedStoryCategory;"
 
-                :froggo_feedads573_drop_edge
-                const/4 v0, 0x0
-                return v0
-
-                :froggo_feedads573_keep_edge
-            """.trimIndent(),
+        // Bind targets to this method's locations, so later AI-filter prepends rebase them.
+        val keepEdge = edgeBody.newLabelForIndex(0)
+        val dropInstructions = listOf(
+            BuilderInstruction21c(Opcode.CONST_STRING, 0, ImmutableStringReference("FroggoFeedAds573")),
+            BuilderInstruction21c(Opcode.CONST_STRING, 1, ImmutableStringReference("blocked SPONSORED/PROMOTION")),
+            BuilderInstruction35c(Opcode.INVOKE_STATIC, 2, 0, 1, 0, 0, 0,
+                ImmutableMethodReference("Landroid/util/Log;", "d", listOf("Ljava/lang/String;", "Ljava/lang/String;"), "I")),
+            BuilderInstruction11n(Opcode.CONST_4, 0, 0),
+            BuilderInstruction11x(Opcode.RETURN, 0),
         )
+        dropInstructions.asReversed().forEach { edgeBody.addInstruction(0, it) }
+        val dropEdge = edgeBody.newLabelForIndex(0)
+        val guardInstructions = listOf(
+            BuilderInstruction22x(Opcode.MOVE_OBJECT_FROM16, 0, edgeBody.registerCount - 2),
+            BuilderInstruction35c(Opcode.INVOKE_VIRTUAL, 1, 0, 0, 0, 0, 0,
+                ImmutableMethodReference("Lcom/facebook/graphql/model/GraphQLFeedUnitEdge;", "B6k", emptyList(), category)),
+            BuilderInstruction11x(Opcode.MOVE_RESULT_OBJECT, 1),
+            BuilderInstruction21c(Opcode.SGET_OBJECT, 2, ImmutableFieldReference(category, "A0K", category)),
+            BuilderInstruction22t(Opcode.IF_EQ, 1, 2, dropEdge),
+            BuilderInstruction21c(Opcode.SGET_OBJECT, 2, ImmutableFieldReference(category, "A0I", category)),
+            BuilderInstruction22t(Opcode.IF_EQ, 1, 2, dropEdge),
+            BuilderInstruction10t(Opcode.GOTO, keepEdge),
+        )
+        guardInstructions.asReversed().forEach { edgeBody.addInstruction(0, it) }
         multiAdsSponsoredData.method.addInstructions(
             0,
             """
