@@ -73,12 +73,6 @@ private val navigationColors = listOf("A01", "A02", "A04", "A05").associateWith 
     )
 }
 
-private val commentBodyText = Fingerprint(
-    returnType = "LX/3Pu;",
-    parameters = listOf("LX/24H;"),
-    custom = { method, classDef -> classDef.type == "LX/8HT;" && method.name == "render" },
-)
-
 private val postBodyText = Fingerprint(
     returnType = "LX/3Pu;",
     parameters = listOf("LX/3QZ;"),
@@ -124,25 +118,26 @@ private fun org.w3c.dom.Document.replaceColorValue(colorName: String, value: Str
 private fun org.w3c.dom.Document.applyMaterialYouStyle(styleName: String) {
     val background = "@android:color/system_neutral1_900"
     val primaryIcon = "@android:color/system_accent1_200"
+    val primaryName = "@android:color/system_accent1_100"
     val secondaryText = "@android:color/system_accent1_300"
-    val tertiaryText = "@android:color/system_neutral2_600"
+    val tertiaryIcon = "@android:color/system_neutral2_600"
+    val tertiaryText = "@android:color/system_accent1_300"
     val accent = "@android:color/system_accent1_200"
-    val metadata = "@color/froggo_theme_metadata"
+    val metadata = "@android:color/system_accent1_300"
 
     replaceStyleItem(styleName, "attr_0x7f040646", background)
     replaceStyleItem(styleName, "attr_0x7f04061c", background)
     replaceStyleItem(styleName, "attr_0x7f040628", background)
     replaceStyleItem(styleName, "attr_0x7f0405de", primaryIcon)
-    // Approved soft hierarchy: pale names, mid-tone body copy, quieter metadata.
-    replaceStyleItem(styleName, "attr_0x7f0405e1", "@color/froggo_theme_name")
-    replaceStyleItem(styleName, "attr_0x7f04057a", "@color/froggo_theme_name")
+    replaceStyleItem(styleName, "attr_0x7f0405e1", primaryName)
+    replaceStyleItem(styleName, "attr_0x7f04057a", primaryName)
     replaceStyleItem(styleName, "attr_0x7f0405cb", metadata)
     replaceStyleItem(styleName, "attr_0x7f0405a7", metadata)
     replaceStyleItem(styleName, "attr_0x7f040601", secondaryText)
     replaceStyleItem(styleName, "attr_0x7f040605", accent)
     replaceStyleItem(styleName, "attr_0x7f04060a", secondaryText)
     replaceStyleItem(styleName, "attr_0x7f04060d", metadata)
-    replaceStyleItem(styleName, "attr_0x7f04062b", tertiaryText)
+    replaceStyleItem(styleName, "attr_0x7f04062b", tertiaryIcon)
     replaceStyleItem(styleName, "attr_0x7f04062c", tertiaryText)
     replaceStyleItem(styleName, "attr_0x7f04050f", accent)
     replaceStyleItem(styleName, "attr_0x7f0404ff", accent)
@@ -150,6 +145,22 @@ private fun org.w3c.dom.Document.applyMaterialYouStyle(styleName: String) {
     replaceStyleItem(styleName, "attr_0x7f040627", accent)
     replaceStyleItem(styleName, "attr_0x7f040629", secondaryText)
     replaceStyleItem(styleName, "attr_0x7f04062a", secondaryText)
+
+    // Semantic accent/border/story roles that are consumed directly by FDS.
+    replaceStyleItem(styleName, "attr_0x7f040500", secondaryText) // accent deemphasized
+    replaceStyleItem(styleName, "attr_0x7f040501", accent) // active dot
+    replaceStyleItem(styleName, "attr_0x7f04050a", "@android:color/system_neutral1_800") // background deemphasized
+    replaceStyleItem(styleName, "attr_0x7f040510", secondaryText) // focus border
+    replaceStyleItem(styleName, "attr_0x7f040511", "@android:color/system_neutral2_700") // persistent border
+    replaceStyleItem(styleName, "attr_0x7f040512", "@android:color/system_neutral2_700") // responsive border
+    replaceStyleItem(styleName, "attr_0x7f040513", "@android:color/system_neutral2_700") // emphasis border
+    replaceStyleItem(styleName, "attr_0x7f04051e", "@android:color/system_neutral2_700") // card border
+    replaceStyleItem(styleName, "attr_0x7f04061a", tertiaryIcon) // story seen
+    replaceStyleItem(styleName, "attr_0x7f04061b", accent) // story unseen
+    replaceStyleItem(styleName, "attr_0x7f040631", "@android:color/system_neutral1_800") // text input bar
+    replaceStyleItem(styleName, "attr_0x7f040635", "@android:color/system_neutral2_700") // text input inner border
+    replaceStyleItem(styleName, "attr_0x7f040636", "@android:color/system_neutral2_700") // text input outer border
+    replaceStyleItem(styleName, "attr_0x7f04063f", "@android:color/system_neutral1_700") // UFI icon button background
 
     // Darker posts; secondary containers keep their own lighter surface.
     replaceStyleItem(styleName, "attr_0x7f04061c", "@android:color/system_neutral2_900")
@@ -168,7 +179,7 @@ private fun org.w3c.dom.Document.applyMaterialYouStyle(styleName: String) {
     replaceStyleItem(styleName, "attr_0x7f0405aa", "@android:color/system_neutral2_800") // navigation
     replaceStyleItem(styleName, "attr_0x7f0405ce", "@android:color/system_neutral1_800") // popovers
     replaceStyleItem(styleName, "attr_0x7f040571", "@android:color/system_neutral2_700") // divider
-    replaceStyleItem(styleName, "attr_0x7f04056b", tertiaryText) // disabled icon
+    replaceStyleItem(styleName, "attr_0x7f04056b", tertiaryIcon) // disabled icon
     replaceStyleItem(styleName, "attr_0x7f04056e", tertiaryText) // disabled text
     replaceStyleItem(styleName, "attr_0x7f0405d1", accent) // primary button background
     replaceStyleItem(styleName, "attr_0x7f0405d4", background) // icon on accent button
@@ -198,14 +209,14 @@ val changeFacebookTheme573Patch = resourcePatch(
     dependsOn(bytecodePatch {
         execute {
             if (themeOption.value == "Material You") {
-                // This helper is called only by post/comment body consumers, never by FDSColors.
+                // Resolve the system palette at runtime so the body color follows Monet changes.
                 val bodyColor = ImmutableMethod(
-                    commentBodyText.classDef.type,
+                    postBodyText.classDef.type,
                     "froggoBodyColor",
                     listOf(ImmutableMethodParameter("Landroid/content/Context;", null, null)),
                     "I",
                     AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
-                    null, null, MutableMethodImplementation(5),
+                    null, null, MutableMethodImplementation(2),
                 ).toMutable().apply {
                     addInstructions(0, """
                         invoke-static {p0}, LX/1yy;->A06(Landroid/content/Context;)Z
@@ -214,38 +225,13 @@ val changeFacebookTheme573Patch = resourcePatch(
                         const/4 v0, 0x0
                         return v0
                         :froggo_dark_body
-                        invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
-                        move-result-object v0
-                        const-string v1, "froggo_theme_body"
-                        const-string v2, "color"
-                        invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
-                        move-result-object v3
-                        invoke-virtual {v0, v1, v2, v3}, Landroid/content/res/Resources;->getIdentifier(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
-                        move-result v0
+                        sget v0, Landroid/R${'$'}color;->system_neutral1_200:I
                         invoke-virtual {p0, v0}, Landroid/content/Context;->getColor(I)I
                         move-result v0
                         return v0
                     """.trimIndent())
                 }
-                commentBodyText.classDef.methods.add(bodyColor)
-
-                val commentMethod = commentBodyText.method
-                require(commentMethod.implementation!!.registerCount == 27)
-                val commentAnchor = commentMethod.implementation!!.instructions.withIndex().filter { (_, instruction) ->
-                    (instruction as? ReferenceInstruction)?.reference.toString() == "LX/Fky;->AAS(Landroid/text/Spannable;I)Z"
-                }.single().index
-                val commentDone = commentMethod.implementation!!.newLabelForIndex(commentAnchor + 1)
-                commentMethod.addInstructions(commentAnchor + 1, """
-                    invoke-static {v14}, LX/8HT;->froggoBodyColor(Landroid/content/Context;)I
-                    move-result v1
-                    new-instance v0, Landroid/text/style/ForegroundColorSpan;
-                    invoke-direct {v0, v1}, Landroid/text/style/ForegroundColorSpan;-><init>(I)V
-                    invoke-virtual {v6}, Landroid/text/SpannableStringBuilder;->length()I
-                    move-result v7
-                    const v8, 0xff0021
-                    invoke-virtual {v6, v0, v4, v7, v8}, Landroid/text/SpannableStringBuilder;->setSpan(Ljava/lang/Object;III)V
-                """.trimIndent())
-                commentMethod.implementation!!.addInstruction(commentAnchor + 3, BuilderInstruction21t(Opcode.IF_EQZ, 1, commentDone))
+                postBodyText.classDef.methods.add(bodyColor)
 
                 // A23(0) selects the default body color; explicit media/custom colors survive.
                 val postMethod = postBodyText.method
@@ -256,13 +242,13 @@ val changeFacebookTheme573Patch = resourcePatch(
                 val postDone = postMethod.implementation!!.newLabelForIndex(postAnchor)
                 postMethod.addInstructions(postAnchor, """
                     iget-object v1, v3, LX/3QZ;->A0C:Landroid/content/Context;
-                    invoke-static {v1}, LX/8HT;->froggoBodyColor(Landroid/content/Context;)I
+                    invoke-static {v1}, LX/30L;->froggoBodyColor(Landroid/content/Context;)I
                     move-result v1
                 """.trimIndent())
                 postMethod.implementation!!.addInstruction(postAnchor, BuilderInstruction21t(Opcode.IF_NEZ, 1, postDone))
 
                 // Branches bind to this method's locations, not detached snippet offsets.
-                listOf(commentMethod, postMethod).forEach { method ->
+                listOf(postMethod).forEach { method ->
                     val instructions = method.implementation!!.instructions.toList()
                     val addresses = instructions.runningFold(0) { address, instruction -> address + instruction.codeUnits }.dropLast(1)
                     instructions.forEachIndexed { index, instruction ->
@@ -369,18 +355,6 @@ val changeFacebookTheme573Patch = resourcePatch(
             }
 
             "Material You" -> {
-                // Android's native tonal conversion retains the wallpaper hue without
-                // hardcoding the green preview. L* separates text by perceived lightness.
-                mapOf("name" to 92, "body" to 82, "metadata" to 65).forEach { (role, tone) ->
-                    get("res/color/froggo_theme_$role.xml").apply {
-                        parentFile.mkdirs()
-                        writeText("""
-                            <selector xmlns:android="http://schemas.android.com/apk/res/android">
-                                <item android:color="@android:color/system_neutral2_600" android:lStar="$tone" />
-                            </selector>
-                        """.trimIndent())
-                    }
-                }
                 document("res/values/style.2s.xml").use { styles ->
                     // ThemePreferences applies 0x7f20022b/22c for dark.
                     styles.applyMaterialYouStyle("style.2_0x7f20022b")
@@ -388,16 +362,29 @@ val changeFacebookTheme573Patch = resourcePatch(
                 }
 
                 document("res/values/colors.xml").use { colors ->
-                    // FDS/MIG components frequently resolve these resources directly instead of
-                    // consulting the root theme attributes. 0x7f0601fb is the direct dark card
-                    // surface used by several feed/search components; keep it distinct from WASH.
+                    // FDS/MIG components frequently bypass the root theme and read these directly.
+                    // Keep every override as an Android dynamic-color reference, never a preview hex.
+                    colors.replaceColorValue("color_0x7f060001", "@android:color/system_accent1_500")
+                    colors.replaceColorValue("color_0x7f060002", "@android:color/system_neutral1_10")
+                    colors.replaceColorValue("color_0x7f060003", "@android:color/system_neutral1_900")
+                    colors.replaceColorValue("color_0x7f060004", "@android:color/system_neutral1_800")
+                    colors.replaceColorValue("color_0x7f060005", "@android:color/system_neutral2_700")
+                    colors.replaceColorValue("color_0x7f0600a8", "@android:color/system_accent1_500")
+                    colors.replaceColorValue("color_0x7f0602d4", "@android:color/system_accent1_500")
+                    colors.replaceColorValue("color_0x7f06035c", "@android:color/system_accent1_500")
                     colors.replaceColorValue("color_0x7f0601fb", "@android:color/system_neutral2_900")
                     colors.replaceColorValue("color_0x7f060153", "@android:color/system_neutral1_800")
                 }
 
                 document("res/values-night/colors.xml").use { colors ->
-                    // This night-qualified surface is also fetched directly by some views.
+                    colors.replaceColorValue("color_0x7f060002", "@android:color/system_neutral1_900")
+                    colors.replaceColorValue("color_0x7f060003", "@android:color/system_neutral1_50")
+                    colors.replaceColorValue("color_0x7f060004", "@android:color/system_neutral1_10")
+                    colors.replaceColorValue("color_0x7f060005", "@android:color/system_neutral2_200")
                     colors.replaceColorValue("color_0x7f060463", "@android:color/system_neutral1_900")
+                    colors.replaceColorValue("color_0x7f060464", "@android:color/system_accent1_200")
+                    colors.replaceColorValue("color_0x7f060465", "@android:color/system_neutral1_800")
+                    colors.replaceColorValue("color_0x7f060466", "@android:color/system_neutral1_50")
                 }
             }
 
