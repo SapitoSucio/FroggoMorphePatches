@@ -187,6 +187,47 @@ val facebook573AiFilterSuggestedDiagnosticsPatch = bytecodePatch(
 
 @Suppress("unused")
 val hideFacebookSuggestedForYou573Patch = bytecodePatch(
+    name = "Hide Facebook suggested posts (573)",
+    description = "Keeps Facebook's ranked Home feed while hiding suggested posts and Follow recommendations.",
+    default = false,
+) {
+    compatibleWith(COMPATIBILITY_FACEBOOK_573)
+
+    execute {
+        feedEdgeInsertion.method.addInstructions(
+            0,
+            """
+                move-object/from16 v0, p2
+                invoke-virtual {v0}, Lcom/facebook/graphql/model/GraphQLFeedUnitEdge;->BO4()LX/3S1;
+                move-result-object v1
+                instance-of v2, v1, Lcom/facebook/graphql/model/GraphQLStory;
+                if-eqz v2, :froggo_suggested573_keep_edge
+                check-cast v1, Lcom/facebook/graphql/model/GraphQLStory;
+                invoke-virtual {v1}, Lcom/facebook/graphql/model/GraphQLStory;->A0j()Lcom/google/common/collect/ImmutableList;
+                move-result-object v2
+                const-string v1, "FollowProfileActionLink"
+                invoke-static {v1, v2}, LX/2m4;->A05(Ljava/lang/String;Ljava/util/List;)LX/41Q;
+                move-result-object v1
+                if-eqz v1, :froggo_suggested573_keep_edge
+                # 0x18b7967b is the cache key for should_use_blue_link,
+                # which renders the Follow button for unfollowed profiles.
+                const v2, 0x18b7967b
+                invoke-virtual {v1, v2}, Lcom/facebook/graphql/modelutil/BaseModelWithTree;->getCachedBoolean(I)Z
+                move-result v1
+                if-eqz v1, :froggo_suggested573_keep_edge
+
+                const/4 v0, 0x0
+                return v0
+
+                :froggo_suggested573_keep_edge
+                nop
+            """.trimIndent(),
+        )
+    }
+}
+
+@Suppress("unused")
+val facebook573FeedRecommendationDiagnosticsPatch = bytecodePatch(
     name = "Facebook 573 Feed recommendation diagnostics",
     description = "Logs structural metadata for injected Feed stories without filtering them.",
     default = false,
